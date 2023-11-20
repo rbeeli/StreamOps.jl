@@ -1,16 +1,14 @@
 """
-Returns passed value.
-Calls next operation in pipeline if there is one.
-Always returns passed value.
+Calls next operation in pipeline, and always returns the passed value.
+It does NOT return the value calculated from the downstream pipeline.
 """
-struct OpReturn{Next<:Union{Nothing,Op}} <: Op
+struct OpReturn{Next<:Op} <: Op
     next::Next
-    
-    OpReturn() = new{Nothing}(nothing)
-    OpReturn(next::Next) where {Next<:Union{Nothing,Op}} = new{Next}(next)
+
+    OpReturn(; next::Next=OpNone()) where {Next<:Op} = new{Next}(next)
 end
 
 @inline (op::OpReturn)(value) = begin
-    !isnothing(op.next) && op.next(value)
+    op.next(value)
     value
 end

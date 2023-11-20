@@ -10,7 +10,10 @@ mutable struct OpMean{In<:Number,Out<:Number,Next<:Op} <: Op
     const window_size::Int
     M1::Out
 
-    OpMean{In,Out}(window_size::Int, next::Next) where {In<:Number,Out<:Number,Next<:Op} =
+    OpMean{In,Out}(
+        window_size::Int;
+        next::Next=OpNone()
+    ) where {In<:Number,Out<:Number,Next<:Op} =
         new{In,Out,Next}(
             next,
             CircularBuffer{In}(window_size),

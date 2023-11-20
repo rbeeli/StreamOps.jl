@@ -9,13 +9,24 @@ struct OpSlidingWindow{In,Next<:Op} <: Op
     next::Next
     buffer::CircularBuffer{In}
 
-    # zero for default value does not work on strings, use one instead
-    OpSlidingWindow{In}(window_size::Int, next::Next; init_value=one(t)) where {In<:AbstractString,Next<:Op} = begin
+
+    OpSlidingWindow{In}(
+        window_size::Int
+        ;
+        init_value=one(In), # zero for default value does not work on strings, use one instead
+        next::Next=OpNone()
+    ) where {In<:AbstractString,Next<:Op} = begin
         buffer = CircularBuffer{In}(window_size)
         fill!(buffer, init_value)
         new{In,Next}(next, buffer)
     end
-    OpSlidingWindow{In}(window_size::Int, next::Next; init_value=zero(t)) where {In,Next<:Op} = begin
+
+    OpSlidingWindow{In}(
+        window_size::Int
+        ;
+        init_value=zero(In),
+        next::Next=OpNone()
+    ) where {In,Next<:Op} = begin
         buffer = CircularBuffer{In}(window_size)
         fill!(buffer, init_value)
         new{In,Next}(next, buffer)

@@ -4,10 +4,19 @@ mutable struct OpForwardFill{In,F<:Function,Next<:Op} <: Op
     last_valid::In
 
     # zero for default value does not work on strings, use one instead
-    OpForwardFill{In}(checker::F, next::Next; init_value=one(In)) where {In<:AbstractString,F<:Function,Next<:Op} =
-        new{In,F,Next}(next, checker, init_value)
-    OpForwardFill{In}(checker::F, next::Next; init_value=zero(In)) where {In,F<:Function,Next<:Op} =
-        new{In,F,Next}(next, checker, init_value)
+    OpForwardFill{In}(
+        checker::F
+        ;
+        init_value=one(In),
+        next::Next=OpNone()
+    ) where {In<:AbstractString,F<:Function,Next<:Op} = new{In,F,Next}(next, checker, init_value)
+
+    OpForwardFill{In}(
+        checker::F
+        ;
+        init_value=zero(In),
+        next::Next=OpNone()
+    ) where {In,F<:Function,Next<:Op} = new{In,F,Next}(next, checker, init_value)
 end
 
 @inline (op::OpForwardFill)(value) = begin

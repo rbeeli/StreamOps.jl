@@ -27,7 +27,12 @@ mutable struct OpEWMean{In<:Number,Out<:Number,Next<:Op} <: Op
     extra_factor::Out
     n::Int
 
-    OpEWMean{In}(alpha::Out, next::Next; corrected=true) where {In<:Number,Out<:Number,Next<:Op} =
+    OpEWMean{In}(
+        alpha::Out
+        ;
+        corrected=true,
+        next::Next=OpNone()
+    ) where {In<:Number,Out<:Number,Next<:Op} =
         new{In,Out,Next}(
             next,
             alpha,

@@ -1,15 +1,20 @@
 """
 Prints the value and passes it on to the next op.
+The default print function is Julia's `println`.
 """
-struct OpPrint{Next<:Union{Nothing,Op}} <: Op
+struct OpPrint{F<:Function,Next<:Op} <: Op
     next::Next
+    print_fn::F
 
-    OpPrint() = new{Nothing}(nothing)
-    OpPrint(next::Next) where {Next<:Union{Nothing,Op}} = new{Next}(next)
+    OpPrint(
+        ;
+        print_fn::F=println,
+        next::Next=OpNone()
+    ) where {F<:Function,Next<:Op} = new{F,Next}(next, print_fn)
 end
 
 @inline (op::OpPrint)(value) = begin
-    println(value)
+    op.print_fn(value)
     if isnothing(op.next)
         return value
     else

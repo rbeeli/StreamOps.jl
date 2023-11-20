@@ -4,7 +4,7 @@ using StreamOps
 
 @testset "OpSlidingWindow" begin
     window_size = 3
-    op = OpSlidingWindow{Int}(window_size, OpReturn(); init_value = -1)
+    op = OpSlidingWindow{Int}(window_size; init_value = -1, next=OpReturn())
 
     @test length(op.buffer) == window_size
     @test all(op.buffer .== -1) # check initial values

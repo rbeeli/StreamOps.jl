@@ -15,7 +15,12 @@ mutable struct OpStd{In<:Number,Out<:Number,Next<:Op} <: Op
     M1::Out
     M2::Out
 
-    OpStd{In,Out}(window_size::Int, next::Next; corrected=true) where {In<:Number,Out<:Number,Next<:Op} =
+    OpStd{In,Out}(
+        window_size::Int
+        ;
+        corrected=true,
+        next::Next=OpNone()
+    ) where {In<:Number,Out<:Number,Next<:Op} =
         new{In,Out,Next}(
             next,
             CircularBuffer{In}(window_size),
@@ -40,7 +45,7 @@ end
 
     n = n1 + 1
     push!(op.buffer, value)
-    
+
     # update states
     delta = value - op.M1
     delta_n = delta / n

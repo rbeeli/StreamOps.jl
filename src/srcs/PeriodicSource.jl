@@ -1,7 +1,8 @@
 using Dates
 
 
-@kwdef mutable struct PeriodicSource{I,D<:Dates.AbstractDateTime} <: StreamSource
+@kwdef mutable struct PeriodicSource{I,D<:Dates.AbstractDateTime,Next<:Op} <: StreamSource
+    const next::Next
     const id::I
     const start_date::D
     const end_date::D
@@ -11,12 +12,15 @@ using Dates
 end
 
 
-function next!(source::PeriodicSource{I,D})::Union{Nothing,StreamEvent{PeriodicSource{I,D},D,D}} where {I,D<:Dates.AbstractDateTime}
+function next!(source::PeriodicSource)
     date = source.current_date
     source.inclusive_end && date > source.end_date && return nothing # end of data
     !source.inclusive_end && date >= source.end_date && return nothing # end of data
     source.current_date += source.period
-    StreamEvent{PeriodicSource{I,D},D,D}(source, date, date)
+    value = date
+    evt = StreamEvent(source, date, value)
+    source.next(evt)
+    evt
 end
 
 

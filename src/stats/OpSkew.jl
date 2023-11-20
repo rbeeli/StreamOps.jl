@@ -15,7 +15,12 @@ mutable struct OpSkew{In<:Number,Out<:Number,Next<:Op} <: Op
     const window_size::Int
     const corrected::Bool
 
-    OpSkew{In,Out}(window_size::Int, next::Next; corrected::Bool=true) where {In<:Number,Out<:Number,Next<:Op} =
+    OpSkew{In,Out}(
+        window_size::Int
+        ;
+        corrected::Bool=true,
+        next::Next=OpNone()
+    ) where {In<:Number,Out<:Number,Next<:Op} =
         new{In,Out,Next}(
             next,
             CircularBuffer{In}(window_size),

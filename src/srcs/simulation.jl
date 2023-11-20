@@ -1,13 +1,13 @@
 using Dates
 
 
-function simulate_chronological_stream(sources, pipeline)
+function simulate_chronological_stream(sources)
     # initial state of sources
-    states::Vector{Union{Nothing, StreamEvent}} = map(next!, sources)
+    states::Vector{Union{Nothing,StreamEvent}} = map(next!, collect(sources))
 
     while true
-        # choose source(s) with latest event
-        min_items = Tuple{Int, StreamEvent}[]
+        # find latest source event(s)
+        min_items = Tuple{Int,StreamEvent}[]
         min_date = nothing
         for (i, state) in enumerate(states)
             isnothing(state) && continue
@@ -21,16 +21,14 @@ function simulate_chronological_stream(sources, pipeline)
                 push!(min_items, (i, state))
             elseif date == min_date
                 push!(min_items, (i, state))
-            end            
+            end
         end
-        
-        # check if no more events left
+
+        # check if any events left
         length(min_items) == 0 && return
 
-        # emit latest events through pipeline
-        # and update state
+        # update to latest source event(s)
         for (i, item) in min_items
-            pipeline(item)
             states[i] = next!(sources[i])
         end
     end

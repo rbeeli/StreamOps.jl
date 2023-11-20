@@ -3,7 +3,7 @@ using Test
 
 @testset "OpEWStd: No bias correction" begin
     alpha = 0.9
-    op = OpEWStd{Float64}(alpha, OpReturn(); corrected=false)
+    op = OpEWStd{Float64}(alpha; corrected=false, next=OpReturn())
     @test op.corrected == false
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -34,7 +34,7 @@ end
 
 @testset "OpEWStd: With bias correction" begin
     alpha = 0.9
-    op = OpEWStd{Float64}(alpha, OpReturn())
+    op = OpEWStd{Float64}(alpha; next=OpReturn())
     @test op.corrected == true
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -65,7 +65,7 @@ end
 
 @testset "OpEWStd: Constant (uncorrected)" begin
     alpha = 0.9
-    op = OpEWStd{Float64}(alpha, OpReturn(); corrected=false)
+    op = OpEWStd{Float64}(alpha; corrected=false, next=OpReturn())
     @test op.corrected == false
 
     vals = [1.0 1.0 1.0]
@@ -78,7 +78,7 @@ end
 
 @testset "OpEWStd: Constant (corrected)" begin
     alpha = 0.9
-    op = OpEWStd{Float64}(alpha, OpReturn())
+    op = OpEWStd{Float64}(alpha; next=OpReturn())
     @test op.corrected == true
 
     vals = [1.0 1.0 1.0]

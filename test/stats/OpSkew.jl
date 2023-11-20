@@ -4,7 +4,7 @@ using StatsBase
 
 @testset "OpSkew: Biased" begin
     window_size = 4
-    op = OpSkew{Float64,Float64}(window_size, OpReturn(); corrected=false)
+    op = OpSkew{Float64,Float64}(window_size; corrected=false, next=OpReturn())
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -36,7 +36,7 @@ end
 
 @testset "OpSkew: Unbiased" begin
     window_size = 4
-    op = OpSkew{Float64,Float64}(window_size, OpReturn(); corrected=true)
+    op = OpSkew{Float64,Float64}(window_size; corrected=true, next=OpReturn())
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -67,7 +67,7 @@ end
 
 @testset "OpSkew: Window size 1" begin
     window_size = 1
-    op = OpSkew{Float64,Float64}(window_size, OpReturn())
+    op = OpSkew{Float64,Float64}(window_size; next=OpReturn())
     @test isnan(op(10.0))
     @test isnan(op(20.0))
     @test isnan(op(-1.0))

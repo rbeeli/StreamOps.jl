@@ -3,7 +3,7 @@ using Test
 
 @testset "OpEWZScore" begin
     alpha = 0.9
-    op = OpEWZScore{Float64}(alpha, OpReturn())
+    op = OpEWZScore{Float64}(alpha; next=OpReturn())
     @test op.corrected == true
 
     @test isnan(op(1.0))
@@ -18,7 +18,7 @@ end
 
 @testset "OpEWZScore: Constant (uncorrected bias)" begin
     alpha = 0.9
-    op = OpEWZScore{Float64}(alpha, OpReturn(); corrected=false)
+    op = OpEWZScore{Float64}(alpha; corrected=false, next=OpReturn())
     @test op.corrected == false
 
     @test isnan(op(1.0))
@@ -29,7 +29,7 @@ end
 
 @testset "OpEWZScore: Constant (corrected bias)" begin
     alpha = 0.9
-    op = OpEWZScore{Float64}(alpha, OpReturn())
+    op = OpEWZScore{Float64}(alpha; next=OpReturn())
     @test op.corrected == true
 
     @test isnan(op(1.0))

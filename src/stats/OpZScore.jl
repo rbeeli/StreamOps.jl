@@ -9,15 +9,20 @@ Formula
 """
 mutable struct OpZScore{In<:Number,Out<:Number,Next<:Op} <: Op
     const next::Next
-    const mean::OpMean{In,Out,OpReturn{Nothing}}
-    const std::OpStd{In,Out,OpReturn{Nothing}}
+    const mean::OpMean{In,Out,OpReturn{OpNone}}
+    const std::OpStd{In,Out,OpReturn{OpNone}}
     const corrected::Bool # bias correction for std
 
-    OpZScore{In,Out}(window_size::Int, next::Next; corrected=true) where {In<:Number,Out<:Number,Next<:Op} =
+    OpZScore{In,Out}(
+        window_size::Int
+        ;
+        corrected=true,
+        next::Next=OpNone()
+    ) where {In<:Number,Out<:Number,Next<:Op} =
         new{In,Out,Next}(
             next,
-            OpMean{In,Out}(window_size, OpReturn()),
-            OpStd{In,Out}(window_size, OpReturn(); corrected=corrected),
+            OpMean{In,Out}(window_size; next=OpReturn()),
+            OpStd{In,Out}(window_size; corrected=corrected, next=OpReturn()),
             corrected
         )
 end

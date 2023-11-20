@@ -11,10 +11,17 @@ mutable struct OpFracChange{In,Next<:Op} <: Op
     const next::Next
     prev_value::In
 
-    OpFracChange{In}(next::Next; init_value=one(In)) where {In<:AbstractString,Next<:Op} =
-        new{In,Next}(next, init_value)
-    OpFracChange{In}(next::Next; init_value=zero(In)) where {In,Next<:Op} =
-        new{In,Next}(next, init_value)
+    OpFracChange{In}(
+        ;
+        init_value=one(In),
+        next::Next=OpNone()
+    ) where {In<:AbstractString,Next<:Op} = new{In,Next}(next, init_value)
+
+    OpFracChange{In}(
+        ;
+        init_value=zero(In),
+        next::Next=OpNone()
+    ) where {In,Next<:Op} = new{In,Next}(next, init_value)
 end
 
 # for floating-point numbers

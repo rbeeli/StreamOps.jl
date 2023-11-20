@@ -3,10 +3,13 @@ Applies arbitrary function.
 """
 struct OpFunc{F<:Function,Next<:Op} <: Op
     next::Next
-    f::F
+    fn::F
 
-    OpFunc(func::F, next::Next) where {F<:Function,Next<:Op} =
-        new{F,Next}(next, func)
+    OpFunc(
+        fn::F
+        ;
+        next::Next=OpNone()
+    ) where {F<:Function,Next<:Op} = new{F,Next}(next, fn)
 end
 
-@inline (op::OpFunc)(value) = op.next(op.f(value))
+@inline (op::OpFunc)(value) = op.next(op.fn(value))

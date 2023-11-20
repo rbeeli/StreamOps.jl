@@ -6,8 +6,9 @@ using StreamOps
     op = OpReturn()
     @test op(true) == true
 
+    # ensure next op is called
     ref = Ref{Bool}(false)
-    op = OpReturn(OpHook(ref, OpNone()))
+    op = OpReturn(; next=OpHook(ref))
     @test op(true) == true
-    @test ref[] == true # ensure Ref was updated, so OpHook was calleds
+    @test ref[] == true # ensure Ref was updated, so OpHook was called
 end

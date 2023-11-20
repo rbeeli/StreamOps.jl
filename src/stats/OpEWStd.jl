@@ -18,7 +18,12 @@ mutable struct OpEWStd{In<:Number,Out<:Number,Next<:Op} <: Op
     var::Out
     initialized::Bool
 
-    OpEWStd{In}(alpha::Out, next::Next; corrected::Bool=true) where {In<:Number,Out<:Number,Next<:Op} =
+    OpEWStd{In}(
+        alpha::Out
+        ;
+        corrected::Bool=true,
+        next::Next=OpNone()
+    ) where {In<:Number,Out<:Number,Next<:Op} =
         new{In,Out,Next}(
             next,
             alpha,
@@ -42,7 +47,7 @@ end
         # static
         old_wt_factor = one(Out) - op.alpha
         new_wt = op.corrected ? one(Out) : op.alpha
-    
+
         op.sum_wt *= old_wt_factor
         op.sum_wt2 *= old_wt_factor * old_wt_factor
         op.old_wt *= old_wt_factor

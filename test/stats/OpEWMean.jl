@@ -3,7 +3,7 @@ using Test
 
 @testset "OpEWMean: Initialization" begin
     alpha = 0.5
-    op = OpEWMean{Float64}(alpha, OpReturn())
+    op = OpEWMean{Float64}(alpha; next=OpReturn())
 
     @test op.alpha == alpha
     @test op.M == 0.0
@@ -12,7 +12,7 @@ end
 
 @testset "OpEWMean: Without bias correction" begin
     alpha = 0.9
-    op = OpEWMean{Float64}(alpha, OpReturn(); corrected=false)
+    op = OpEWMean{Float64}(alpha; corrected=false, next=OpReturn())
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -37,7 +37,7 @@ end
 
 @testset "OpEWMean: With bias correction" begin
     alpha = 0.9
-    op = OpEWMean{Float64}(alpha, OpReturn())
+    op = OpEWMean{Float64}(alpha; next=OpReturn())
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 

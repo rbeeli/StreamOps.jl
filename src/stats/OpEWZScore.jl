@@ -9,15 +9,20 @@ Formula
 """
 mutable struct OpEWZScore{In<:Number,Out<:Number,Next<:Op} <: Op
     const next::Next
-    const ew_mean::OpEWMean{In,Out,OpReturn{Nothing}}
-    const ew_std::OpEWStd{In,Out,OpReturn{Nothing}}
+    const ew_mean::OpEWMean{In,Out,OpReturn{OpNone}}
+    const ew_std::OpEWStd{In,Out,OpReturn{OpNone}}
     const corrected::Bool # bias correction for both mean and std
 
-    OpEWZScore{In}(alpha::Out, next::Next; corrected=true) where {In<:Number,Out<:Number,Next<:Op} =
+    OpEWZScore{In}(
+        alpha::Out
+        ;
+        corrected=true,
+        next::Next=OpNone()
+    ) where {In<:Number,Out<:Number,Next<:Op} =
         new{In,Out,Next}(
             next,
-            OpEWMean{In}(alpha, OpReturn(); corrected=corrected),
-            OpEWStd{In}(alpha, OpReturn(); corrected=corrected),
+            OpEWMean{In}(alpha; corrected=corrected, next=OpReturn()),
+            OpEWStd{In}(alpha; corrected=corrected, next=OpReturn()),
             corrected
         )
 end

@@ -4,8 +4,12 @@ mutable struct OpLag{In,Next<:Op} <: Op
     const lag::Int
     index::Int
 
-    OpLag{In}(lag::Int, next::Next; init_value::In=zero(In)) where {In,Next<:Op} =
-        new{In,Next}(next, fill(init_value, lag), lag, 1)
+    OpLag{In}(
+        lag::Int
+        ;
+        init_value::In=zero(In),
+        next::Next=OpNone()
+    ) where {In,Next<:Op} = new{In,Next}(next, fill(init_value, lag), lag, 1)
 end
 
 @inline (op::OpLag)(value) = begin
