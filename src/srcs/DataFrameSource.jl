@@ -20,21 +20,3 @@ function next!(source::DataFrameSource)
     source.next(evt)
     evt
 end
-
-
-# # contrustors
-# DataFrameSource(;
-#     data::D,
-#     date_fn::DS,
-#     as_named_tuple::Bool=false,
-#     position=1) where {D<:AbstractDataFrame,DS<:Function} = DataFrameSource{D}(
-#     data,
-#     date_fn,
-#     as_named_tuple,
-#     position)
-
-
-# function next_event_date(source::DataFrameSource)::Union{DateTime, Nothing}
-#     source.position <= nrow(source.data) || return nothing # end of data
-#     DateTime(source.data[!, source.date_column][source.position])
-# end

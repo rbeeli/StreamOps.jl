@@ -22,10 +22,3 @@ function next!(source::PeriodicSource)
     source.next(evt)
     evt
 end
-
-
-# function next_event_date(source::PeriodicSource)::Union{DateTime, Nothing}
-#     inclusive_end && source.current_date <= source.end_date || return nothing # end of data
-#     !inclusive_end && source.current_date < source.end_date || return nothing # end of data
-#     DateTime(source.current_date)
-# end
