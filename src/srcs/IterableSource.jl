@@ -13,7 +13,7 @@ function next!(source::IterableSource)
     source.position += 1
     value = @inbounds source.data[pos]
     date = source.date_fn(value)
-    evt = StreamEvent(source, date, value)
+    evt = StreamEvent(source.id, date, value)
     source.next(evt)
     evt
 end

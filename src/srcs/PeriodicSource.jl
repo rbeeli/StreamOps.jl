@@ -18,7 +18,7 @@ function next!(source::PeriodicSource)
     !source.inclusive_end && date >= source.end_date && return nothing # end of data
     source.current_date += source.period
     value = date
-    evt = StreamEvent(source, date, value)
+    evt = StreamEvent(source.id, date, value)
     source.next(evt)
     evt
 end
