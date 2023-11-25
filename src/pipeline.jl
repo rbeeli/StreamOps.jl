@@ -19,8 +19,24 @@ is the same as manually constructing the pipeline as follows:
 
     pipe = OpFunc(x -> abs(x)^2; next=OpLag{Float64}(1; next=OpPrint()))
 
+
+Multi-line syntax using a begin-end block is supported:
+
+    pipe = @pipeline begin
+        OpFunc(x -> abs(x)^2)
+        OpLag{Float64}(1)
+        OpPrint()
+    end
+
 """
 macro pipeline(ops...)
+    # if arguments are passed inside a block, extract them
+    if ops isa Tuple && ops[1].head == :block
+        # it's a begin/end block, unwrap contents
+        # filter out LineNumberNode
+        ops = filter(e -> !isa(e, LineNumberNode), ops[1].args)
+    end
+
     # start with the last operation (which must specify its 'next' argument or use default)
     pipeline_expr = ops[end]
 

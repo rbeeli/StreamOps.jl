@@ -26,7 +26,7 @@ using Statistics
 end
 
 
-@testset "OpZScore: Correted std" begin
+@testset "OpZScore: Corrected std" begin
     window_size = 4
     corrected = true
     op = OpZScore{Float64,Float64}(window_size; corrected=corrected, next=OpReturn())

@@ -2,14 +2,7 @@ using Dates
 
 
 """
-Aggregates data over regular periods using
-arbitrary user-defined function for aggregation
-and periodization.
-
-Note that dates exactly matching the current period-end-date are included in the aggregation
-and cause immediate aggregation flush.
-
-Dates must be unique and in ascending order, otherwise an error is thrown.
+Aggregates data over user-defined time intervals.
 """
 mutable struct AggPeriodFn{In,DT,FD<:Function,FP<:Function,FA<:Function,Next<:Op} <: Op
     const next::Next
@@ -18,7 +11,6 @@ mutable struct AggPeriodFn{In,DT,FD<:Function,FP<:Function,FA<:Function,Next<:Op
     const agg_fn::FA
     const buffer::Vector{In}
     current_period::DT
-    last_date::DT
     initialized::Bool
 
     AggPeriodFn{In,DT}(
@@ -35,7 +27,6 @@ mutable struct AggPeriodFn{In,DT,FD<:Function,FP<:Function,FA<:Function,Next<:Op
             agg_fn,
             Vector{In}(), # buffer
             DT(0), # current_period
-            DT(0), # last_date
             false, # initialized
         )
 end
@@ -43,63 +34,36 @@ end
 @inline (op::AggPeriodFn)(value) = begin
     dt = op.date_fn(value)
     dt_period = op.period_fn(dt)
+    
+    # println("dt = $dt period = $dt_period curr_period = $(op.current_period)")
 
     # check if very first value
     if !op.initialized
         op.current_period = dt_period
         op.initialized = true
-    else
-        # check for duplicate dates
-        if dt == op.last_date
-            throw(ArgumentError("Dates must be unique, got $(dt)."))
-        # check if date is in ascending order
-        elseif dt < op.last_date
-            throw(ArgumentError("Dates must be in ascending order, got $(dt) with last date $(op.last_date)."))
-        end
-
-        # if last value date was exactly at end of period
-        # causing an aggregation, then we need to update current period
-        if op.last_date == op.current_period
-            op.current_period = dt_period
-        end
     end
 
-    op.last_date = dt
-
-    # check if date is at end of current period,
-    # or already in new period.
-    # aggregate and flush buffer if so
-    end_of_period = dt == op.current_period
-    in_next_period = dt > op.current_period
-    if end_of_period || in_next_period
-    
-        # if value is end of period, add to this aggregation
-        if end_of_period
-            push!(op.buffer, value)
-        end
-
+    # flush buffer if date is in new period
+    if dt_period > op.current_period
         # call user-defined aggregate function
         agg_value = op.agg_fn(op.current_period, op.buffer)
 
         # clear buffer
         empty!(op.buffer)
 
-        # if value is in next period, add to next aggregation
-        if in_next_period
-            # push new value to buffer
-            push!(op.buffer, value)
-        end
-
         # update to new period
         op.current_period = dt_period
 
-        # push aggregate to next operation
-        return op.next(agg_value)
-    else
         # push new value to buffer
         push!(op.buffer, value)
+
+        # push aggregate to next operation
+        return op.next(agg_value)
     end
-    
+
+    # push new value to buffer
+    push!(op.buffer, value)
+
     nothing
 end
 

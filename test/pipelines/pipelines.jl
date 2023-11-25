@@ -29,6 +29,17 @@ using StreamOps
         @test pipe(3.0) == 2.0^2 # third value
     end
 
+    @testset "Three operations multi-line block syntax" begin
+        pipe = @pipeline begin
+            OpFunc(x -> x * x)
+            OpLag{Float64}(1)
+            OpReturn()
+        end
+        @test pipe(1.5) == 0.0 # first value
+        @test pipe(2.0) == 1.5^2 # second value
+        @test pipe(3.0) == 2.0^2 # third value
+    end
+
     @testset "Two operations using constructor and instance variable" begin
         last_op = OpReturn()
         pipe = @pipeline OpFunc(x -> x * x) last_op
