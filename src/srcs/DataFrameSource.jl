@@ -14,7 +14,7 @@ function next!(source::DataFrameSource)
     pos = source.position
     pos > nrow(source.data) && return nothing # end of data
     source.position += 1
-    row = source.as_named_tuple ? copy(source.data[pos, :]) : @view source.data[pos, :]
+    row = @inbounds source.as_named_tuple ? copy(source.data[pos, :]) : @view source.data[pos, :]
     date = source.date_fn(row)
     evt = StreamEvent(source, date, row)
     source.next(evt)
