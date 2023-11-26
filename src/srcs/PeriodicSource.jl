@@ -1,24 +1,40 @@
 using Dates
 
 
-@kwdef mutable struct PeriodicSource{I,D<:Dates.AbstractDateTime,Next<:Op} <: StreamSource
+"""
+Iterates over a date range by a specified period
+and passes each date to the next operator.
+"""
+mutable struct PeriodicSource{D<:Dates.AbstractDateTime,P<:Dates.Period,Next<:Op} <: StreamSource
     const next::Next
-    const id::I
     const start_date::D
     const end_date::D
-    const inclusive_end::Bool = false
-    const period::Dates.Period
+    const inclusive_end::Bool
+    const period::P
     current_date::D
-end
 
+    PeriodicSource(;
+        next::Next,
+        start_date::D,
+        end_date::D,
+        period::P,
+        inclusive_end::Bool = false
+    ) where {D,P,Next} =
+        new{D,P,Next}(
+            next,
+            start_date,
+            end_date,
+            inclusive_end,
+            period,
+            start_date # current_date
+        )
+end
 
 function next!(source::PeriodicSource)
     date = source.current_date
     source.inclusive_end && date > source.end_date && return nothing # end of data
     !source.inclusive_end && date >= source.end_date && return nothing # end of data
+    source.next(date)
     source.current_date += source.period
-    value = date
-    evt = StreamEvent(source.id, date, value)
-    source.next(evt)
-    evt
+    date
 end

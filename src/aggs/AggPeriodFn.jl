@@ -79,15 +79,13 @@ julia> round_origin(DateTime(2019, 1, 1, 12, 30, 0), Dates.Hour(1))
 "2019-01-01T13:00:00"
 ````
 """
-function round_origin(
+@inline function round_origin(
     dt::D,
     period::P
     ;
     mode::RoundingMode=RoundUp,
     origin=nothing
 ) where {D<:Dates.TimeType,P<:Period}
-    if isnothing(origin)
-        return round(dt, period, mode)
-    end
+    isnothing(origin) && return round(dt, period, mode)
     origin + round(dt - origin, period, mode)
 end

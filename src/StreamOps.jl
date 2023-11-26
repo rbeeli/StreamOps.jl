@@ -3,6 +3,7 @@ module StreamOps
 
 # operations
 include("ops/Op.jl")
+include("ops/OpCollect.jl")
 include("ops/OpCombineLatest.jl")
 include("ops/OpDropIf.jl")
 include("ops/OpForwardFill.jl")
@@ -16,7 +17,8 @@ include("ops/OpPrint.jl")
 include("ops/OpReturn.jl")
 include("ops/OpSlidingWindow.jl")
 
-export Op, OpCombineLatest, OpDropIf, OpForwardFill, OpFunc, OpHook, OpLag, OpNone, OpFracChange, OpPrev, OpPrint, OpReturn, OpSlidingWindow
+export Op, OpCollect, OpCombineLatest, OpDropIf, OpForwardFill, OpFunc, OpHook, OpLag, OpNone, OpFracChange, OpPrev, OpPrint, OpReturn, OpSlidingWindow
+
 
 # statistics
 include("stats/OpEWMean.jl")
@@ -38,24 +40,23 @@ export AggPeriodFn, round_origin
 
 # stream sources
 include("srcs/StreamSource.jl")
-include("srcs/StreamEvent.jl")
-include("srcs/DataFrameSource.jl")
+include("srcs/DataFrameRowSource.jl")
 include("srcs/IterableSource.jl")
 include("srcs/PeriodicSource.jl")
+include("srcs/TimestampedSource.jl")
 
-export StreamSource, StreamEvent, DataFrameSource, IterableSource, PeriodicSource, next!
+export StreamSource, DataFrameRowSource, IterableSource, PeriodicSource, TimestampedSource, next!
 
 
 # simulation functionality
-include("srcs/simulation.jl")
+include("simulation.jl")
 
-export simulate_chronological_stream
+export simulate_chronological_stream 
 
 
 # pipeline
 include("pipeline.jl")
 
 export @pipeline
-
 
 end

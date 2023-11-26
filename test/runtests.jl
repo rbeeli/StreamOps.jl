@@ -5,12 +5,13 @@ using StreamOps
 #
 #   Pkg.test("StreamOps", test_args=["stats/OpStd.jl"])
 #   Pkg.test("StreamOps", test_args=["aggs/AggPeriodFn.jl"])
-#   Pkg.test("StreamOps", test_args=["ops/OpCombineLatest.jl"])
+#   Pkg.test("StreamOps", test_args=["ops/OpCollect.jl"])
 #   Pkg.test("StreamOps", test_args=["pipelines/pipelines.jl"])
 
 requested_tests = ARGS
 
 if isempty(requested_tests)
+    include("ops/OpCollect.jl")
     include("ops/OpCombineLatest.jl")
     include("ops/OpDropIf.jl")
     include("ops/OpForwardFill.jl")

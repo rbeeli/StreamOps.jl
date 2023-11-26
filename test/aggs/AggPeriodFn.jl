@@ -35,7 +35,7 @@ using StreamOps
         )
 
         res = agg.(data)
-        display(res)
+        # display(res)
 
         @test isnothing(res[1])
         @test res[2] == (DateTime("2020-01-01T12:00:00"), 0.0)

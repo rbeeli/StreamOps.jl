@@ -1,19 +1,26 @@
-@kwdef mutable struct IterableSource{I,D,DS<:Function,Next<:Op} <: StreamSource
+"""
+Iterates over elements of an iterable and
+passes each element to the next operator.
+"""
+mutable struct IterableSource{D,Next<:Op} <: StreamSource
     const next::Next
-    const id::I
     const data::D
-    const date_fn::DS
-    position::Int = 1
+    position::Int64
+
+    IterableSource(;
+        next::Next,
+        data::D) where {D,Next} =
+        new{D,Next}(
+            next,
+            data,
+            0 # position
+        )
 end
 
-
 function next!(source::IterableSource)
-    pos = source.position
-    pos > length(source.data) && return nothing # end of data
+    source.position >= length(source.data) && return nothing # end of data
     source.position += 1
-    value = @inbounds source.data[pos]
-    date = source.date_fn(value)
-    evt = StreamEvent(source.id, date, value)
-    source.next(evt)
-    evt
+    value = @inbounds source.data[source.position]
+    source.next(value)
+    value
 end

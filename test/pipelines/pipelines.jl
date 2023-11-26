@@ -46,4 +46,31 @@ using StreamOps
         @test pipe(2) == 4
     end
 
+    @testset "Capture variables passed to @pipeline Ops" begin
+        function test_fn(pipe)
+            pipe.([1, 2, 3])
+        end
+
+        # Test with pre-allocated array
+        output = Int64[]
+        pipe = @pipeline begin
+            OpFunc(x -> x^2)
+            OpCollect(; values=output)
+        end
+        test_fn(pipe)
+        @test all(output .== [1, 2, 3] .^ 2)
+    end
+
+    @testset "Capture variables passed to manual pipeline" begin
+        function test_fn(pipe)
+            pipe.([1, 2, 3])
+        end
+
+        # Test with pre-allocated array
+        output = Int64[]
+        pipe = OpFunc(x -> x^2; next=OpCollect(; values=output))
+        test_fn(pipe)
+        @test all(output .== [1, 2, 3] .^ 2)
+    end
+
 end
