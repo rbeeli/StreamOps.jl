@@ -55,7 +55,7 @@ using StreamOps
         output = Int64[]
         pipe = @pipeline begin
             OpFunc(x -> x^2)
-            OpCollect(; values=output)
+            OpCollect(; out=output)
         end
         test_fn(pipe)
         @test all(output .== [1, 2, 3] .^ 2)
@@ -68,7 +68,7 @@ using StreamOps
 
         # Test with pre-allocated array
         output = Int64[]
-        pipe = OpFunc(x -> x^2; next=OpCollect(; values=output))
+        pipe = OpFunc(x -> x^2; next=OpCollect(; out=output))
         test_fn(pipe)
         @test all(output .== [1, 2, 3] .^ 2)
     end

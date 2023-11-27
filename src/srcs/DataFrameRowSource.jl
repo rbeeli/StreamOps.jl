@@ -21,9 +21,10 @@ mutable struct DataFrameRowSource{D,Next<:Op} <: StreamSource
 end
 
 function next!(source::DataFrameRowSource)
-    source.position >= nrow(source.data) && return nothing # end of data
-    source.position += 1
-    row = @inbounds @view source.data[source.position, :]
+    pos = source.position
+    pos >= nrow(source.data) && return nothing # end of data
+    row = @inbounds @view source.data[pos + 1, :]
     source.next(row)
+    source.position += 1
     row
 end

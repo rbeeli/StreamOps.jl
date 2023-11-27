@@ -32,8 +32,11 @@ end
 
 function next!(source::PeriodicSource)
     date = source.current_date
-    source.inclusive_end && date > source.end_date && return nothing # end of data
-    !source.inclusive_end && date >= source.end_date && return nothing # end of data
+    if source.inclusive_end
+        date > source.end_date && return nothing # end of data
+    else
+        date >= source.end_date && return nothing # end of data
+    end
     source.next(date)
     source.current_date += source.period
     date

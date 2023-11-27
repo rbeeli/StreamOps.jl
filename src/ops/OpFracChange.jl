@@ -2,10 +2,11 @@
 Calculates fractional change to previous value, also known as percent change.
 
 Formula
--------
+=======
 
-    δ = x_i / x_(i-1) - 1
+    y = x_t / x_{t-1} - 1
 
+.
 """
 mutable struct OpFracChange{In,Next<:Op} <: Op
     const next::Next

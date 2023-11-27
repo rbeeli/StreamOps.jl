@@ -18,9 +18,10 @@ mutable struct IterableSource{D,Next<:Op} <: StreamSource
 end
 
 function next!(source::IterableSource)
-    source.position >= length(source.data) && return nothing # end of data
-    source.position += 1
-    value = @inbounds source.data[source.position]
+    pos = source.position
+    pos >= length(source.data) && return nothing # end of data
+    value = @inbounds source.data[pos + 1]
     source.next(value)
+    source.position += 1
     value
 end
