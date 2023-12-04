@@ -1,7 +1,7 @@
 name = "StreamOps"
 uuid = "a9627898-32a8-4203-afdc-bd07b9d6797f"
 authors = ["Rino Beeli <40661605+rbeeli@users.noreply.github.com>"]
-version = "0.2.0"
+version = "0.3.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"

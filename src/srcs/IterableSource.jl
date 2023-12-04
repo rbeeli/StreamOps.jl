@@ -2,26 +2,24 @@
 Iterates over elements of an iterable and
 passes each element to the next operator.
 """
-mutable struct IterableSource{D,Next<:Op} <: StreamSource
-    const next::Next
+mutable struct IterableSource{D} <: StreamSource
     const data::D
     position::Int64
 
-    IterableSource(;
-        next::Next,
-        data::D) where {D,Next} =
-        new{D,Next}(
-            next,
+    IterableSource(
+        data::D
+    ) where {D} =
+        new{D}(
             data,
             0 # position
         )
 end
 
-function next!(source::IterableSource)
-    pos = source.position
-    pos >= length(source.data) && return nothing # end of data
-    value = @inbounds source.data[pos + 1]
-    source.next(value)
-    source.position += 1
+
+function next!(src::IterableSource{D}) where {D}
+    pos = src.position
+    pos >= length(src.data) && return nothing # end of data
+    src.position += 1
+    value = @inbounds src.data[pos + 1]
     value
 end

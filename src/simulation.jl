@@ -4,32 +4,40 @@ using DataStructures
 
 function simulate_chronological_stream(
     ::Type{D},
-    sources # ::Vector{StreamSource}
+    sources, # ::Vector{StreamSource}
+    pipelines
 ) where {D<:Dates.AbstractDateTime}
+    @assert length(sources) == length(pipelines)
 
-    sources_heap = BinaryMinHeap{Tuple{StreamSource,OpTimestamper{D}}}()
+    sources_heap = BinaryMinHeap{Tuple{Int64,D}}()
+    values = Vector{Any}(undef, length(sources))
 
-    for source in sources
-        next!(source) # initial source event
-        push!(sources_heap, (source, source.next))
+    for (i, source) in enumerate(sources)
+        value = next!(source) # initial data point
+        values[i] = value
+        push!(sources_heap, (i, value[1]))
     end
 
     while length(sources_heap) > 0
         # get oldest source event
-        source, op_timestamper = pop!(sources_heap)
+        i, dt = pop!(sources_heap)
 
         # flush event downstream
-        flush!(op_timestamper)
+        pipelines[i](values[i])
 
         # fetch next event
-        next!(source)
+        value = next!(sources[i])
+
+        isnothing(value) && continue
+        
+        dt = value[1]
 
         # push new event to heap
-        if op_timestamper.current_date != typemax(D)
-            push!(sources_heap, (source, op_timestamper))
+        if dt != typemax(D)
+            push!(sources_heap, (i, dt))
+            values[i] = value
         end
     end
-
 
     # function simulate_chronological_stream(
     #     sources::Vector{TimestampedSource{D}}
@@ -95,6 +103,6 @@ end
 
 
 @inline Base.isless(
-    x::Tuple{StreamSource,OpTimestamper{D}},
-    y::Tuple{StreamSource,OpTimestamper{D}}
-) where {D<:Dates.AbstractDateTime} = x[2].current_date < y[2].current_date
+    x::Tuple{Int64,D},
+    y::Tuple{Int64,D}
+) where {D<:Dates.AbstractDateTime} = x[2] < y[2]

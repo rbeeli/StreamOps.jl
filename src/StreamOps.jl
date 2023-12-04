@@ -2,44 +2,38 @@ module StreamOps
 
 
 # operations
-include("ops/Op.jl")
-include("ops/OpBroadcast.jl")
-include("ops/OpCollect.jl")
-include("ops/OpCombineLatest.jl")
-include("ops/OpDiff.jl")
-include("ops/OpDropIf.jl")
-include("ops/OpForwardFill.jl")
-include("ops/OpFunc.jl")
-include("ops/OpHook.jl")
-include("ops/OpLag.jl")
-include("ops/OpNone.jl")
-include("ops/OpFracChange.jl")
-include("ops/OpPrev.jl")
-include("ops/OpPrint.jl")
-include("ops/OpReturn.jl")
-include("ops/OpSlidingWindow.jl")
-include("ops/OpTimestamper.jl")
+include("ops/Collect.jl")
+include("ops/Combine.jl")
+include("ops/Diff.jl")
+include("ops/ForwardFill.jl")
+include("ops/Func.jl")
+include("ops/Hook.jl")
+include("ops/Lag.jl")
+include("ops/FracChange.jl")
+include("ops/Prev.jl")
+include("ops/Print.jl")
+include("ops/SlidingWindow.jl")
+# include("ops/Timestamper.jl")
 
-export Op, OpBroadcast, OpCollect, OpCombineLatest, OpDiff, OpDropIf, OpForwardFill, OpFunc, OpHook, OpLag, OpNone, OpFracChange, OpPrev, OpPrint, OpReturn, OpSlidingWindow
-export OpTimestamper, flush!
-
-
-# statistics
-include("stats/OpEWMean.jl")
-include("stats/OpEWStd.jl")
-include("stats/OpEWZScore.jl")
-include("stats/OpMean.jl")
-include("stats/OpSkew.jl")
-include("stats/OpStd.jl")
-include("stats/OpZScore.jl")
-
-export OpEWMean, OpEWStd, OpEWZScore, OpMean, OpSkew, OpStd, OpZScore
+export Collect, Combine, Diff, ForwardFill, Func, Hook, Lag, FracChange, Prev, Print, SlidingWindow
 
 
 # aggregations
-include("aggs/AggPeriodFn.jl")
+include("ops/Aggregate.jl")
+export Aggregate, round_origin
 
-export AggPeriodFn, round_origin
+
+# statistics
+include("stats/EWMean.jl")
+include("stats/EWStd.jl")
+include("stats/EWZScore.jl")
+include("stats/Mean.jl")
+include("stats/Skew.jl")
+include("stats/Std.jl")
+include("stats/ZScore.jl")
+
+export EWMean, EWStd, EWZScore, Mean, Skew, Std, ZScore
+
 
 
 # stream sources
@@ -51,15 +45,14 @@ include("srcs/PeriodicSource.jl")
 export StreamSource, DataFrameRowSource, IterableSource, PeriodicSource, next!
 
 
-# simulation functionality
-include("simulation.jl")
+# # simulation functionality
+# include("simulation.jl")
 
-export simulate_chronological_stream 
+# export simulate_chronological_stream 
 
 
-# pipeline
-include("pipeline.jl")
+include("macros.jl")
 
-export @pipeline
+export @streamops, @filter
 
 end

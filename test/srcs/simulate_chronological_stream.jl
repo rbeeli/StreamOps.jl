@@ -7,18 +7,18 @@ using StreamOps, Dates
     output = []
 
     periodic_source = PeriodicSource(;
-        next=(@pipeline begin
-            OpTimestamper{DateTime,DateTime}(; date_fn=identity)
-            OpCollect(; values=output)
+        next=(@streamops begin
+            Timestamper{DateTime,DateTime}(; date_fn=identity)
+            Collect(output)
         end),
         start_date=DateTime(2018, 1, 1),
         end_date=DateTime(2018, 1, 6),
         period=Day(1))
 
     dates_source = IterableSource(;
-        next=(@pipeline begin
-            OpTimestamper{DateTime,DateTime}(; date_fn=identity)
-            OpCollect(; values=output)
+        next=(@streamops begin
+            Timestamper{DateTime,DateTime}(; date_fn=identity)
+            Collect(output)
         end),
         data=[
             DateTime(2017, 1, 1),
@@ -28,9 +28,9 @@ using StreamOps, Dates
         ])
 
     dates_source2 = IterableSource(;
-        next=(@pipeline begin
-            OpTimestamper{DateTime,DateTime}(; date_fn=identity)
-            OpCollect(; values=output)
+        next=(@streamops begin
+            Timestamper{DateTime,DateTime}(; date_fn=identity)
+            Collect(output)
         end),
         data=[
             DateTime(2017, 1, 1),

@@ -1,43 +1,44 @@
 using Test
 using StreamOps
 
+
 # To run a subset of tests, call Pkg.test as follows:
 #
 #   Pkg.test("StreamOps", test_args=["stats/OpStd.jl"])
-#   Pkg.test("StreamOps", test_args=["aggs/AggPeriodFn.jl"])
-#   Pkg.test("StreamOps", test_args=["ops/OpDiff.jl"])
+#   Pkg.test("StreamOps", test_args=["ops/Combine.jl"])
 #   Pkg.test("StreamOps", test_args=["pipelines/pipelines.jl"])
+#   Pkg.test("StreamOps", test_args=["pipelines/broadcast.jl"])
+#   Pkg.test("StreamOps", test_args=["pipelines/filter.jl"])
 #   Pkg.test("StreamOps", test_args=["srcs/simulate_chronological_stream.jl"])
+
 
 requested_tests = ARGS
 
 if isempty(requested_tests)
-    include("ops/OpBroadcast.jl")
-    include("ops/OpCollect.jl")
-    include("ops/OpCombineLatest.jl")
-    include("ops/OpDropIf.jl")
-    include("ops/OpForwardFill.jl")
-    include("ops/OpFracChange.jl")
-    include("ops/OpFunc.jl")
-    include("ops/OpHook.jl")
-    include("ops/OpLag.jl")
-    include("ops/OpNone.jl")
-    include("ops/OpPrev.jl")
-    include("ops/OpPrint.jl")
-    include("ops/OpReturn.jl")
-    include("ops/OpSlidingWindow.jl")
+    include("ops/Aggregate.jl")
+    include("ops/Collect.jl")
+    include("ops/Combine.jl")
+    include("ops/ForwardFill.jl")
+    include("ops/FracChange.jl")
+    include("ops/Func.jl")
+    include("ops/Hook.jl")
+    include("ops/Lag.jl")
+    include("ops/Prev.jl")
+    include("ops/Print.jl")
+    include("ops/SlidingWindow.jl")
 
-    include("stats/OpEWMean.jl")
-    include("stats/OpEWStd.jl")
-    include("stats/OpEWZScore.jl")
-    include("stats/OpMean.jl")
-    include("stats/OpSkew.jl")
-    include("stats/OpStd.jl")
-    include("stats/OpZScore.jl")
-
-    include("aggs/AggPeriodFn.jl")
+    include("stats/EWMean.jl")
+    include("stats/EWStd.jl")
+    include("stats/EWZScore.jl")
+    include("stats/Mean.jl")
+    include("stats/Skew.jl")
+    include("stats/Std.jl")
+    include("stats/ZScore.jl")
 
     include("pipelines/pipelines.jl")
+    include("pipelines/filter.jl")
+    include("pipelines/broadcast.jl")
+    include("pipelines/collect_tuple.jl")
 else
     println('-' ^ 60)
     println("Running subset of tests:")
