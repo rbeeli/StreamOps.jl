@@ -18,8 +18,8 @@ mutable struct EWStd{In<:Number,Out<:Number}
     initialized::Bool
 
     EWStd{In}(
-        alpha::Out
         ;
+        alpha::Out,
         corrected::Bool=true
     ) where {In<:Number,Out<:Number} =
         new{In,Out}(

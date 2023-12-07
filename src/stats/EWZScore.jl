@@ -13,13 +13,13 @@ struct EWZScore{In<:Number,Out<:Number}
     corrected::Bool # bias correction for both mean and std
 
     EWZScore{In}(
-        alpha::Out
         ;
+        alpha::Out,
         corrected=true
     ) where {In<:Number,Out<:Number} =
         new{In,Out}(
-            EWMean{In}(alpha; corrected=corrected),
-            EWStd{In}(alpha; corrected=corrected),
+            EWMean{In}(; alpha=alpha, corrected=corrected),
+            EWStd{In}(; alpha=alpha, corrected=corrected),
             corrected
         )
 end

@@ -3,7 +3,7 @@ using Test
 
 @testset "EWStd: No bias correction" begin
     alpha = 0.9
-    op = EWStd{Float64}(alpha; corrected=false)
+    op = EWStd{Float64}(; alpha=alpha, corrected=false)
     @test op.corrected == false
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -34,7 +34,7 @@ end
 
 @testset "EWStd: With bias correction" begin
     alpha = 0.9
-    op = EWStd{Float64}(alpha)
+    op = EWStd{Float64}(; alpha=alpha)
     @test op.corrected == true
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -65,7 +65,7 @@ end
 
 @testset "EWStd: Constant (uncorrected)" begin
     alpha = 0.9
-    op = EWStd{Float64}(alpha; corrected=false)
+    op = EWStd{Float64}(; alpha=alpha, corrected=false)
     @test op.corrected == false
 
     vals = [1.0 1.0 1.0]
@@ -78,7 +78,7 @@ end
 
 @testset "EWStd: Constant (corrected)" begin
     alpha = 0.9
-    op = EWStd{Float64}(alpha)
+    op = EWStd{Float64}(; alpha=alpha)
     @test op.corrected == true
 
     vals = [1.0 1.0 1.0]

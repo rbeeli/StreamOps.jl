@@ -3,7 +3,7 @@ using Test
 
 @testset "EWMean: Initialization" begin
     alpha = 0.5
-    op = EWMean{Float64}(alpha)
+    op = EWMean{Float64}(; alpha=alpha)
 
     @test op.alpha == alpha
     @test op.M == 0.0
@@ -12,7 +12,7 @@ end
 
 @testset "EWMean: Without bias correction" begin
     alpha = 0.9
-    op = EWMean{Float64}(alpha; corrected=false)
+    op = EWMean{Float64}(; alpha=alpha, corrected=false)
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -37,7 +37,7 @@ end
 
 @testset "EWMean: With bias correction" begin
     alpha = 0.9
-    op = EWMean{Float64}(alpha)
+    op = EWMean{Float64}(; alpha=alpha)
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 

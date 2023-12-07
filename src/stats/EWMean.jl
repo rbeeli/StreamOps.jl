@@ -27,8 +27,8 @@ mutable struct EWMean{In<:Number,Out<:Number}
     n::Int
 
     EWMean{In}(
-        alpha::Out
         ;
+        alpha::Out,
         corrected=true
     ) where {In<:Number,Out<:Number} =
         new{In,Out}(
