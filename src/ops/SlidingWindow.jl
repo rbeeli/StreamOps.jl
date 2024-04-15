@@ -2,7 +2,9 @@ using DataStructures
 
 
 """
-Maintains a sliding window of the last `window_size` values.
+Maintains a sliding window of the last `window_size` values using a circular buffer.
+Note that the returned value is a view into the buffer, so it is not a copy of the data,
+hence the result should not be modified or stored for later use. If required, a copy should be made.
 """
 struct SlidingWindow{In}
     buffer::CircularBuffer{In}

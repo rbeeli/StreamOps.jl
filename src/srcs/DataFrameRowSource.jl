@@ -20,7 +20,7 @@ end
 
 function next!(source::DataFrameRowSource)
     pos = source.position
-    pos >= nrow(source.df) && return nothing # end of data frame
+    pos >= size(source.df, 1) && return nothing # end of data frame
     row = @inbounds @view source.df[pos + 1, :]
     source.position += 1
     row
