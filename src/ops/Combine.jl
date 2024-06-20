@@ -2,8 +2,7 @@
 Combines multiple streams into a single stream by emitting
 a tuple of the latest values on every update of any of the input streams.
 
-`slot_fn` returns the index of the slot in the vector of
-a given value.
+`slot_fn` returns the index of the slot the given value is to be stored in.
 """
 struct Combine{T,K<:Function,C<:Function}
     slot_fn::K

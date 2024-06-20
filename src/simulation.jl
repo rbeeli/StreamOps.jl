@@ -38,7 +38,7 @@ function simulate_chronological_stream(
         value = next!(sources[i])
 
         isnothing(value) && continue
-        
+
         dt = value[1]
 
         # push new event to heap

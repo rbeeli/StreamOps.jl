@@ -4,9 +4,7 @@ Calculates fractional change to previous value, also known as percent change.
 Formula
 =======
 
-    y = x_t / x_{t-1} - 1
-
-.
+`` y = x\\_t / x\\_{t-1} - 1 ``
 """
 mutable struct FracChange{In}
     prev_value::In

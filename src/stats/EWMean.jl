@@ -20,10 +20,10 @@ https://blog.fugue88.ws/archives/2017-01/The-correct-way-to-start-an-Exponential
 """
 mutable struct EWMean{In<:Number,Out<:Number}
     const alpha::Out
+    const c::Out # 1 - alpha
     const corrected::Bool # bias correction
     M::Out
-    extra::Out
-    extra_factor::Out
+    ci::Out
     n::Int
 
     EWMean{In}(
@@ -33,10 +33,10 @@ mutable struct EWMean{In<:Number,Out<:Number}
     ) where {In<:Number,Out<:Number} =
         new{In,Out}(
             alpha,
+            one(Out) - alpha, # c
             corrected,
             zero(Out), # M
-            one(Out), # extra
-            corrected ? one(Out) - alpha : zero(Out), # extra_factor
+            corrected ? one(Out) : zero(Out), # ci
             0 # n
         )
 end
@@ -45,11 +45,16 @@ end
     if !state.corrected && state.n == 0
         state.M = value
     else
-        state.M = (one(Out) - state.alpha) * state.M + state.alpha * value
+        state.M = state.c * state.M + state.alpha * value
     end
-    mean = state.M
-    state.extra *= state.extra_factor # only relevant if corrected=true
-    mean /= one(Out) - state.extra
+
     state.n += 1
-    mean
+
+    if state.corrected
+        state.ci *= state.c
+        mean = state.M / (one(Out) - state.ci)
+        return mean
+    end
+
+    state.M
 end
