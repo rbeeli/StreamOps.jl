@@ -1,11 +1,10 @@
 using Test
 using Statistics
 
-
-@testset "ZScore: Uncorreted std" begin
+@testset "RollingZScore: Uncorreted std" begin
     window_size = 4
     corrected = false
-    op = ZScore{Float64,Float64}(window_size; corrected=corrected)
+    op = RollingZScore{Float64,Float64}(window_size; corrected=corrected)
     @test op.corrected == corrected
 
     vals = [
@@ -25,11 +24,10 @@ using Statistics
     end
 end
 
-
-@testset "ZScore: Corrected std" begin
+@testset "RollingZScore: Corrected std" begin
     window_size = 4
     corrected = true
-    op = ZScore{Float64,Float64}(window_size; corrected=corrected)
+    op = RollingZScore{Float64,Float64}(window_size; corrected=corrected)
     @test op.corrected == corrected
 
     vals = [
@@ -49,10 +47,9 @@ end
     end
 end
 
-
-@testset "ZScore: Constant (uncorrected bias)" begin
+@testset "RollingZScore: Constant (uncorrected bias)" begin
     window_size = 5
-    op = ZScore{Float64,Float64}(window_size; corrected=false)
+    op = RollingZScore{Float64,Float64}(window_size; corrected=false)
     @test op.corrected == false
 
     @test isnan(op(1.0))
@@ -60,10 +57,9 @@ end
     @test isnan(op(1.0))
 end
 
-
-@testset "ZScore: Constant (corrected bias)" begin
+@testset "RollingZScore: Constant (corrected bias)" begin
     window_size = 5
-    op = ZScore{Float64,Float64}(window_size)
+    op = RollingZScore{Float64,Float64}(window_size)
     @test op.corrected == true
 
     @test isnan(op(1.0))

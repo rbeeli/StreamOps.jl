@@ -1,10 +1,9 @@
 using Test
 using StatsBase
 
-
-@testset "Skew: Biased" begin
+@testset "RollingSkew: Biased" begin
     window_size = 4
-    op = Skew{Float64,Float64}(window_size; corrected=false)
+    op = RollingSkew{Float64,Float64}(window_size; corrected=false)
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -33,10 +32,9 @@ using StatsBase
     @test op(vals[7]) ≈ expected[7] atol = 1e-6
 end
 
-
-@testset "Skew: Unbiased" begin
+@testset "RollingSkew: Unbiased" begin
     window_size = 4
-    op = Skew{Float64,Float64}(window_size; corrected=true)
+    op = RollingSkew{Float64,Float64}(window_size; corrected=true)
 
     vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
 
@@ -65,9 +63,9 @@ end
     @test op(vals[7]) ≈ expected[7] atol = 1e-6
 end
 
-@testset "Skew: Window size 1" begin
+@testset "RollingSkew: Window size 1" begin
     window_size = 1
-    op = Skew{Float64,Float64}(window_size)
+    op = RollingSkew{Float64,Float64}(window_size)
     @test isnan(op(10.0))
     @test isnan(op(20.0))
     @test isnan(op(-1.0))

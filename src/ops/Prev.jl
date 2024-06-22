@@ -15,8 +15,8 @@ mutable struct Prev{In}
     ) where {In} = new{In}(init_value)
 end
 
-@inline (state::Prev)(value) = begin
-    tmp = state.value
-    state.value = value
+@inline (op::Prev)(value) = begin
+    tmp = op.value
+    op.value = value
     tmp
 end

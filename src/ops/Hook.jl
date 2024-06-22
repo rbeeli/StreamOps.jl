@@ -12,7 +12,7 @@ struct Hook{In}
     ) where {In} = new{In}(ref)
 end
 
-@inline (state::Hook)(value) = begin
-    state.ref[] = value # update the reference value
+@inline (op::Hook)(value) = begin
+    op.ref[] = value # update the reference value
     value
 end

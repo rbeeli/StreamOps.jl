@@ -1,36 +1,34 @@
 """
 Forwards the current value to all operations defined
-in the block of the `@collect_tuple` call.
-The return value of each pipeline is collected and returned
-as a tuple.
+in the block of the `@broadcast_collect` call.
+The return value of each pipeline is collected and returned as a tuple.
 
 There exist two modes:
 
-- `:broadcast` (default):
+- `:broadcast` (default)
 
-    Each pipeline within the `@collect_tuple` block
+    Each pipeline within the `@broadcast_collect` block
     receives the same input value.
 
-- `:sequential`:
+- `:sequential`
 
-    Each pipeline within the `@collect_tuple` block
+    Each pipeline within the `@broadcast_collect` block
     receives the output of the previous pipeline as input.
 
 """
-macro collect_tuple(ops...)
+macro broadcast_collect(ops...)
     ops
 end
 
 
 """
 Forwards the current value to all operations defined
-in the block of the `@collect_tuple` call.
+in the block of the `@broadcast` call.
 
 This operation does not return any value, but instead
 forwards the input value to the downstream pipeline.
 
-Each pipeline within the `@broadcast` block receives
-the same input value.
+Each pipeline within the `@broadcast` block receives the same input value.
 """
 macro broadcast(ops...)
     ops
@@ -42,6 +40,15 @@ Only keeps values that meet the condition.
 Otherwise, returns `nothing` if the condition is not met.
 """
 macro filter(condition)
+    condition
+end
+
+
+"""
+Skips values that meet the condition (opposite of `@filter`).
+Returns `nothing` if the condition is met.
+"""
+macro skipIf(condition)
     condition
 end
 
@@ -92,14 +99,14 @@ function make_op(
             state_inits;
             mode=:sequential
         )
-        push!(op_vars_all, gensym("op"))
+        push!(op_vars_all, gensym("block"))
         push!(block.args, :(local $(op_vars_all[end]) = $(op_block)))
     elseif op.head == :macrocall
         length(op.args) > 0 || error("Macro call without arguments: $op")
 
-        if op.args[1] == Symbol("@collect_tuple")
+        if op.args[1] == Symbol("@broadcast_collect")
             # --------------
-            # @collect_tuple
+            # @broadcast_collect
             # --------------
             t_exprs = macroexpand(@__MODULE__, op, recursive=false)
             t_exprs_filtered = []
@@ -110,7 +117,7 @@ function make_op(
                 if expr isa Expr && expr.head == Symbol("=") && expr.args[1] == :mode && expr.args[2] isa QuoteNode
                     # collection mode
                     mode = expr.args[2].value
-                    mode in valid_modes || error("Invalid @collect_tuple mode: $mode")
+                    mode in valid_modes || error("Invalid @broadcast_collect mode: $mode")
                 else
                     push!(t_exprs_filtered, expr)
                 end
@@ -137,10 +144,17 @@ function make_op(
                 state_inits;
                 mode=mode
             )
-            tuple_args = map(x -> x.args[1].args[1], t_block.args) # unwrap op vars
+            
+            # create tuple from op vars and add to block
+            tuple_args = map(x -> x.args[1].args[1], t_block.args)
             tuple_expr = Expr(:tuple, tuple_args...)
             push!(t_block.args, tuple_expr)
-            push!(block.args, t_block)
+
+            # store block result in variable
+            push!(op_vars_all, gensym("broadcast_collect"))
+            push!(block.args, :(
+                local $(op_vars_all[end]) = $(t_block)
+            ))
         elseif op.args[1] == Symbol("@broadcast")
             # --------------
             # @broadcast
@@ -165,10 +179,11 @@ function make_op(
                 mode=:broadcast
             )
 
+            # add broadcast block and pass on original input value
             push!(op_vars_all, gensym("broadcast"))
             push!(block.args, :(
-                local $(op_vars_all[end]) =  begin
-                    $(b_block.args...)
+                local $(op_vars_all[end]) = begin
+                    $(b_block)
                     $(op_var_prev) # pass on input value of broadcast
                 end
             ))
@@ -182,6 +197,19 @@ function make_op(
                 begin
                     local $(if_var) = $(esc(if_expr))
                     ($(if_var)($(op_var_prev))) || return nothing
+                    $(op_var_prev)
+                end
+            ))
+        elseif op.args[1] == Symbol("@skipIf")
+            # --------------
+            # @skipIf
+            # --------------
+            if_expr = macroexpand(@__MODULE__, op, recursive=true)
+            if_var = gensym("skipIf")
+            push!(block.args, :(
+                begin
+                    local $(if_var) = $(esc(if_expr))
+                    !($(if_var)($(op_var_prev))) || return nothing
                     $(op_var_prev)
                 end
             ))
@@ -264,12 +292,12 @@ the resulting code is type-stable and efficient.
 Example
 =======
 
-    pipe = @streamops Func(x -> abs(x)^2) Lag{Float64}(1) Print()
+    pipe = @streamops Transform(x -> abs(x)^2) Lag{Float64}(1) Print()
 
-Multi-line syntax using a begin-end block is supported:
+Multi-line syntax using a `begin`-`end` block is supported:
 
     pipe = @streamops begin
-        Func(x -> abs(x)^2)
+        Transform(x -> abs(x)^2)
         Lag{Float64}(1)
         Print()
     end

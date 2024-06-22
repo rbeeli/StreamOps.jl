@@ -1,7 +1,6 @@
 using Test
 using StreamOps
 
-
 @testset "Collect" begin
     op = Collect{Float64}()
     @test all(op(1.0) .== [1.0])
@@ -25,12 +24,11 @@ using StreamOps
     @test all(op.out .== [1, 2, 3])
 end
 
-
 @testset "Collect inside pipeline" begin
     # Test with pre-allocated array
     out = Int64[]
     pipe = @streamops begin
-        Func(x -> x^2)
+        Transform(x -> x^2)
         Collect(out)
     end
     @test all(pipe(1) .== [1])

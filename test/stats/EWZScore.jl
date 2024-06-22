@@ -1,6 +1,5 @@
 using Test
 
-
 @testset "EWZScore" begin
     alpha = 0.9
     op = EWZScore{Float64}(; alpha=alpha)
@@ -15,7 +14,6 @@ using Test
     @test op(3.0) ≈ -0.12923992259611067
 end
 
-
 @testset "EWZScore: Constant (uncorrected bias)" begin
     alpha = 0.9
     op = EWZScore{Float64}(; alpha=alpha, corrected=false)
@@ -25,7 +23,6 @@ end
     @test isnan(op(1.0))
     @test isnan(op(1.0))
 end
-
 
 @testset "EWZScore: Constant (corrected bias)" begin
     alpha = 0.9

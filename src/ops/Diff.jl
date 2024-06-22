@@ -22,9 +22,9 @@ mutable struct Diff{In}
     ) where {In} = new{In}(fill(init_value, lag), lag, 1)
 end
 
-@inline function (state::Diff{In})(value::In)::In where {In}
-    lagged_value = @inbounds state.buffer[state.index]
-    @inbounds state.buffer[state.index] = value
-    state.index = state.index % state.lag + 1
+@inline function (op::Diff{In})(value::In)::In where {In}
+    lagged_value = @inbounds op.buffer[op.index]
+    @inbounds op.buffer[op.index] = value
+    op.index = op.index % op.lag + 1
     value - lagged_value
 end

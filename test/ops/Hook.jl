@@ -1,7 +1,6 @@
 using Test
 using StreamOps
 
-
 @testset "Hook" begin
     ref = Ref{Bool}(false)
     op = Hook(ref)

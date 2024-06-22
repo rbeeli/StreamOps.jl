@@ -1,7 +1,6 @@
 """
-Collects all passed values to this operation in an array
-called `out`. The array can be passed in from outside
-in the constructor.
+Collects all passed values to this operation by appending them to a vector.
+The vector to append to must be passed as the first argument to the operation.
 """
 struct Collect{E}
     out::Vector{E}
@@ -15,7 +14,7 @@ struct Collect{E}
     ) where {E} = new{E}(out)
 end
 
-@inline (state::Collect)(value) = begin
-    push!(state.out, value)
-    state.out
+@inline (op::Collect)(value) = begin
+    push!(op.out, value)
+    op.out
 end

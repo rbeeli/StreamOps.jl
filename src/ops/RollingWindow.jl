@@ -1,15 +1,15 @@
 using DataStructures
 
-
 """
 Maintains a sliding window of the last `window_size` values using a circular buffer.
 Note that the returned value is a view into the buffer, so it is not a copy of the data,
-hence the result should not be modified or stored for later use. If required, a copy should be made.
+hence the result should not be modified or stored for later use.
+If temporary storage of the result or modification is required, a copy should be made.
 """
-struct SlidingWindow{In}
+struct RollingWindow{In}
     buffer::CircularBuffer{In}
 
-    SlidingWindow{In}(
+    RollingWindow{In}(
         window_size::Int
         ;
         init_value=one(In) # zero for default value does not work on strings, use one instead
@@ -19,7 +19,7 @@ struct SlidingWindow{In}
         new{In}(buffer)
     end
 
-    SlidingWindow{In}(
+    RollingWindow{In}(
         window_size::Int
         ;
         init_value=zero(In)
@@ -30,8 +30,8 @@ struct SlidingWindow{In}
     end
 end
 
-@inline (state::SlidingWindow)(value) = begin
+@inline (op::RollingWindow)(value) = begin
     # automatically handles overwriting in a circular manner
-    push!(state.buffer, value)
-    view(state.buffer, 1:length(state.buffer))
+    push!(op.buffer, value)
+    view(op.buffer, 1:length(op.buffer))
 end

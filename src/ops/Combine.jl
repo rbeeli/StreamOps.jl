@@ -1,32 +1,35 @@
 """
-Combines multiple streams into a single stream by emitting
-a tuple of the latest values on every update of any of the input streams.
+Combines multiple streams into a single stream by using a user-defined function
+to combine the values of the input streams.
 
 `slot_fn` returns the index of the slot the given value is to be stored in.
 """
-struct Combine{T,K<:Function,C<:Function}
+struct Combine{N,T,K<:Function,V<:Function,C<:Function}
     slot_fn::K
+    value_fn::V
     combine_fn::C
-    latest::Vector{Union{Nothing,T}}
+    state::Vector{Union{Nothing,T}}
 
-    Combine{T}(
-        n_slots::Int;
+    Combine{N,T}(
+        ;
         slot_fn::K,
+        value_fn::V=x -> x,
         combine_fn::C=x -> Tuple(x)
-    ) where {T,K<:Function,C<:Function} =
-        new{T,K,C}(
+    ) where {N,T,K<:Function,V<:Function,C<:Function} =
+        new{N,T,K,V,C}(
             slot_fn,
+            value_fn,
             combine_fn,
-            Vector{Union{Nothing,T}}(nothing, n_slots)
+            Vector{Union{Nothing,T}}(nothing, N) # state
         )
 end
 
-@inline (state::Combine)(value) = begin
+@inline function (op::Combine)(value)
     # get key for index lookup in slot map
-    slot_ix = state.slot_fn(value)
+    slot_ix = op.slot_fn(value)
 
-    # update slot with latest value
-    state.latest[slot_ix] = value
+    # update slot with new value
+    op.state[slot_ix] = op.value_fn(value)
 
-    state.combine_fn(state.latest)
+    op.combine_fn(op.state)
 end

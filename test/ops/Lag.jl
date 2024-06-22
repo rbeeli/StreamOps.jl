@@ -1,7 +1,6 @@
 using Test
 using StreamOps
 
-
 @testset "Lag" begin
     op = Lag{Float64}(3)
     @test op(5.0) == zero(Float64)

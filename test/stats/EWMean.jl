@@ -1,6 +1,5 @@
 using Test
 
-
 @testset "EWMean: Initialization" begin
     op = EWMean{Float64}(; alpha=0.5)
     @test op.alpha == 0.5

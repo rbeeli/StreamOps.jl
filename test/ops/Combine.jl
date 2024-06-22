@@ -1,24 +1,21 @@
 using Test
 using StreamOps
 
-
 @testset verbose = true "Combine" begin
 
     @testset "initialization" begin
-        op = Combine{Tuple{Symbol,Float64}}(
-            2,
+        op = Combine{2,Tuple{Symbol,Float64}}(;
             slot_fn=x -> Dict(
                 :a => 1,
                 :b => 2
             )[x[1]]
         )
-        @test length(op.latest) == 2
-        @test all(isnothing, op.latest)
+        @test length(op.state) == 2
+        @test all(isnothing, op.state)
     end
 
     @testset "default tuples" begin
-        op = Combine{Tuple{Symbol,Float64}}(
-            2;
+        op = Combine{2,Tuple{Symbol,Float64}}(;
             slot_fn=x -> Dict(
                 :a => 1,
                 :b => 2
@@ -31,8 +28,7 @@ using StreamOps
     end
 
     @testset "combine_fn" begin
-        op = Combine{Tuple{Symbol,Float64}}(
-            2;
+        op = Combine{2,Tuple{Symbol,Float64}}(;
             slot_fn=x -> Dict(
                 :a => 1,
                 :b => 2

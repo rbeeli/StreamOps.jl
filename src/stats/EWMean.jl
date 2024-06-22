@@ -41,20 +41,20 @@ mutable struct EWMean{In<:Number,Out<:Number}
         )
 end
 
-@inline function (state::EWMean{In,Out})(value::In)::Out where {In<:Number,Out<:Number}
-    if !state.corrected && state.n == 0
-        state.M = value
+@inline function (op::EWMean{In,Out})(value::In)::Out where {In<:Number,Out<:Number}
+    if !op.corrected && op.n == 0
+        op.M = value
     else
-        state.M = state.c * state.M + state.alpha * value
+        op.M = op.c * op.M + op.alpha * value
     end
 
-    state.n += 1
+    op.n += 1
 
-    if state.corrected
-        state.ci *= state.c
-        mean = state.M / (one(Out) - state.ci)
+    if op.corrected
+        op.ci *= op.c
+        mean = op.M / (one(Out) - op.ci)
         return mean
     end
 
-    state.M
+    op.M
 end

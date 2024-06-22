@@ -1,7 +1,6 @@
 using Test
 using StreamOps
 
-
 @testset "ForwardFill with numbers" begin
     op = ForwardFill{Float64}(x -> isnan(x))
     @test op(NaN) == 0

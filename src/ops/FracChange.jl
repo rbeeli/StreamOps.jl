@@ -21,23 +21,23 @@ mutable struct FracChange{In}
 end
 
 # for floating-point numbers
-@inline (state::FracChange{In})(value) where {In<:AbstractFloat} = begin
-    if state.prev_value == zero(In)
+@inline (op::FracChange{In})(value) where {In<:AbstractFloat} = begin
+    if op.prev_value == zero(In)
         pct_change = In(NaN) # handle division by zero
     else
-        pct_change = value / state.prev_value - one(In)
+        pct_change = value / op.prev_value - one(In)
     end
-    state.prev_value = value
+    op.prev_value = value
     pct_change
 end
 
 # for other numeric types, including integers
-@inline (state::FracChange{In})(value) where {In} = begin
-    if state.prev_value == zero(In)
+@inline (op::FracChange{In})(value) where {In} = begin
+    if op.prev_value == zero(In)
         pct_change = zero(In) # handle division by zero
     else
-        pct_change = (value - state.prev_value) / state.prev_value
+        pct_change = (value - op.prev_value) / op.prev_value
     end
-    state.prev_value = value
+    op.prev_value = value
     pct_change
 end

@@ -1,10 +1,9 @@
 using Test
 using StreamOps
 
-
-@testset "SlidingWindow" begin
+@testset "RollingWindow" begin
     window_size = 3
-    op = SlidingWindow{Int}(window_size; init_value=-1)
+    op = RollingWindow{Int}(window_size; init_value=-1)
 
     @test length(op.buffer) == window_size
     @test all(op.buffer .== -1) # check initial values

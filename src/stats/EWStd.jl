@@ -34,52 +34,52 @@ mutable struct EWStd{In<:Number,Out<:Number}
         )
 end
 
-@inline (state::EWStd{In,Out})(value::In) where {In<:Number,Out<:Number} = begin
-    if !state.initialized
-        state.mean = value
-        std = state.corrected ? NaN : zero(Out)
-        state.initialized = true
+@inline (op::EWStd{In,Out})(value::In) where {In<:Number,Out<:Number} = begin
+    if !op.initialized
+        op.mean = value
+        std = op.corrected ? NaN : zero(Out)
+        op.initialized = true
         return std
     end
     
     # static
-    old_wt_factor = one(Out) - state.alpha
-    new_wt = state.corrected ? one(Out) : state.alpha
+    old_wt_factor = one(Out) - op.alpha
+    new_wt = op.corrected ? one(Out) : op.alpha
 
-    state.sum_wt *= old_wt_factor
-    state.sum_wt2 *= old_wt_factor * old_wt_factor
-    state.old_wt *= old_wt_factor
+    op.sum_wt *= old_wt_factor
+    op.sum_wt2 *= old_wt_factor * old_wt_factor
+    op.old_wt *= old_wt_factor
 
     # mean update
-    old_mean = state.mean
-    if state.mean != value # reduce numerical errors
-        state.mean = ((state.old_wt * old_mean) + (new_wt * value)) / (state.old_wt + new_wt)
+    old_mean = op.mean
+    if op.mean != value # reduce numerical errors
+        op.mean = ((op.old_wt * old_mean) + (new_wt * value)) / (op.old_wt + new_wt)
     end
 
     # variance update
-    state.var = (
-        (state.old_wt * (state.var + ((old_mean - state.mean) * (old_mean - state.mean)))) +
-        (new_wt * ((value - state.mean) * (value - state.mean)))
-    ) / (state.old_wt + new_wt)
+    op.var = (
+        (op.old_wt * (op.var + ((old_mean - op.mean) * (old_mean - op.mean)))) +
+        (new_wt * ((value - op.mean) * (value - op.mean)))
+    ) / (op.old_wt + new_wt)
 
-    state.sum_wt += new_wt
-    state.sum_wt2 += (new_wt * new_wt)
-    state.old_wt += new_wt
+    op.sum_wt += new_wt
+    op.sum_wt2 += (new_wt * new_wt)
+    op.old_wt += new_wt
 
-    if state.corrected
-        num = state.sum_wt * state.sum_wt
-        denom = num - state.sum_wt2
+    if op.corrected
+        num = op.sum_wt * op.sum_wt
+        denom = num - op.sum_wt2
         if denom > 0
             bias = num / denom
-            return sqrt(bias * state.var)
+            return sqrt(bias * op.var)
         else
             return Out(NaN)
         end
     else
-        state.sum_wt /= state.old_wt
-        state.sum_wt2 /= state.old_wt * state.old_wt
-        state.old_wt = one(Out)
+        op.sum_wt /= op.old_wt
+        op.sum_wt2 /= op.old_wt * op.old_wt
+        op.old_wt = one(Out)
 
-        return sqrt(state.var)
+        return sqrt(op.var)
     end
 end

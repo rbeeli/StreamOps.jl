@@ -9,12 +9,12 @@ TODO: Make it an efficient online-algorithm like Mean and Std.
 
 https://web.archive.org/web/20181222175223/http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
 """
-struct Skew{In<:Number,Out<:Number}
+struct RollingSkew{In<:Number,Out<:Number}
     buffer::CircularBuffer{In}
     window_size::Int
     corrected::Bool
 
-    Skew{In,Out}(
+    RollingSkew{In,Out}(
         window_size::Int
         ;
         corrected::Bool=true
@@ -26,13 +26,13 @@ struct Skew{In<:Number,Out<:Number}
         )
 end
 
-@inline (state::Skew{In})(value::In) where {In<:Number} = begin
-    DataStructures.push!(state.buffer, value)
-    skew = skewness(state.buffer)
+@inline (op::RollingSkew{In})(value::In) where {In<:Number} = begin
+    DataStructures.push!(op.buffer, value)
+    skew = skewness(op.buffer)
 
-    if state.corrected
+    if op.corrected
         # adjust. for statistical bias
-        n = length(state.buffer)
+        n = length(op.buffer)
         skew *= (sqrt(n * (n - 1))) / (n - 2)
     end
 

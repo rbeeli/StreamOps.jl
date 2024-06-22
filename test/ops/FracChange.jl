@@ -1,7 +1,6 @@
 using Test
 using StreamOps
 
-
 @testset "FracChange: Basic Functionality" begin
     op = FracChange{Int}(; init_value=100)
     @test op(120) ≈ 120 / 100 - 1.0

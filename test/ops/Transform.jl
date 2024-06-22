@@ -1,30 +1,29 @@
 using Test
 using StreamOps
 
-
-@testset verbose = true "Func" begin
+@testset verbose = true "Transform" begin
 
     @testset "identity" begin
-        op = Func(identity)
+        op = Transform(identity)
         @test op(7) == 7
     end
 
     @testset "x*x" begin
-        op = Func(x -> x * x)
+        op = Transform(x -> x * x)
         @test op(5) == 25
     end
 
     @testset "multiple" begin
         pipe = @streamops begin
-            Func(x -> x * x)
-            Func(x -> x - 1)
+            Transform(x -> x * x)
+            Transform(x -> x - 1)
         end
         @test pipe(5) == 24
     end
 
     @testset "block wrapped" begin
         pipe = @streamops begin
-            Func(x -> begin
+            Transform(x -> begin
                 x * x
             end)
         end

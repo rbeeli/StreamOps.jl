@@ -21,9 +21,9 @@ mutable struct Lag{In}
     ) where {In} = new{In}(fill(init_value, lag), lag, 1)
 end
 
-@inline (state::Lag)(value) = begin
-    lagged_value = state.buffer[state.index]
-    state.buffer[state.index] = value
-    state.index = state.index % state.lag + 1
+@inline (op::Lag)(value) = begin
+    lagged_value = op.buffer[op.index]
+    op.buffer[op.index] = value
+    op.index = op.index % op.lag + 1
     lagged_value
 end

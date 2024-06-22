@@ -2,19 +2,19 @@ using DataStructures
 
 
 """
-Rolling arithmetic standard deviation with fixed window size.
+Calculates the moving standard deviation with fixed window size in O(1) time.
 
 https://web.archive.org/web/20181222175223/http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
 https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
 """
-mutable struct Std{In<:Number,Out<:Number}
+mutable struct RollingStd{In<:Number,Out<:Number}
     const buffer::CircularBuffer{In}
     const window_size::Int
     const corrected::Bool
     M1::Out
     M2::Out
 
-    Std{In,Out}(
+    RollingStd{In,Out}(
         window_size::Int
         ;
         corrected=true
@@ -28,30 +28,30 @@ mutable struct Std{In<:Number,Out<:Number}
         )
 end
 
-@inline (state::Std{In})(value::In) where {In<:Number} = begin
-    if isfull(state.buffer)
-        dropped = popfirst!(state.buffer)
-        n1 = length(state.buffer)
-        delta = dropped - state.M1
+@inline (op::RollingStd{In})(value::In) where {In<:Number} = begin
+    if isfull(op.buffer)
+        dropped = popfirst!(op.buffer)
+        n1 = length(op.buffer)
+        delta = dropped - op.M1
         delta_n = delta / n1
-        state.M1 -= delta_n
-        state.M2 -= delta * (dropped - state.M1)
+        op.M1 -= delta_n
+        op.M2 -= delta * (dropped - op.M1)
     else
-        n1 = length(state.buffer)
+        n1 = length(op.buffer)
     end
 
     n = n1 + 1
-    push!(state.buffer, value)
+    push!(op.buffer, value)
 
     # update states
-    delta = value - state.M1
+    delta = value - op.M1
     delta_n = delta / n
     term1 = delta * delta_n * n1
-    state.M1 += delta_n
-    state.M2 += term1
+    op.M1 += delta_n
+    op.M2 += term1
 
     # calculate variance
-    var = state.M2 / (state.corrected ? (n - 1) : n)
+    var = op.M2 / (op.corrected ? (n - 1) : n)
 
     # calculate standard deviation
     sqrt(var)

@@ -16,13 +16,13 @@ mutable struct ForwardFill{In,F<:Function}
     ) where {In,F<:Function} = new{In,F}(checker, init_value)
 end
 
-@inline (state::ForwardFill)(value) = begin
+@inline (op::ForwardFill)(value) = begin
     # check for values that should be filled
-    if state.checker(value)
-        value = state.last_valid
+    if op.checker(value)
+        value = op.last_valid
     else
         # update fill_value with the latest valid value
-        state.last_valid = value
+        op.last_valid = value
     end
     value
 end

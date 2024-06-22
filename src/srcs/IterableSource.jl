@@ -15,11 +15,15 @@ mutable struct IterableSource{D} <: StreamSource
         )
 end
 
-
 function next!(src::IterableSource{D}) where {D}
     pos = src.position
     pos >= length(src.data) && return nothing # end of data
     src.position += 1
     value = @inbounds src.data[pos + 1]
     value
+end
+
+function reset!(src::IterableSource)
+    src.position = 0
+    nothing
 end

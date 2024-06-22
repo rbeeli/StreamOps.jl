@@ -1,6 +1,5 @@
 using Dates
 
-
 """
 Iterates over a date range by a specified period
 and passes each date to the next operator.
@@ -28,13 +27,18 @@ mutable struct PeriodicSource{D<:Dates.AbstractDateTime,P<:Dates.Period} <: Stre
         )
 end
 
-function next!(source::PeriodicSource)
-    date = source.current_date
-    if source.inclusive_end
-        date > source.end_date && return nothing # end of data
+function next!(src::PeriodicSource)
+    date = src.current_date
+    if src.inclusive_end
+        date > src.end_date && return nothing # end of data
     else
-        date >= source.end_date && return nothing # end of data
+        date >= src.end_date && return nothing # end of data
     end
-    source.current_date += source.period
+    src.current_date += src.period
     date
+end
+
+function reset!(src::PeriodicSource)
+    src.current_date = src.start_date
+    nothing
 end

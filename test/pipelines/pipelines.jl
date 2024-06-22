@@ -1,16 +1,15 @@
 using Test
 using StreamOps
 
-
 @testset verbose = true "Pipelines" begin
 
     @testset "Two operations" begin
-        pipe = @streamops Func(x -> x) Func(x -> x^2)
+        pipe = @streamops Transform(x -> x) Transform(x -> x^2)
         @test pipe(1) == 1
     end
 
     @testset "Three operations" begin
-        pipe = @streamops Func(x -> x * x) Lag{Float64}(1)
+        pipe = @streamops Transform(x -> x * x) Lag{Float64}(1)
         @test pipe(1.5) == 0.0 # first value
         @test pipe(2.0) == 1.5^2 # second value
         @test pipe(3.0) == 2.0^2 # third value
@@ -18,7 +17,7 @@ using StreamOps
 
     @testset "Three operations multi-line block syntax" begin
         pipe = @streamops begin
-            Func(x -> x * x)
+            Transform(x -> x * x)
             Lag{Float64}(1)
         end
         @test pipe(1.5) == 0.0 # first value
@@ -27,8 +26,8 @@ using StreamOps
     end
 
     @testset "Two operations using constructor and instance variable" begin
-        last_op = Func(x -> x)
-        pipe = @streamops Func(x -> x * x) last_op
+        last_op = Transform(x -> x)
+        pipe = @streamops Transform(x -> x * x) last_op
         @test pipe(2) == 4
     end
 
@@ -40,7 +39,7 @@ using StreamOps
         # Test with pre-allocated array
         output = Int64[]
         pipe = @streamops begin
-            Func(x -> x^2)
+            Transform(x -> x^2)
             Collect(output)
         end
         test_fn(pipe)

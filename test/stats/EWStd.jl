@@ -1,6 +1,5 @@
 using Test
 
-
 @testset "EWStd: No bias correction" begin
     alpha = 0.9
     op = EWStd{Float64}(; alpha=alpha, corrected=false)
@@ -30,7 +29,6 @@ using Test
     @test op(vals[6]) ≈ expected[6] atol = 1e-6
     @test op(vals[7]) ≈ expected[7] atol = 1e-6
 end
-
 
 @testset "EWStd: With bias correction" begin
     alpha = 0.9
@@ -62,7 +60,6 @@ end
     @test op(vals[7]) ≈ expected[7] atol = 1e-6
 end
 
-
 @testset "EWStd: Constant (uncorrected)" begin
     alpha = 0.9
     op = EWStd{Float64}(; alpha=alpha, corrected=false)
@@ -74,7 +71,6 @@ end
     @test op(vals[2]) ≈ 0.0
     @test op(vals[3]) ≈ 0.0
 end
-
 
 @testset "EWStd: Constant (corrected)" begin
     alpha = 0.9

@@ -24,8 +24,8 @@ struct EWZScore{In<:Number,Out<:Number}
         )
 end
 
-@inline (state::EWZScore{In})(value::In) where {In<:Number} = begin
-    mean = state.ew_mean(value)
-    std = state.ew_std(value)
+@inline (op::EWZScore{In})(value::In) where {In<:Number} = begin
+    mean = op.ew_mean(value)
+    std = op.ew_std(value)
     (value - mean) / std
 end

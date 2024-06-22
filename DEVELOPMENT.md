@@ -1,0 +1,3 @@
+- Apply and Transform as macros
+- join streams again
+- accumulator

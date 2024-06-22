@@ -1,20 +1,19 @@
 using Test
 using StreamOps
 
-
 @testset "@broadcast" begin
     op1 = Float64[]
     op2 = Float64[]
     op3 = Float64[]
 
     pipe = @streamops begin
-        Func(x -> x)
+        Transform(x -> x)
         @broadcast begin
             Collect{Float64}(op1)
             Collect{Float64}(op2)
             Collect{Float64}(op3)
         end
-        Func(x -> x * x)
+        Transform(x -> x * x)
     end
 
     @test pipe(1.0) == 1.0

@@ -1,5 +1,6 @@
 """
-Prints the value. The default print function is Julia's `println`.
+Prints the value.
+The default print function is Julia's `println`.
 """
 struct Print{F<:Function}
     print_fn::F
@@ -10,7 +11,7 @@ struct Print{F<:Function}
     ) where {F<:Function} = new{F}(print_fn)
 end
 
-@inline (state::Print)(value) = begin
-    state.print_fn(value)
+@inline (op::Print)(value) = begin
+    op.print_fn(value)
     value
 end

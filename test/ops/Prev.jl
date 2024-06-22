@@ -1,7 +1,6 @@
 using Test
 using StreamOps
 
-
 @testset "Prev" begin
     op = Prev{Int64}()
     @test op(1) == zero(typeof(1))

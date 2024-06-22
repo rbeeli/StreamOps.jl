@@ -1,6 +1,11 @@
 using Dates
 using DataStructures
 
+struct SimChronoItem{D}
+    i::Int
+    date::D
+end
+
 """
 Simulate a chronological stream of events from multiple sources.
 
@@ -10,47 +15,74 @@ and stops when all sources are exhausted.
 The individual sources are assumed to be sorted in chronological order.
 
 Uses a binary heap to keep track of the oldest event from each source.
+
+Parameters
+=========
+D : Type
+    The type of the date of the event.
+
+V : Type
+    The type of the event. Use Union if the events are of different types.
+
+sources : Vector{StreamSource}
+    The sources of the events.
+
+date_fns : Vector{Function}
+    The functions to extract the date from the event.
+
+pipelines : Vector{Function}
+    The functions to process the event of each source.
 """
 function simulate_chronological_stream(
     ::Type{D},
-    sources, # ::Vector{StreamSource}
+    ::Type{V},
+    sources,
+    date_fns,
     pipelines
-) where {D<:Dates.AbstractDateTime}
+) where {D<:Dates.AbstractDateTime,V}
     @assert length(sources) == length(pipelines)
+    @assert length(sources) == length(date_fns)
 
-    sources_heap = BinaryMinHeap{Tuple{Int64,D}}()
-    values = Vector{Any}(undef, length(sources))
+    queue = BinaryMinHeap{SimChronoItem{D}}()
+    events = Vector{Union{V,Nothing}}(undef, length(sources))
 
+    # initialize heap
     for (i, source) in enumerate(sources)
-        value = next!(source) # initial data point
-        values[i] = value
-        push!(sources_heap, (i, value[1]))
+        event::Union{V,Nothing} = next!(source)
+        events[i] = event
+        isnothing(event) && continue
+        date::D = @inbounds date_fns[i](event)
+        push!(queue, SimChronoItem(i, date))
     end
 
-    while length(sources_heap) > 0
+    while length(queue) > 0
         # get oldest source event
-        i, dt = pop!(sources_heap)
+        item = pop!(queue)
+        i = item.i
+        date = item.date
 
         # flush event downstream
-        pipelines[i](values[i])
+        event::Union{V,Nothing} = @inbounds events[i]
+        if !isnothing(event)
+            @inbounds pipelines[i](event)
+        end
 
         # fetch next event
-        value = next!(sources[i])
+        next_event = next!(@inbounds sources[i])
 
-        isnothing(value) && continue
+        isnothing(next_event) && continue
 
-        dt = value[1]
+        date::D = @inbounds date_fns[i](next_event)
 
         # push new event to heap
-        if dt != typemax(D)
-            push!(sources_heap, (i, dt))
-            values[i] = value
+        if date != typemax(D)
+            push!(queue, SimChronoItem(i, date))
+            @inbounds events[i] = next_event
         end
     end
 end
 
-
 @inline Base.isless(
-    x::Tuple{Int64,D},
-    y::Tuple{Int64,D}
-) where {D<:Dates.AbstractDateTime} = x[2] < y[2]
+    x::SimChronoItem{D},
+    y::SimChronoItem{D}
+) where {D<:Dates.AbstractDateTime} = x.date < y.date

@@ -1,7 +1,6 @@
 using Test
 using StreamOps
 
-
 @testset "Diff lag=1 (default)" begin
     op = Diff{Float64}()
     @test op.lag == 1

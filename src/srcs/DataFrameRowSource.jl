@@ -1,6 +1,5 @@
 using DataFrames
 
-
 """
 Iterates over each row of a DataFrame.
 Each row is passed to the next operator as a view.
@@ -18,10 +17,15 @@ mutable struct DataFrameRowSource{D} <: StreamSource
         )
 end
 
-function next!(source::DataFrameRowSource)
-    pos = source.position
-    pos >= size(source.df, 1) && return nothing # end of data frame
-    row = @inbounds @view source.df[pos + 1, :]
-    source.position += 1
+function next!(src::DataFrameRowSource)
+    pos = src.position
+    pos >= size(src.df, 1) && return nothing # end of data frame
+    row = @inbounds @view src.df[pos + 1, :]
+    src.position += 1
     row
+end
+
+function reset!(src::DataFrameRowSource)
+    src.position = 0
+    nothing
 end
