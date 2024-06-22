@@ -1,10 +1,11 @@
 using DataStructures
 
 """
-Maintains a sliding window of the last `window_size` values using a circular buffer.
+Maintains a rolling window of the last `window_size` values using a circular buffer.
+
 Note that the returned value is a view into the buffer, so it is not a copy of the data,
 hence the result should not be modified or stored for later use.
-If temporary storage of the result or modification is required, a copy should be made.
+If temporary storage of the result or modification of the values is needed, a copy should be made.
 """
 struct RollingWindow{In}
     buffer::CircularBuffer{In}
