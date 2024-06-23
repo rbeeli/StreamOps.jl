@@ -9,7 +9,7 @@ using StreamOps
                 :a => 1,
                 :b => 2
             )[x[1]],
-            initial_value=((:none, 0.0), (:none, 0.0))
+            init_value=((:none, 0.0), (:none, 0.0))
         )
         @test length(op.state) == 2
         @test all(op.state .== [(:none, 0.0), (:none, 0.0)])
@@ -21,7 +21,7 @@ using StreamOps
                 :a => 1,
                 :b => 2
             )[x[1]],
-            initial_value=((:none, 0.0), (:none, 0.0))
+            init_value=((:none, 0.0), (:none, 0.0))
         )
         @test all(op((:a, 1.0)) .== [(:a, 1.0), (:none, 0.0)])
         @test all(op((:b, 2.0)) .== [(:a, 1.0), (:b, 2.0)])

@@ -21,9 +21,10 @@ include("ops/RollingWindow.jl")
 include("ops/Aggregate.jl")
 include("ops/Sample.jl")
 include("ops/Counter.jl")
+include("ops/Accumulate.jl")
 
 export Apply, Collect, Combine, CombineTuple, Diff, ForwardFill, Transform, Hook, Lag, FracChange
-export Prev, Print, RollingWindow, Counter
+export Prev, Print, RollingWindow, Counter, Accumulate
 export Aggregate, Sample
 
 # statistics

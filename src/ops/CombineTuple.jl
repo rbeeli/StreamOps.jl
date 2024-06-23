@@ -13,13 +13,13 @@ struct CombineTuple{N,T,K<:Function,V<:Function}
         ;
         slot_fn::K,
         value_fn::V=x -> x,
-        initial_value
+        init_value
     ) where {N,T,K<:Function,V<:Function}
-        @assert length(initial_value) == N "initial_value must have length $N, but got $(length(initial_value))"
+        @assert length(init_value) == N "init_value must have length $N, but got $(length(init_value))"
         new{N,T,K,V}(
             slot_fn,
             value_fn,
-            collect(initial_value) # state
+            collect(init_value) # state
         )
     end
 end

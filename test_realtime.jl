@@ -2,10 +2,8 @@ using Dates
 
 include("src/macros.jl");
 include("src/simulation.jl");
-include("src/ops/Func.jl");
 include("src/ops/Print.jl");
 include("src/ops/Combine.jl");
-include("src/ops/Collect.jl");
 include("src/srcs/StreamSource.jl");
 include("src/srcs/IterableSource.jl");
 

@@ -3,18 +3,12 @@ Collects all passed values to this operation by appending them to a vector.
 The vector to append to must be passed as the first argument to the operation.
 """
 struct Collect{E}
-    out::Vector{E}
-
-    Collect{E}(
-        out::Vector{E}=E[]
-    ) where {E} = new{E}(out)
-
-    Collect(
-        out::Vector{E}
-    ) where {E} = new{E}(out)
+    buffer::Vector{E}
+    Collect{E}(buffer=E[]) where {E} = new{E}(buffer)
+    Collect(buffer) = new{eltype(buffer)}(buffer)
 end
 
 @inline (op::Collect)(value) = begin
-    push!(op.out, value)
-    op.out
+    push!(op.buffer, value)
+    op.buffer
 end

@@ -16,6 +16,7 @@ requested_tests = ARGS
 if isempty(requested_tests)
     include("utils.jl")
 
+    include("ops/Accumulate.jl")
     include("ops/Apply.jl")
     include("ops/Aggregate.jl")
     include("ops/Sample.jl")
