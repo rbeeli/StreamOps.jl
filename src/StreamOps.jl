@@ -14,7 +14,6 @@ include("ops/ForwardFill.jl")
 include("ops/Transform.jl")
 include("ops/Hook.jl")
 include("ops/Lag.jl")
-include("ops/FracChange.jl")
 include("ops/Prev.jl")
 include("ops/Print.jl")
 include("ops/RollingWindow.jl")
@@ -23,11 +22,13 @@ include("ops/Sample.jl")
 include("ops/Counter.jl")
 include("ops/Accumulate.jl")
 
-export Apply, Collect, Combine, CombineTuple, Diff, ForwardFill, Transform, Hook, Lag, FracChange
+export Apply, Collect, Combine, CombineTuple, Diff, ForwardFill, Transform, Hook, Lag
 export Prev, Print, RollingWindow, Counter, Accumulate
 export Aggregate, Sample
 
 # statistics
+include("stats/PctChange.jl")
+include("stats/FracDiff.jl")
 include("stats/EWMean.jl")
 include("stats/EWStd.jl")
 include("stats/EWZScore.jl")
@@ -36,7 +37,8 @@ include("stats/RollingSkew.jl")
 include("stats/RollingStd.jl")
 include("stats/RollingZScore.jl")
 
-export EWMean, EWStd, EWZScore, RollingMean, RollingSkew, RollingStd, RollingZScore
+export FracDiff, frac_diff_weights
+export PctChange, EWMean, EWStd, EWZScore, RollingMean, RollingSkew, RollingStd, RollingZScore
 
 # stream sources
 include("srcs/StreamSource.jl")

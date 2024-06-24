@@ -1,6 +1,10 @@
 """
 Expontential Weighted Moving Average (EWMA) with bias correction.
 
+The parameter `alpha` is the weight of the new value, and should be in the range [0, 1].
+A higher alpha value discounts older observations faster,
+hence the model is more reactive to recent changes.
+
 Formulas
 --------
 

@@ -3,12 +3,12 @@ using StreamOps
 
 # To run a subset of tests, call Pkg.test as follows:
 #
-#   Pkg.test("StreamOps", test_args=["stats/OpStd.jl"])
 #   Pkg.test("StreamOps", test_args=["ops/Combine.jl"])
 #   Pkg.test("StreamOps", test_args=["ops/Sample.jl"])
 #   Pkg.test("StreamOps", test_args=["pipelines/pipelines.jl"])
 #   Pkg.test("StreamOps", test_args=["pipelines/broadcast.jl"])
 #   Pkg.test("StreamOps", test_args=["pipelines/filter.jl"])
+#   Pkg.test("StreamOps", test_args=["stats/FracDiff.jl"])
 #   Pkg.test("StreamOps", test_args=["srcs/simulate_chronological_stream.jl"])
 
 requested_tests = ARGS
@@ -24,7 +24,6 @@ if isempty(requested_tests)
     include("ops/Combine.jl")
     include("ops/CombineTuple.jl")
     include("ops/ForwardFill.jl")
-    include("ops/FracChange.jl")
     include("ops/Transform.jl")
     include("ops/Hook.jl")
     include("ops/Lag.jl")
@@ -33,6 +32,8 @@ if isempty(requested_tests)
     include("ops/Print.jl")
     include("ops/RollingWindow.jl")
 
+    include("stats/PctChange.jl")
+    include("stats/FracDiff.jl")
     include("stats/EWMean.jl")
     include("stats/EWStd.jl")
     include("stats/EWZScore.jl")
