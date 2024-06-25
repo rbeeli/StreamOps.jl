@@ -11,11 +11,11 @@ Formula
 """
 mutable struct Lag{In}
     const buffer::Vector{In}
-    const lag::Int64
-    index::Int64
+    const lag::Int
+    index::Int
 
     Lag{In}(
-        lag::Int64=1
+        lag::Int=1
         ;
         init_value::In=zero(In)
     ) where {In} = new{In}(fill(init_value, lag), lag, 1)

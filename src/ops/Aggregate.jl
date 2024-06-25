@@ -7,7 +7,7 @@ mutable struct Aggregate{In,Key,FP<:Function,FA<:Function}
     const buffer::Vector{In}
     last_key::Key
 
-    Aggregate{In,Key}(
+    Aggregate{In}(
         ;
         key_fn::FP, # (value) -> grouping key
         agg_fn::FA, # (key, buffer) -> aggregated value,

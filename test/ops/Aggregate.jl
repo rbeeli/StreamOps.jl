@@ -16,7 +16,7 @@ using StreamOps
         (DateTime("2020-01-01T12:42:00"), 4.2), # [10]  12:45:00
     ]
 
-    agg = Aggregate{eltype(data),DateTime}(;
+    agg = Aggregate{eltype(data)}(;
         initial_key=DateTime(0),
         key_fn=v -> round_origin(v[1], Dates.Minute(5)),
         agg_fn=(key, buffer) -> begin

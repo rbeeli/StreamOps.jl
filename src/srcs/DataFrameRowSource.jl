@@ -6,7 +6,7 @@ Each row is passed to the next operator as a view.
 """
 mutable struct DataFrameRowSource{D} <: StreamSource
     const df::D
-    position::Int64
+    position::Int
 
     DataFrameRowSource(
         df::D

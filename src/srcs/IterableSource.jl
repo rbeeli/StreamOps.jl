@@ -4,7 +4,7 @@ passes each element to the next operator.
 """
 mutable struct IterableSource{D} <: StreamSource
     const data::D
-    position::Int64
+    position::Int
 
     IterableSource(
         data::D

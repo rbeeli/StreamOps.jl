@@ -27,7 +27,7 @@ struct FracDiff{In<:Number,Out<:Number}
     function FracDiff{In,Out}(
         order
         ;
-        init_value=0.0,
+        init_value=zero(Out),
         weight_threshold=1e-4
     ) where {In<:Number,Out<:Number}
         weights = frac_diff_weights(Out, order, weight_threshold)

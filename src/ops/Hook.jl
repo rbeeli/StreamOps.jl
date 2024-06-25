@@ -6,10 +6,7 @@ This allows to hook into a pipeline and extract intermediate values.
 """
 struct Hook{In}
     ref::Ref{In}
-
-    Hook(
-        ref::Ref{In}
-    ) where {In} = new{In}(ref)
+    Hook(ref::Ref{In}) where {In} = new{In}(ref)
 end
 
 @inline (op::Hook)(value) = begin
