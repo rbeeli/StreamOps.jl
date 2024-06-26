@@ -1,11 +1,11 @@
 using Test
 using StreamOps
 
-@testset "@skipIf" begin
+@testset "@skip_if" begin
     counter = 0
     pipe = @streamops begin
         Transform(x -> x)
-        @skipIf x -> x <= 0
+        @skip_if x -> x <= 0
         Transform(x -> begin
             counter += 1
             x

@@ -48,7 +48,7 @@ end
 Skips values that meet the condition (opposite of `@filter`).
 Returns `nothing` if the condition is met.
 """
-macro skipIf(condition)
+macro skip_if(condition)
     condition
 end
 
@@ -200,12 +200,12 @@ function make_op(
                     $(op_var_prev)
                 end
             ))
-        elseif op.args[1] == Symbol("@skipIf")
+        elseif op.args[1] == Symbol("@skip_if")
             # --------------
-            # @skipIf
+            # @skip_if
             # --------------
             if_expr = macroexpand(@__MODULE__, op, recursive=true)
-            if_var = gensym("skipIf")
+            if_var = gensym("skip_if")
             push!(block.args, :(
                 begin
                     local $(if_var) = $(esc(if_expr))

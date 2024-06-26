@@ -7,6 +7,7 @@ export round_origin
 # operations
 include("ops/Apply.jl")
 include("ops/Collect.jl")
+include("ops/Sink.jl")
 include("ops/Combine.jl")
 include("ops/CombineTuple.jl")
 include("ops/Diff.jl")
@@ -23,8 +24,7 @@ include("ops/Counter.jl")
 include("ops/Accumulate.jl")
 
 export Apply, Collect, Combine, CombineTuple, Diff, ForwardFill, Transform, Hook, Lag
-export Prev, Print, RollingWindow, Counter, Accumulate
-export Aggregate, Sample
+export Prev, Print, RollingWindow, Counter, Accumulate, Sink, Aggregate, Sample
 
 # statistics
 include("stats/PctChange.jl")
@@ -55,6 +55,6 @@ export simulate_chronological_stream
 
 include("macros.jl")
 
-export @streamops, @filter, @skipIf, @broadcast, @broadcast_collect
+export @streamops, @filter, @skip_if, @broadcast, @broadcast_collect
 
 end
