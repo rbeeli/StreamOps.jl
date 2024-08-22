@@ -10,11 +10,11 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     start_time::TTime
     end_time::TTime
     event_queue::Channel{ExecutionEvent{TTime}}
-    source_funcs::Vector{Function}
+    adapter_funcs::Vector{Function}
     function RealtimeExecutor{TTime}(graph::StreamGraph, states::TStates; start_time::TTime, end_time::TTime) where {TStates,TTime}
         event_queue = Channel{ExecutionEvent{TTime}}(128)
-        source_funcs = Vector{Function}()
-        new{TStates,TTime}(graph, states, start_time, end_time, event_queue, source_funcs)
+        adapter_funcs = Vector{Function}()
+        new{TStates,TTime}(graph, states, start_time, end_time, event_queue, adapter_funcs)
     end
 end
 
@@ -37,7 +37,7 @@ function compile_realtime_executor(::Type{TTime}, graph::StreamGraph; debug=fals
     # Compile source functions
     for source in executor.graph.source_nodes
         source_fn = compile_source!(executor, executor.graph.nodes[source]; debug=debug)
-        push!(executor.source_funcs, source_fn)
+        push!(executor.adapter_funcs, source_fn)
     end
 
     executor
@@ -45,7 +45,7 @@ end
 
 function run_realtime!(executor::RealtimeExecutor{TStates,TTime}, adapters; start_time::TTime, end_time::TTime) where {TStates,TTime}
     @assert start_time < end_time "Start time '$start_time' must be before end time '$end_time'"
-    @assert length(adapters) == length(executor.source_funcs) "Number of adapters must match number of source nodes"
+    @assert length(adapters) == length(executor.adapter_funcs) "Number of adapters must match number of source nodes"
 
     # Set executor time bounds
     executor.start_time = start_time

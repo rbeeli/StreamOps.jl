@@ -1,12 +1,12 @@
-mutable struct TimerAdapter{TPeriod,TTime,TSourceFunc}
+mutable struct TimerAdapter{TPeriod,TTime,TAdapterFunc}
     node::StreamNode
-    source_func::TSourceFunc
+    adapter_func::TAdapterFunc
     interval::TPeriod
     current_time::TTime
     
     function TimerAdapter{TTime}(executor, node::StreamNode; interval::TPeriod, start_time::TTime) where {TPeriod,TTime}
-        source_func = executor.source_funcs[node.index]
-        new{TPeriod,TTime,typeof(source_func)}(node, source_func, interval, start_time)
+        adapter_func = executor.adapter_funcs[node.index]
+        new{TPeriod,TTime,typeof(adapter_func)}(node, adapter_func, interval, start_time)
     end
 end
 
@@ -28,7 +28,7 @@ end
 
 function advance!(timer::TimerAdapter{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     # Execute subgraph based on current value
-    timer.source_func(executor, timer.current_time)
+    timer.adapter_func(executor, timer.current_time)
 
     # Schedule next event
     timer.current_time += timer.interval

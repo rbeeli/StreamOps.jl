@@ -1,12 +1,12 @@
-mutable struct IterableAdapter{TData,TSourceFunc}
+mutable struct IterableAdapter{TData,TAdapterFunc}
     node::StreamNode
-    source_func::TSourceFunc
+    adapter_func::TAdapterFunc
     data::TData
     position::Int
     
     function IterableAdapter(executor, node::StreamNode, data::TData; start_index=1) where {TData}
-        source_func = executor.source_funcs[node.index]
-        new{TData,typeof(source_func)}(node, source_func, data, start_index)
+        adapter_func = executor.adapter_funcs[node.index]
+        new{TData,typeof(adapter_func)}(node, adapter_func, data, start_index)
     end
 end
 
@@ -25,7 +25,7 @@ end
 function advance!(adapter::IterableAdapter{TData}, executor::HistoricExecutor{TStates,TTime}) where {TData,TStates,TTime}
     # Execute subgraph based on current value
     timestamp, input_data = @inbounds adapter.data[adapter.position]
-    adapter.source_func(executor, input_data)
+    adapter.adapter_func(executor, input_data)
 
     # Schedule next record
     if adapter.position < length(adapter.data)

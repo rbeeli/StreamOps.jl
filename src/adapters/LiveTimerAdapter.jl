@@ -1,14 +1,14 @@
-mutable struct LiveTimerAdapter{TPeriod,TTime,TSourceFunc}
+mutable struct LiveTimerAdapter{TPeriod,TTime,TAdapterFunc}
     node::StreamNode
-    source_func::TSourceFunc
+    adapter_func::TAdapterFunc
     interval::TPeriod
     start_time::TTime
     # timer::Union{Timer,Nothing}
     task::Union{Task,Nothing}
     
     function LiveTimerAdapter{TTime}(executor, node::StreamNode; interval::TPeriod, start_time::TTime) where {TPeriod,TTime}
-        source_func = executor.source_funcs[node.index]
-        new{TPeriod,TTime,typeof(source_func)}(node, source_func, interval, start_time, nothing)
+        adapter_func = executor.adapter_funcs[node.index]
+        new{TPeriod,TTime,typeof(adapter_func)}(node, adapter_func, interval, start_time, nothing)
     end
 end
 
@@ -62,7 +62,7 @@ end
 function process_event!(adapter::LiveTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}, event::ExecutionEvent{TTime}) where {TPeriod,TStates,TTime}
     # Execute subgraph based on current value
     timestamp = event.timestamp
-    adapter.source_func(executor, timestamp)
+    adapter.adapter_func(executor, timestamp)
     nothing
 end
 
