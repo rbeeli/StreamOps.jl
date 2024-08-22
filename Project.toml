@@ -1,17 +1,14 @@
 name = "StreamOps"
 uuid = "a9627898-32a8-4203-afdc-bd07b9d6797f"
 authors = ["Rino Beeli <40661605+rbeeli@users.noreply.github.com>"]
-version = "0.3.1"
+version = "0.4.0"
 
 [deps]
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 ShowGraphviz = "14e20f5a-e304-4f94-b7d9-bca841234ddf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
