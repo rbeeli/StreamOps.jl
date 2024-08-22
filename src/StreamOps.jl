@@ -28,10 +28,12 @@ include("statistics/Counter.jl")
 include("statistics/Diff.jl")
 include("statistics/PctChange.jl")
 include("statistics/Mean.jl")
+include("statistics/Variance.jl")
+include("statistics/EWMean.jl")
 
 # export all
 for n in names(@__MODULE__; all=true)
-    if Base.isidentifier(n) && n ∉ (Symbol(@__MODULE__), :eval, :include)
+    if Base.isidentifier(n) && n ∉ (Symbol(@__MODULE__), :eval, :include) && !startswith(string(n), "_")
         @eval export $n
     end
 end

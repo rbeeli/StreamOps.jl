@@ -2,7 +2,9 @@ using Test
 using Dates
 using StreamOps
 
-@testset verbose = true "round_origin Tests" begin
+@testset verbose = true "utils" begin
+
+@testset "round_origin" begin
     # basic
     @test round_origin(DateTime("2019-01-01T12:30:00"), Hour(1)) == DateTime("2019-01-01T13:00:00")
     @test round_origin(DateTime("2019-06-15T05:45:00"), Day(1)) == DateTime("2019-06-16T00:00:00")
@@ -23,4 +25,6 @@ using StreamOps
     origin = DateTime("2018-12-31T12:30:00")
     @test round_origin(DateTime("2019-01-01T12:29:00"), Hour(1); mode=RoundDown, origin) == DateTime("2019-01-01T11:30:00")
     @test round_origin(DateTime("2019-01-01T12:22:00"), Hour(1); mode=RoundUp, origin) == DateTime("2019-01-01T12:30:00")
+end
+
 end

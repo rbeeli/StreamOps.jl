@@ -1,6 +1,7 @@
 """
 Calculates difference of two numeric values.
-The input must be a tuple of two values: `(x\\_{t-1}, x\\_t)`.
+The input must be an iterable, where the first value represents
+`x\\_{t-1}`, and the second value represents `x\\_t`.
 
 Formula
 =======
@@ -19,8 +20,8 @@ mutable struct Diff{T<:Number} <: StreamOperation
     end
 end
 
-@inline (op::Diff)(executor, value) = begin
-    op.current = (value[1], value[2])
+@inline function (op::Diff)(executor, value)
+    op.current = (first(value), last(value))
     op.called = true
     nothing
 end
@@ -28,5 +29,5 @@ end
 @inline is_valid(op::Diff) = op.called
 
 @inline function get_state(op::Diff{T})::T where {T}
-    op.current[2] - op.current[1]
+    last(op.current) - first(op.current)
 end

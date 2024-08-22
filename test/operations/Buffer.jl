@@ -3,7 +3,7 @@ using StreamOps
 
 @testset verbose = true "Buffer" begin
 
-    @testset "Buffer" begin
+    @testset "default" begin
         g = StreamGraph()
 
         values = source!(g, :values, out=Int, init=0)
@@ -27,7 +27,7 @@ using StreamOps
         @test get_state(buffer.operation) == [1, 2, 3, 4]
     end
 
-    @testset "Buffer w/ flush" begin
+    @testset "w/ flush" begin
         g = StreamGraph()
 
         # Create source nodes

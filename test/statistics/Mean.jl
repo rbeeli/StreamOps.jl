@@ -1,7 +1,9 @@
 using Test
 using StreamOps
 
-@testset "Mean (default: full_only=false)" begin
+@testset verbose = true "Mean" begin
+
+@testset "full_only=false(default)" begin
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)
@@ -28,7 +30,7 @@ using StreamOps
     @test output.operation.buffer ≈ [1, (1+2)/2, (1+2+3)/3, (2+3+4)/3, (3+4+1)/3]
 end
 
-@testset "Mean (full_only=true)" begin
+@testset "full_only=true" begin
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)
@@ -53,4 +55,6 @@ end
     ]
     run_simulation!(exe, adapters; start_time=start, end_time=stop)
     @test output.operation.buffer ≈ [(1+2+3)/3, (2+3+4)/3, (3+4+1)/3]
+end
+
 end

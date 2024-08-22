@@ -1,7 +1,9 @@
 using Test
 using StreamOps
 
-@testset "WindowBuffer <Always>" begin
+@testset verbose = true "WindowBuffer" begin
+
+@testset "<Always>" begin
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)
@@ -37,7 +39,7 @@ using StreamOps
     @test length(collected) == 4
 end
 
-@testset "WindowBuffer <default>" begin
+@testset "<default>" begin
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)
@@ -69,4 +71,6 @@ end
     @test collected[1] == [1, 2, 3]
     @test collected[2] == [2, 3, 4]
     @test length(collected) == 2
+end
+
 end

@@ -25,4 +25,4 @@ end
 
 @inline is_valid(op::Lag) = op.counter > op.lag
 
-@inline get_state(op::Lag) = @inbounds op.buffer[1]
+@inline get_state(op::Lag) = @inbounds first(op.buffer)

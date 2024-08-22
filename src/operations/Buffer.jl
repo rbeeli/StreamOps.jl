@@ -10,7 +10,7 @@ mutable struct Buffer{T} <: StreamOperation
     end
 end
 
-@inline (op::Buffer)(executor, val) = begin
+@inline function (op::Buffer)(executor, val)
     push!(op.buffer, val)
     nothing
 end

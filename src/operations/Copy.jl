@@ -6,7 +6,7 @@ mutable struct Copy{T} <: StreamOperation
     end
 end
 
-@inline (op::Copy{T})(executor, value::V) where {T, V} = begin
+@inline function (op::Copy{T})(executor, value::V) where {T, V}
     op.last_value = copy(value)
     nothing
 end

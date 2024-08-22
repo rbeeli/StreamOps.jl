@@ -53,6 +53,8 @@ if isempty(requested_tests)
     include("statistics/Diff.jl")
     include("statistics/PctChange.jl")
     include("statistics/Mean.jl")
+    include("statistics/Variance.jl")
+    include("statistics/EWMean.jl")
 
 else
     println('-'^60)

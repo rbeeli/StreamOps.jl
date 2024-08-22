@@ -33,7 +33,7 @@ mutable struct WindowBuffer{In} <: StreamOperation
     end
 end
 
-@inline (op::WindowBuffer)(executor, value) = begin
+@inline function (op::WindowBuffer)(executor, value)
     # automatically handles overwriting in a circular manner
     push!(op.buffer, value)
     op.counter += 1
@@ -42,4 +42,6 @@ end
 
 @inline is_valid(op::WindowBuffer) = op.counter >= length(op.buffer)
 
-@inline get_state(op::WindowBuffer) = @inbounds view(op.buffer, 1:length(op.buffer))
+@inline function get_state(op::WindowBuffer)
+    view(op.buffer, :)
+end

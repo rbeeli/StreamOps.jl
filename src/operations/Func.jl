@@ -15,12 +15,12 @@ mutable struct Func{T,TFunc} <: StreamOperation
     end
 end
 
-@inline (op::Func{Nothing,TFunc})(args...; kwargs...) where {TFunc} = begin
+@inline function (op::Func{Nothing,TFunc})(args...; kwargs...) where {TFunc}
     op.func(args...; kwargs...)
     nothing
 end
 
-@inline (op::Func{T,TFunc})(args...; kwargs...) where {T,TFunc} = begin
+@inline function (op::Func{T,TFunc})(args...; kwargs...) where {T,TFunc}
     op.last_value = op.func(args...; kwargs...)
     nothing
 end
