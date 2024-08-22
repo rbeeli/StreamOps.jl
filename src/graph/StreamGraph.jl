@@ -128,7 +128,7 @@ function _make_node!(
 end
 
 function source!(graph::StreamGraph, label::Symbol; out::Type{TOutput}, init::TOutput) where {TOutput}
-    _make_node!(graph, true, SourceStorage{TOutput}(init), PositionParams(), TOutput, label)
+    _make_node!(graph, true, AdapterStorage{TOutput}(init), PositionParams(), TOutput, label)
 end
 
 function op!(graph::StreamGraph, label::Symbol, operation::StreamOperation; out::Type{TOutput}, params_bind=PositionParams()) where {TOutput}

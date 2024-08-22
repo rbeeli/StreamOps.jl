@@ -13,7 +13,7 @@ using StreamOps
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 0, 15)
     adapters = [
-        TimerSource{DateTime}(exe, timer; interval=Dates.Second(5), start_time=start),
+        TimerAdapter{DateTime}(exe, timer; interval=Dates.Second(5), start_time=start),
     ]
     run_simulation!(exe, adapters; start_time=start, end_time=stop)
     @test get_state(counter.operation) == 4 # 0, 5, 10, 15

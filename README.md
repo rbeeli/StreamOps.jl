@@ -1,12 +1,12 @@
 # StreamOps.jl
 
-Composable operations for efficient online processing of heterogeneous data streams.
+Composable operations for efficient online processing of realtime data streams.
 
 ## Background
 
-Real-time data processing is a common requirement in many applications such as IoT, monitoring and telemetry systems, streaming analytics, financial trading, etc.
-In these applications, data is continuously generated and needs to be processed in real-time to extract insights or make decisions.
+Real-time data processing is a common requirement in many applications such as IoT, monitoring, telemetry systems, streaming analytics, financial trading, etc.
+In these applications, data is continuously generated and needs to be processed in real-time in order to extract insights and take decisions.
 
-Ideally, algorithms processing continuous data streams are able to process data as it arrives using efficient online algorithms.
+Algorithms processing continuous data streams are able to process data as it arrives using efficient [online algorithms](https://en.wikipedia.org/wiki/Online_algorithm).
 Online algorithms update their state with each new data point and do not require the entire dataset to be loaded into memory.
-An update usually consists of a single data point, which is processed in constant time in the best case.
+An update usually consists of a single data point. In the vest case, the update is processed in constant time and takes constant memory.
