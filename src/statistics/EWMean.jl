@@ -1,12 +1,11 @@
 """
-Expontential Weighted Moving Average (EWMA) with bias correction.
+Calculates the expontentially weighted moving average (EWMA) with bias correction.
 
 The parameter `alpha` is the weight of the new value, and should be in the range [0, 1].
 A higher alpha value discounts older observations faster,
 hence the model is more reactive to recent changes.
 
-Formulas
---------
+# Formulas
 
     corrected = true:
 
@@ -17,8 +16,7 @@ Formulas
         S_0 = X_0
         S_t = (1 - alpha) * S_{t-1} + alpha * X_t
 
-References
-----------
+# References
 Incremental calculation of weighted mean and variance, Tony Finch, Feb 2009
 https://blog.fugue88.ws/archives/2017-01/The-correct-way-to-start-an-Exponential-Moving-Average-EMA
 """

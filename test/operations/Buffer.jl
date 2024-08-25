@@ -12,7 +12,7 @@ using StreamOps
         bind!(g, values, buffer)
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
-        
+
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         adapters = [
@@ -37,10 +37,10 @@ using StreamOps
         # Create operation nodes
         buffer = op!(g, :buffer, Buffer{Float64}(), out=Buffer{Float64})
         flush_buffer = op!(g, :flush_buffer, Func{Vector{Float64}}((exe, buf, dt) -> begin
-            vals = copy(buf)
-            empty!(buf)
-            vals
-        end, Float64[]), out=Vector{Float64})
+                    vals = copy(buf)
+                    empty!(buf)
+                    vals
+                end, Float64[]), out=Vector{Float64})
 
         # Create sink nodes
         collected = []
@@ -53,7 +53,7 @@ using StreamOps
         bind!(g, flush_buffer, output)
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
-        
+
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 6)
         adapters = [

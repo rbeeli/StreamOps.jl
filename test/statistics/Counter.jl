@@ -7,9 +7,9 @@ using StreamOps
     timer = source!(g, :timer, out=DateTime, init=DateTime(0))
     counter = sink!(g, :counter, Counter())
     bind!(g, timer, counter)
-    
+
     exe = compile_historic_executor(DateTime, g; debug=!true)
-    
+
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 0, 15)
     adapters = [

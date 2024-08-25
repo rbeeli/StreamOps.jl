@@ -1,3 +1,8 @@
+"""
+    Counter{T}
+
+A counter of type `T` that increments by one each time it is called.
+"""
 mutable struct Counter{T} <: StreamOperation
     counter::T
     

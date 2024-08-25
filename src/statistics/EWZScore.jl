@@ -1,12 +1,9 @@
 """
-Calculates the expontentially weighted moving variance with optional bias correction.
+    ZScore{In<:Number,Out<:Number,corrected}
 
-# References
-Incremental calculation of weighted mean and variance, Tony Finch, Feb 2009
-https://blog.fugue88.ws/archives/2017-01/The-correct-way-to-start-an-Exponential-Moving-Average-EMA
-https://github.com/pandas-dev/pandas/blob/main/pandas/_libs/window/aggregations.pyx#L1877
+Calculates the expontentially weighted moving z-score with optional bias correction.
 """
-mutable struct EWVariance{In<:Number,Out<:Number,corrected} <: StreamOperation
+mutable struct EWZScore{In<:Number,Out<:Number,corrected} <: StreamOperation
     const alpha::Out
     const corrected::Bool # bias correction
     sum_wt::Out
@@ -15,7 +12,9 @@ mutable struct EWVariance{In<:Number,Out<:Number,corrected} <: StreamOperation
     mean::Out
     var::Out
     nobs::Int
-    EWVariance{In,Out}(
+    current_zscore::Out
+
+    EWZScore{In,Out}(
         ;
         alpha::Out,
         corrected::Bool=true
@@ -28,15 +27,17 @@ mutable struct EWVariance{In<:Number,Out<:Number,corrected} <: StreamOperation
             one(Out), # old_wt
             zero(Out), # mean
             zero(Out), # var
-            0 # nobs
+            0, # nobs
+            zero(Out) # current_zscore
         )
 end
 
-# uncorrected variance
-@inline function (op::EWVariance{In,Out,false})(executor, value::In) where {In<:Number,Out<:Number}
+# uncorrected z-score
+@inline function (op::EWZScore{In,Out,false})(executor, value::In) where {In<:Number,Out<:Number}
     op.nobs += 1
     if op.nobs == 1
         op.mean = value
+        op.current_zscore = Out(NaN)
         return nothing
     end
     
@@ -64,16 +65,21 @@ end
     op.sum_wt2 /= op.old_wt * op.old_wt
     op.old_wt = one(Out)
 
+    # Calculate z-score
+    std_dev = sqrt(op.var)
+    op.current_zscore = std_dev > zero(Out) ? (value - op.mean) / std_dev : Out(NaN)
+
     nothing
 end
 
-# bias-corrected variance
-@inline function (op::EWVariance{In,Out,true})(executor, value::In) where {In<:Number,Out<:Number}
+# bias-corrected z-score
+@inline function (op::EWZScore{In,Out,true})(executor, value::In) where {In<:Number,Out<:Number}
     op.nobs += 1
     if op.nobs == 1
         op.mean = value
         op.sum_wt = op.alpha
         op.sum_wt2 = op.alpha * op.alpha
+        op.current_zscore = Out(NaN)
         return nothing
     end
     
@@ -95,26 +101,22 @@ end
 
     op.old_wt += new_wt
 
+    # Calculate bias-corrected variance
+    num = op.sum_wt * op.sum_wt
+    denom = num - op.sum_wt2
+    corrected_var = denom > zero(Out) ? (num / denom) * op.var : op.var
+
+    # Calculate z-score
+    std_dev = sqrt(corrected_var)
+    op.current_zscore = std_dev > zero(Out) ? (value - op.mean) / std_dev : Out(NaN)
+
     nothing
 end
 
-@inline function is_valid(op::EWVariance)
+@inline function is_valid(op::EWZScore)
     op.nobs > 0
 end
 
-# uncorrected variance
-@inline function get_state(op::EWVariance{In,Out,false})::Out where {In,Out}
-    op.nobs > 1 ? op.var : zero(Out)
-end
-
-# bias corrected variance
-@inline function get_state(op::EWVariance{In,Out,true})::Out where {In,Out}
-    if op.nobs > 1
-        num = op.sum_wt * op.sum_wt
-        denom = num - op.sum_wt2
-        if denom > 0
-            return (num / denom) * op.var
-        end
-    end
-    return Out(NaN)
+@inline function get_state(op::EWZScore{In,Out})::Out where {In,Out}
+    op.current_zscore
 end

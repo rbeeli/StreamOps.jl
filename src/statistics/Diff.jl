@@ -3,9 +3,7 @@ Calculates difference of two numeric values.
 The input must be an iterable, where the first value represents
 `x\\_{t-1}`, and the second value represents `x\\_t`.
 
-Formula
-=======
-
+# Formula
 `` y = x\\_t -/ x\\_{t-1} ``
 """
 mutable struct Diff{T<:Number} <: StreamOperation

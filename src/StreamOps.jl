@@ -29,8 +29,10 @@ include("statistics/Diff.jl")
 include("statistics/PctChange.jl")
 include("statistics/Mean.jl")
 include("statistics/Variance.jl")
+include("statistics/ZScore.jl")
 include("statistics/EWMean.jl")
 include("statistics/EWVariance.jl")
+include("statistics/EWZScore.jl")
 
 # export all
 for n in names(@__MODULE__; all=true)

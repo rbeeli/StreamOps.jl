@@ -14,7 +14,7 @@ using StreamOps
     bind!(g, diff, output)
 
     exe = compile_historic_executor(DateTime, g; debug=!true)
-    
+
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 5)
     adapters = [

@@ -3,8 +3,7 @@ using DataStructures
 """
 Calculates the simple moving variance with fixed window size in O(1) time.
 
-References
-==========
+# References
 https://web.archive.org/web/20181222175223/http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
 https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
 """
