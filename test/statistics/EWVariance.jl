@@ -106,7 +106,7 @@ using StreamOps
         @test output.operation.buffer ≈ expected
     end
 
-    @testset "alpha=0.9 corrected=true (constant numbers)" begin
+    @testset "alpha=0.9 corrected=true w/ all constant values" begin
         g = StreamGraph()
 
         values = source!(g, :values, out=Float64, init=0.0)
