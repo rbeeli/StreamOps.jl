@@ -11,21 +11,31 @@ Types of nodes:
 mutable struct StreamNode
     index::Int
     is_source::Bool
+    is_sink::Bool
     operation::StreamOperation
     input_bindings::Vector{InputBinding{StreamNode}}
     binding_mode::ParamsBinding
     output_type::Type
     label::Symbol
     field_name::Symbol
-    function StreamNode(index, is_source, operation::StreamOperation, binding_mode, output_type, label::Symbol)
+    function StreamNode(
+        index,
+        is_source,
+        is_sink,
+        operation::StreamOperation,
+        binding_mode,
+        output_type,
+        label::Symbol
+    )
         input_bindings = InputBinding{StreamNode}[]
         field_name = label
-        new(index, is_source, operation, input_bindings, binding_mode, output_type, label, field_name)
+        new(index, is_source, is_sink, operation, input_bindings,
+            binding_mode, output_type, label, field_name)
     end
 end
 
 @inline is_source(node::StreamNode) = node.is_source
 
-@inline is_sink(node::StreamNode) = node.output_type == Nothing
+@inline is_sink(node::StreamNode) = node.is_sink
 
 @inline label(node::StreamNode) = node.label

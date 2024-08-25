@@ -102,6 +102,7 @@ end
 function _make_node!(
     graph::StreamGraph,
     is_source::Bool,
+    is_sink::Bool,
     operation,
     binding_mode::ParamsBinding,
     output_type::Type,
@@ -116,7 +117,7 @@ function _make_node!(
     end
 
     # Create node and add to graph
-    node = StreamNode(index, is_source, operation, binding_mode, output_type, label)
+    node = StreamNode(index, is_source, is_sink, operation, binding_mode, output_type, label)
     push!(graph.nodes, node)
     push!(graph.deps, Int[]) # The nodes that this node depends on
     push!(graph.reverse_deps, Int[]) # The nodes that depend on this node
@@ -128,15 +129,15 @@ function _make_node!(
 end
 
 function source!(graph::StreamGraph, label::Symbol; out::Type{TOutput}, init::TOutput) where {TOutput}
-    _make_node!(graph, true, AdapterStorage{TOutput}(init), PositionParams(), TOutput, label)
+    _make_node!(graph, true, false, AdapterStorage{TOutput}(init), PositionParams(), TOutput, label)
 end
 
 function op!(graph::StreamGraph, label::Symbol, operation::StreamOperation; out::Type{TOutput}, params_bind=PositionParams()) where {TOutput}
-    _make_node!(graph, false, operation, params_bind, TOutput, label)
+    _make_node!(graph, false, false, operation, params_bind, TOutput, label)
 end
 
 function sink!(graph::StreamGraph, label::Symbol, operation::StreamOperation; params_bind=PositionParams())
-    _make_node!(graph, false, operation, params_bind, Nothing, label)
+    _make_node!(graph, false, true, operation, params_bind, Nothing, label)
 end
 
 function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
@@ -513,7 +514,6 @@ function compile_source!(executor::TExecutor, source_node::StreamNode; debug=fal
 
     for (i, node_index) in enumerate(subgraph_indices[2:end])
         node = nodes[node_index]
-        field_name = node.field_name
 
         debug && println("\nNode [$(node.label)] index=$(node.index) output_type=$(node.output_type)")
 
