@@ -15,8 +15,7 @@ mutable struct EWVariance{In<:Number,Out<:Number,corrected} <: StreamOperation
     old_wt::Out
     mean::Out
     var::Out
-    initialized::Bool
-
+    nobs::Int
     EWVariance{In,Out}(
         ;
         alpha::Out,
@@ -30,40 +29,36 @@ mutable struct EWVariance{In<:Number,Out<:Number,corrected} <: StreamOperation
             one(Out), # old_wt
             zero(Out), # mean
             zero(Out), # var
-            false # initialized
+            0 # nobs
         )
 end
 
 # uncorrected variance
 @inline function (op::EWVariance{In,Out,false})(executor, value::In) where {In<:Number,Out<:Number}
-    if !op.initialized
+    op.nobs += 1
+    if op.nobs == 1
         op.mean = value
-        op.initialized = true
         return nothing
     end
-
-    # static
-    old_wt_factor = one(Out) - op.alpha
-    new_wt = op.corrected ? one(Out) : op.alpha
+    
+    alpha = op.alpha
+    old_wt_factor = one(Out) - alpha
+    new_wt = alpha
 
     op.sum_wt *= old_wt_factor
     op.sum_wt2 *= old_wt_factor * old_wt_factor
     op.old_wt *= old_wt_factor
 
-    # mean update
     old_mean = op.mean
-    if op.mean != value # reduce numerical errors
-        op.mean = ((op.old_wt * old_mean) + (new_wt * value)) / (op.old_wt + new_wt)
+    if op.mean != value # avoid numerical errors on constant series
+        op.mean = (op.old_wt * old_mean + new_wt * value) / (op.old_wt + new_wt)
     end
-
-    # variance update
-    op.var = (
-        (op.old_wt * (op.var + ((old_mean - op.mean) * (old_mean - op.mean)))) +
-        (new_wt * ((value - op.mean) * (value - op.mean)))
-    ) / (op.old_wt + new_wt)
+    
+    op.var = (op.old_wt * (op.var + (old_mean - op.mean) * (old_mean - op.mean)) +
+              new_wt * (value - op.mean) * (value - op.mean)) / (op.old_wt + new_wt)
 
     op.sum_wt += new_wt
-    op.sum_wt2 += (new_wt * new_wt)
+    op.sum_wt2 += new_wt * new_wt
     op.old_wt += new_wt
 
     op.sum_wt /= op.old_wt
@@ -73,56 +68,50 @@ end
 
 # bias-corrected variance
 @inline function (op::EWVariance{In,Out,true})(executor, value::In) where {In<:Number,Out<:Number}
-    if !op.initialized
+    op.nobs += 1
+    if op.nobs == 1
         op.mean = value
-        op.initialized = true
         return nothing
     end
-
-    # static
-    old_wt_factor = one(Out) - op.alpha
-    new_wt = op.corrected ? one(Out) : op.alpha
+    
+    alpha = op.alpha
+    old_wt_factor = one(Out) - alpha
+    new_wt = one(Out)
 
     op.sum_wt *= old_wt_factor
     op.sum_wt2 *= old_wt_factor * old_wt_factor
     op.old_wt *= old_wt_factor
 
-    # mean update
     old_mean = op.mean
-    if op.mean != value # reduce numerical errors
-        op.mean = ((op.old_wt * old_mean) + (new_wt * value)) / (op.old_wt + new_wt)
+    if op.mean != value # avoid numerical errors on constant series
+        op.mean = (op.old_wt * old_mean + new_wt * value) / (op.old_wt + new_wt)
     end
-
-    # variance update
-    op.var = (
-        (op.old_wt * (op.var + ((old_mean - op.mean) * (old_mean - op.mean)))) +
-        (new_wt * ((value - op.mean) * (value - op.mean)))
-    ) / (op.old_wt + new_wt)
+    
+    op.var = (op.old_wt * (op.var + (old_mean - op.mean) * (old_mean - op.mean)) +
+              new_wt * (value - op.mean) * (value - op.mean)) / (op.old_wt + new_wt)
 
     op.sum_wt += new_wt
-    op.sum_wt2 += (new_wt * new_wt)
+    op.sum_wt2 += new_wt * new_wt
     op.old_wt += new_wt
-
-    nothing
 end
 
 @inline function is_valid(op::EWVariance)
-    op.initialized
+    op.nobs > 0
 end
 
 # uncorrected variance
 @inline function get_state(op::EWVariance{In,Out,false})::Out where {In,Out}
-    op.var
+    op.nobs > 1 ? op.var : zero(Out)
 end
 
 # bias corrected variance
 @inline function get_state(op::EWVariance{In,Out,true})::Out where {In,Out}
-    num = op.sum_wt * op.sum_wt
-    denom = num - op.sum_wt2
-    return if denom > 0
-        bias = num / denom
-        bias * op.var
-    else
-        Out(NaN)
+    if op.nobs > 1
+        num = op.sum_wt * op.sum_wt
+        denom = num - op.sum_wt2
+        if denom > 0
+            return (num / denom) * op.var
+        end
     end
+    return Out(NaN)
 end
