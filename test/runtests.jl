@@ -22,6 +22,7 @@ if isempty(requested_tests)
     include("operations/WindowBuffer.jl")
     include("operations/Lag.jl")
     include("operations/Print.jl")
+    include("operations/Copy.jl")
 
     include("statistics/Counter.jl")
     include("statistics/Diff.jl")
