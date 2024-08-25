@@ -12,7 +12,7 @@ end
 
 @inline function (op::Print)(executor, value)
     op.print_fn(value)
-    value
+    nothing
 end
 
 @inline is_valid(op::Print, value) = true

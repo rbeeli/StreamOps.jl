@@ -1,47 +1,44 @@
 using DataStructures
 
 """
-Maintains a rolling window of the last `window_size` values using a circular buffer.
+Maintains a rolling window of the last `window_size` values
+using an efficient circular buffer with O(1) push and pop operations.
+
+# Arguments
+- `window_size::Int`: The size of the window to maintain.
+- `copy::Bool=false`: If `true`, the result will be a copy of the data as `Vector{In}`,
+    otherwise it will be a `view` into the underlying buffer.
 
 Note that the returned value is a view into the buffer, so it is not a copy of the data,
 hence the result should not be modified or stored for later use.
 If temporary storage of the result or modification of the values is needed, a copy should be made.
 """
-mutable struct WindowBuffer{In} <: StreamOperation
-    const buffer::CircularBuffer{In}
-    counter::Int
+mutable struct WindowBuffer{T,copy} <: StreamOperation
+    const buffer::CircularBuffer{T}
+    const copy::Bool
 
-    # special constructor for strings
-    WindowBuffer{In}(
+    WindowBuffer{T}(
         window_size::Int
         ;
-        init_value=one(In) # zero for default value does not work on strings, use one instead
-    ) where {In<:AbstractString} = begin
-        buffer = CircularBuffer{In}(window_size)
-        fill!(buffer, init_value)
-        new{In}(buffer, 0)
-    end
-
-    WindowBuffer{In}(
-        window_size::Int
-        ;
-        init_value=zero(In)
-    ) where {In} = begin
-        buffer = CircularBuffer{In}(window_size)
-        fill!(buffer, init_value)
-        new{In}(buffer, 0)
+        copy::Bool=false
+    ) where {T} = begin
+        buffer = CircularBuffer{T}(window_size)
+        new{T,copy}(buffer, copy)
     end
 end
 
 @inline function (op::WindowBuffer)(executor, value)
     # automatically handles overwriting in a circular manner
     push!(op.buffer, value)
-    op.counter += 1
     nothing
 end
 
-@inline is_valid(op::WindowBuffer) = op.counter >= length(op.buffer)
+@inline is_valid(op::WindowBuffer) = isfull(op.buffer)
 
-@inline function get_state(op::WindowBuffer)
+@inline function get_state(op::WindowBuffer{T,false}) where {T}
     view(op.buffer, :)
+end
+
+@inline function get_state(op::WindowBuffer{T,true}) where {T}
+    collect(op.buffer)
 end

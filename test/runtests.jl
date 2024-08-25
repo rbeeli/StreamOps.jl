@@ -20,6 +20,7 @@ if isempty(requested_tests)
 
     include("operations/Buffer.jl")
     include("operations/WindowBuffer.jl")
+    include("operations/Lag.jl")
     include("operations/Print.jl")
 
     include("statistics/Counter.jl")

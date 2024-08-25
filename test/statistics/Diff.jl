@@ -5,7 +5,7 @@ using StreamOps
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)
-    diff_buffer = op!(g, :diff_buffer, WindowBuffer{Int}(2, init_value=0), out=AbstractVector{Int})
+    diff_buffer = op!(g, :diff_buffer, WindowBuffer{Int}(2), out=AbstractVector{Int})
     diff = op!(g, :diff, Diff{Int}(), out=Int)
     output = sink!(g, :output, Buffer{Int}())
 
