@@ -55,6 +55,7 @@ if isempty(requested_tests)
     include("statistics/Mean.jl")
     include("statistics/Variance.jl")
     include("statistics/EWMean.jl")
+    include("statistics/EWVariance.jl")
 
 else
     println('-'^60)
