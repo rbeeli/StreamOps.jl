@@ -71,6 +71,8 @@ end
     op.nobs += 1
     if op.nobs == 1
         op.mean = value
+        op.sum_wt = op.alpha
+        op.sum_wt2 = op.alpha * op.alpha
         return nothing
     end
     
@@ -78,8 +80,8 @@ end
     old_wt_factor = one(Out) - alpha
     new_wt = one(Out)
 
-    op.sum_wt *= old_wt_factor
-    op.sum_wt2 *= old_wt_factor * old_wt_factor
+    op.sum_wt = alpha + old_wt_factor * op.sum_wt
+    op.sum_wt2 = alpha * alpha + old_wt_factor * old_wt_factor * op.sum_wt2
     op.old_wt *= old_wt_factor
 
     old_mean = op.mean
@@ -90,8 +92,6 @@ end
     op.var = (op.old_wt * (op.var + (old_mean - op.mean) * (old_mean - op.mean)) +
               new_wt * (value - op.mean) * (value - op.mean)) / (op.old_wt + new_wt)
 
-    op.sum_wt += new_wt
-    op.sum_wt2 += new_wt * new_wt
     op.old_wt += new_wt
 end
 

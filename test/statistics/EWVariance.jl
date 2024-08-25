@@ -82,7 +82,65 @@ using StreamOps
         ]
         run_simulation!(exe, adapters; start_time=start, end_time=stop)
 
-        @test output.operation.buffer ≈ expected rtol=1e-8
+        @test isnan(output.operation.buffer[1])
+        @test output.operation.buffer[2:end] ≈ expected[2:end]
+    end
+
+    @testset "alpha=0.9 corrected=false (constant numbers)" begin
+        g = StreamGraph()
+
+        values = source!(g, :values, out=Float64, init=0.0)
+        avg = op!(g, :avg, EWVariance{Float64,Float64}(alpha=0.9, corrected=false), out=Float64)
+        output = sink!(g, :output, Buffer{Float64}())
+
+        bind!(g, values, avg)
+        bind!(g, avg, output)
+
+        exe = compile_historic_executor(DateTime, g; debug=!true)
+
+        expected = [0.0, 0.0, 0.0]
+        vals = [1.0, 1.0, 1.0]
+
+        start = DateTime(2000, 1, 1)
+        stop = DateTime(2000, 1, length(vals))
+        adapters = [
+            IterableAdapter(exe, values, [
+                (DateTime(2000, 1, i), x)
+                for (i, x) in enumerate(vals)
+            ])
+        ]
+        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+
+        @test output.operation.buffer ≈ expected
+    end
+
+    @testset "alpha=0.9 corrected=true (constant numbers)" begin
+        g = StreamGraph()
+
+        values = source!(g, :values, out=Float64, init=0.0)
+        avg = op!(g, :avg, EWVariance{Float64,Float64}(alpha=0.9, corrected=true), out=Float64)
+        output = sink!(g, :output, Buffer{Float64}())
+
+        bind!(g, values, avg)
+        bind!(g, avg, output)
+
+        exe = compile_historic_executor(DateTime, g; debug=!true)
+
+        expected = [0.0, 0.0, 0.0]
+        vals = [1.0, 1.0, 1.0]
+
+        start = DateTime(2000, 1, 1)
+        stop = DateTime(2000, 1, length(vals))
+        adapters = [
+            IterableAdapter(exe, values, [
+                (DateTime(2000, 1, i), x)
+                for (i, x) in enumerate(vals)
+            ])
+        ]
+        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+
+        @test isnan(output.operation.buffer[1])
+        @test output.operation.buffer[2:end] ≈ expected[2:end]
     end
 
 end
