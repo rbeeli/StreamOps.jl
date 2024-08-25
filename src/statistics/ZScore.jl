@@ -1,8 +1,6 @@
 using DataStructures
 
 """
-    ZScore{In<:Number,Out<:Number,corrected}
-
 Calculates the simple moving z-score with a fixed window size in O(1) time.
 
 The z-score is computed as `(x - μ) / σ`, where `x` is the current value, `μ` is the mean,
@@ -12,11 +10,6 @@ and `σ` is the standard deviation of the values in the moving window.
 - `In`: Input number type
 - `Out`: Output number type
 - `corrected`: Boolean flag for variance correction
-
-# Constructor
-    ZScore{In,Out}(window_size::Int; corrected::Bool=true) where {In<:Number,Out<:Number}
-
-Constructs a ZScore object with the specified window size and correction flag.
 
 # Arguments
 - `window_size::Int`: Size of the moving window (must be greater than 0)

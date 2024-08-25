@@ -3,6 +3,10 @@ using DataStructures
 """
 Calculates the simple moving variance with fixed window size in O(1) time.
 
+# Arguments
+- `window_size`: The number of observations to consider in the moving window.
+- `corrected=true`: Use Bessel's correction to compute the unbiased sample variance.
+
 # References
 https://web.archive.org/web/20181222175223/http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
 https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/

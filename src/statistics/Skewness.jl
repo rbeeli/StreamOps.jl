@@ -3,6 +3,9 @@ using DataStructures
 """
 Calculates the moving sample skewness with fixed window size in O(1) time.
 
+# Arguments
+- `window_size`: The number of observations to consider in the moving window.
+
 # References
 Python pandas implementation of rolling skewness:
 * https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.window.rolling.Rolling.skew.html

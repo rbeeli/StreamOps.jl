@@ -1,3 +1,12 @@
+"""
+Calls the `copy` function on the input value and stores the result
+as the last value.
+
+Note that `nothing` marks this operation as invalid.
+
+# Arguments
+- `init`: The initial value to use as the last value.
+"""
 mutable struct Copy{Out} <: StreamOperation
     last_value::Out
     

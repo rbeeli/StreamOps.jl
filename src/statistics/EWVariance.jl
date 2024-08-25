@@ -1,6 +1,10 @@
 """
 Calculates the expontentially weighted moving variance with optional bias correction.
 
+# Arguments
+- `alpha::Out`: The weight of the new value, should be in the range [0, 1]. A new value has a weight of `alpha`, and the previous value has a weight of `1 - alpha`.
+- `corrected::Bool=true`: Whether to use corrected (unbiased) variance (default is true)
+
 # References
 Incremental calculation of weighted mean and variance, Tony Finch, Feb 2009
 https://blog.fugue88.ws/archives/2017-01/The-correct-way-to-start-an-Exponential-Moving-Average-EMA

@@ -1,3 +1,7 @@
+"""
+A function operation that applies an arbitrary function to the input stream
+and stores the result as the last value.
+"""
 mutable struct Func{T,TFunc} <: StreamOperation
     const func::TFunc
     last_value::T

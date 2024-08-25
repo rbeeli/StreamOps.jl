@@ -7,14 +7,19 @@ hence the model is more reactive to recent changes.
 
 # Formulas
 
-    corrected = true:
+## Corrected
 
-        S_t = [ (1 - alpha) * S_{t-1} + alpha * X_t ] / (1 - (1-alpha)^t)
+`` S_t = [ (1 - alpha) * S_{t-1} + alpha * X_t ] / (1 - (1-alpha)^t) ``
 
-    corrected = false:
+## Uncorrected
 
-        S_0 = X_0
-        S_t = (1 - alpha) * S_{t-1} + alpha * X_t
+`` S_0 = X_0 ``
+
+`` S_t = (1 - alpha) * S_{t-1} + alpha * X_t ``
+
+# Arguments
+- `alpha::Out`: The weight of the new value, should be in the range [0, 1]. A new value has a weight of `alpha`, and the previous value has a weight of `1 - alpha`.
+- `corrected::Bool=true`: Whether to adjust the initial value to account for the bias in the first few observations.
 
 # References
 Incremental calculation of weighted mean and variance, Tony Finch, Feb 2009

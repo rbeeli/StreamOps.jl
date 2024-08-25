@@ -1,7 +1,9 @@
 """
-    ZScore{In<:Number,Out<:Number,corrected}
-
 Calculates the expontentially weighted moving z-score with optional bias correction.
+
+# Arguments
+- `alpha::Out`: The weight of the new value, should be in the range [0, 1]. A new value has a weight of `alpha`, and the previous value has a weight of `1 - alpha`.
+- `corrected::Bool=true`: Whether to use corrected (unbiased) variance (default is true)
 """
 mutable struct EWZScore{In<:Number,Out<:Number,corrected} <: StreamOperation
     const alpha::Out
