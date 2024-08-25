@@ -58,8 +58,11 @@ using StreamOps
     @testset "Func(func) (Nothing output type)" begin
         g = StreamGraph()
 
+        function do_nothing()
+        end
+
         values = source!(g, :values, out=Int, init=0)
-        buffer = op!(g, :buffer, Func((exe, x) -> println(x)), out=Nothing)
+        buffer = op!(g, :buffer, Func((exe, x) -> do_nothing()), out=Nothing)
         output = sink!(g, :output, Buffer{Nothing}())
 
         bind!(g, values, buffer)

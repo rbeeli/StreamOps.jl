@@ -443,7 +443,16 @@ function _gen_execute_call!(
         error("Unknown parameter binding for node [$node_label]: $(typeof(node.binding_mode))")
     end
 
-    call_expr = :(states.$(node.field_name)(executor, $(input_exprs...)))
+    # directly call func for Func operation (skip functor indirection)
+    if node.operation isa Func
+        if has_output(node.operation)
+            call_expr = :(states.$(node.field_name).last_value = states.$(node.field_name).func(executor, $(input_exprs...)))
+        else
+            call_expr = :(states.$(node.field_name).func(executor, $(input_exprs...)))
+        end
+    else
+        call_expr = :(states.$(node.field_name)(executor, $(input_exprs...)))
+    end
 
     result_expr = if debug
         :(

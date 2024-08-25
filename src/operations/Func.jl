@@ -19,15 +19,20 @@ mutable struct Func{T,TFunc} <: StreamOperation
     end
 end
 
-@inline function (op::Func{Nothing,TFunc})(args...; kwargs...) where {TFunc}
-    op.func(args...; kwargs...)
-    nothing
-end
+@inline has_output(op::Func{T}) where {T} = true
+@inline has_output(op::Func{Nothing}) = false
 
-@inline function (op::Func{T,TFunc})(args...; kwargs...) where {T,TFunc}
-    op.last_value = op.func(args...; kwargs...)
-    nothing
-end
+# no functor call overload needed, func is directly called, see StreamGraph.jl _gen_execute_call!
+
+# @inline function (op::Func{Nothing,TFunc})(args...; kwargs...) where {TFunc}
+#     op.func(args...; kwargs...)
+#     nothing
+# end
+
+# @inline function (op::Func{T,TFunc})(args...; kwargs...) where {T,TFunc}
+#     op.last_value = op.func(args...; kwargs...)
+#     nothing
+# end
 
 @inline is_valid(op::Func{T}) where {T} = !isnothing(op.last_value)
 
