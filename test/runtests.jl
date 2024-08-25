@@ -24,6 +24,7 @@ if isempty(requested_tests)
     include("operations/Print.jl")
     include("operations/Copy.jl")
     include("operations/Func.jl")
+    include("operations/ForwardFill.jl")
 
     include("statistics/Counter.jl")
     include("statistics/Diff.jl")
@@ -36,7 +37,6 @@ if isempty(requested_tests)
     include("statistics/EWVariance.jl")
     include("statistics/EWZScore.jl")
     include("statistics/FractionalDiff.jl")
-
 else
     println('-'^60)
     println("Running subset of tests:")

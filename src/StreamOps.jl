@@ -24,6 +24,7 @@ include("operations/Lag.jl")
 include("operations/Buffer.jl")
 include("operations/WindowBuffer.jl")
 include("operations/Print.jl")
+include("operations/ForwardFill.jl")
 
 include("statistics/Counter.jl")
 include("statistics/Diff.jl")
