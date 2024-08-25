@@ -9,6 +9,8 @@ using StreamOps
         values = source!(g, :values, out=Int, init=0)
         buffer = sink!(g, :buffer, Buffer{Int}())
 
+        @test buffer.operation.min_count == 0
+
         bind!(g, values, buffer)
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
@@ -27,6 +29,36 @@ using StreamOps
         @test get_state(buffer.operation) == [1, 2, 3, 4]
     end
 
+    @testset "min_count" begin
+        g = StreamGraph()
+
+        values = source!(g, :values, out=Int, init=0)
+        buffer = op!(g, :buffer, Buffer{Int}(min_count=3), out=Vector{Int})
+        output = sink!(g, :output, Counter())
+
+        @test buffer.operation.min_count == 3
+
+        bind!(g, values, buffer)
+        bind!(g, buffer, output)
+
+        exe = compile_historic_executor(DateTime, g; debug=!true)
+
+        start = DateTime(2000, 1, 1)
+        stop = DateTime(2000, 1, 4)
+        adapters = [
+            IterableAdapter(exe, values, [
+                (DateTime(2000, 1, 1), 1),
+                (DateTime(2000, 1, 2), 2),
+                (DateTime(2000, 1, 3), 3),
+                (DateTime(2000, 1, 4), 4)
+            ])
+        ]
+        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        
+        # output should only be called twice because of min_count=3
+        @test get_state(output.operation) == 2
+    end
+
     @testset "w/ flush" begin
         g = StreamGraph()
 
@@ -41,6 +73,8 @@ using StreamOps
                     empty!(buf)
                     vals
                 end, Float64[]), out=Vector{Float64})
+
+        @test buffer.operation.min_count == 0
 
         # Create sink nodes
         collected = []

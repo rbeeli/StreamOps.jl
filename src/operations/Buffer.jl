@@ -1,12 +1,13 @@
 mutable struct Buffer{T} <: StreamOperation
     const buffer::Vector{T}
+    const min_count::Int
     
-    function Buffer{T}() where {T}
-        new{T}(T[])
+    function Buffer{T}(; min_count=0) where {T}
+        new{T}(T[], min_count)
     end
 
-    function Buffer(storage::Vector{T}) where {T}
-        new{T}(storage)
+    function Buffer(storage::Vector{T}; min_count=0) where {T}
+        new{T}(storage, min_count)
     end
 end
 
@@ -15,7 +16,7 @@ end
     nothing
 end
 
-@inline is_valid(op::Buffer) = true
+@inline is_valid(op::Buffer) = length(op.buffer) >= op.min_count
 
 @inline Base.empty!(op::Buffer) = empty!(op.buffer)
 
