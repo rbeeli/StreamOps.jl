@@ -1,6 +1,5 @@
 using Test
 using StreamOps
-using Suppressor
 
 @testset "Copy" begin
     

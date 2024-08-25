@@ -23,6 +23,7 @@ if isempty(requested_tests)
     include("operations/Lag.jl")
     include("operations/Print.jl")
     include("operations/Copy.jl")
+    include("operations/Func.jl")
 
     include("statistics/Counter.jl")
     include("statistics/Diff.jl")
