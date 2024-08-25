@@ -33,6 +33,7 @@ include("statistics/ZScore.jl")
 include("statistics/EWMean.jl")
 include("statistics/EWVariance.jl")
 include("statistics/EWZScore.jl")
+include("statistics/FractionalDiff.jl")
 
 # export all
 for n in names(@__MODULE__; all=true)

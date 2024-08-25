@@ -45,8 +45,14 @@ vals = pd.Series([50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0, 50.0, 1.5, 1.1, 4.0,
         -3.0, 150.0, -400.0, 50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0, #
         50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0])
 
+diffseries = _FracDiff(vals, order=0)
+print("d=0")
+print(diffseries.tolist())
+
 diffseries = _FracDiff(vals, order=1)
-print("d=1", diffseries.tolist())
+print("d=1")
+print(diffseries.tolist())
 
 diffseries = _FracDiff(vals, order=0.99)
-print("d=0.99", diffseries.tolist())
+print("d=0.99")
+print(diffseries.tolist())

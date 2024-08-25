@@ -7,6 +7,7 @@ using Dates
 #   import Pkg;Pkg.test("StreamOps", test_args=["operations/WindowBuffer.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["statistics/Mean.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["statistics/EWZScore.jl"])
+#   import Pkg;Pkg.test("StreamOps", test_args=["statistics/FractionalDiff.jl"])
 
 requested_tests = ARGS
 
@@ -27,6 +28,7 @@ if isempty(requested_tests)
     include("statistics/EWMean.jl")
     include("statistics/EWVariance.jl")
     include("statistics/EWZScore.jl")
+    include("statistics/FractionalDiff.jl")
 
 else
     println('-'^60)
