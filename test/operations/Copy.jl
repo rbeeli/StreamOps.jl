@@ -1,7 +1,7 @@
 using Test
 using StreamOps
 
-@testset "Copy" begin
+@testset verbose = true "Copy" begin
     
     @testset "Copy{Vector{Int}}()" begin
         g = StreamGraph()

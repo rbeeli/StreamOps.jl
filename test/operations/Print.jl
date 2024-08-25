@@ -2,7 +2,7 @@ using Test
 using StreamOps
 using Suppressor
 
-@testset "Print" begin
+@testset verbose = true "Print" begin
     
     @testset "default" begin
         g = StreamGraph()
