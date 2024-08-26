@@ -1,91 +1,94 @@
+using Dates
+import Base.Libc
+
 mutable struct LiveTimerAdapter{TPeriod,TTime,TAdapterFunc}
     node::StreamNode
     adapter_func::TAdapterFunc
     interval::TPeriod
     start_time::TTime
-    # timer::Union{Timer,Nothing}
     task::Union{Task,Nothing}
-    
-    function LiveTimerAdapter{TTime}(executor, node::StreamNode; interval::TPeriod, start_time::TTime) where {TPeriod,TTime}
+    stop_flag::Threads.Atomic{Bool}
+    stop_check_interval::Dates.Millisecond
+
+    function LiveTimerAdapter(
+        executor,
+        node::StreamNode
+        ;
+        interval::TPeriod,
+        start_time::TTime,
+        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50)
+    ) where {TPeriod,TTime}
         adapter_func = executor.adapter_funcs[node.index]
-        new{TPeriod,TTime,typeof(adapter_func)}(node, adapter_func, interval, start_time, nothing)
+        stop_flag = Threads.Atomic{Bool}(false)
+        new{TPeriod,TTime,typeof(adapter_func)}(
+            node, adapter_func, interval, start_time, nothing, stop_flag, stop_check_interval)
     end
 end
 
 function worker(timer::LiveTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
-    try
-        while true
-            # Calculate next time to schedule event
-            time_now = time(executor)
+    time_now = time(executor)
+    next_time = _calc_next_time(timer, executor)
 
-            # Check if past end time
-            if time_now >= end_time(executor)
-                break
-            end
+    while true
+        time_now = time(executor)
 
-            # Calculate next time to schedule event
-            next_time = round_origin(
-                time_now + timer.interval,
-                timer.interval,
-                mode=RoundDown,
-                origin=timer.start_time)
+        # Check if past end time
+        time_now >= end_time(executor) && break
 
-            # Wait until next event
-            sleep_duration = next_time - time_now
-            sleep(sleep_duration)
-        
-            # Schedule event for execution
-            put!(executor.event_queue, ExecutionEvent(time(executor), timer.node.index))
+        # Calculate sleep duration
+        sleep_us = Dates.Microsecond(min(next_time - time_now, timer.stop_check_interval))
+
+        # Wait until next event (or stop flag check)
+        Dates.value(sleep_us) > 0 && _sleep(Dates.value(sleep_us) / 1_000_000.0)
+
+        # If we've reached or passed next_time, schedule the event and calculate the next time
+        if time_now >= next_time
+            put!(executor.event_queue, ExecutionEvent(time_now, timer.node.index))
+            next_time = _calc_next_time(timer, executor)
         end
 
-        println("LiveTimerAdapter: Timer [$(timer.node.label)] task ended")
-    catch e
-        println("LiveTimerAdapter: Timer [$(timer.node.label)] task ended with error: $e")
+        # Check if to stop timer
+        timer.stop_flag[] && break
     end
+
+    println("LiveTimerAdapter: Timer [$(timer.node.label)] thread ended")
+end
+
+function _calc_next_time(timer::LiveTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+    round_origin(
+        time(executor) + timer.interval,
+        timer.interval,
+        mode=RoundDown,
+        origin=timer.start_time)
+end
+
+function _sleep(secs::Real)
+    # use Libc.systemsleep(secs) instead of Base.sleep(secs)
+    # for more accurate sleep time
+    Libc.systemsleep(secs)
 end
 
 function run!(timer::LiveTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
-    # i = 0
-    # function callback(jl_timer)
-    #     (global i += 1; println(i))
-    # end
-    # timer.timer = Timer(callback, interval=timer.interval)
-    # wait(t)
-    # sleep(0.5)
-    # close(t)
-
     timer.task = Threads.@spawn worker(timer, executor)
-
+    println("LiveTimerAdapter: Timer [$(timer.node.label)] thread started")
     nothing
 end
 
-function process_event!(adapter::LiveTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}, event::ExecutionEvent{TTime}) where {TPeriod,TStates,TTime}
+function process_event!(
+    adapter::LiveTimerAdapter{TPeriod,TTime},
+    executor::RealtimeExecutor{TStates,TTime},
+    event::ExecutionEvent{TTime}
+) where {TPeriod,TStates,TTime}
     # Execute subgraph based on current value
-    timestamp = event.timestamp
-    adapter.adapter_func(executor, timestamp)
+    adapter.adapter_func(executor, event.timestamp)
     nothing
 end
 
 function destroy!(timer::LiveTimerAdapter{TPeriod,TTime}) where {TPeriod,TTime}
-    # if !isnothing(timer.timer)
-    #     close(timer.timer)
-    #     timer.timer = nothing
-    # end
-
     if !isnothing(timer.task)
-        try
-            if istaskstarted(timer.task) && !istaskdone(timer.task)
-                Base.throwto(timer.task, InterruptException())
-            end
-        catch e
-            if isa(e, InvalidStateException)
-                # already done, ignore
-            else
-                rethrow() # rethrow unexpected exceptions
-            end
-        end
+        timer.stop_flag[] = true
+        wait(timer.task) # will also catch and rethrow any exceptions
         timer.task = nothing
     end
-
     nothing
 end

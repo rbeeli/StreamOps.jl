@@ -20,7 +20,7 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     end
 end
 
-@inline function time(executor::HistoricExecutor{TStates,TTime})::TTime where {TStates,TTime}
+@inline function Base.time(executor::HistoricExecutor{TStates,TTime})::TTime where {TStates,TTime}
     executor.current_time
 end
 
