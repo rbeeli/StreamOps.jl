@@ -22,7 +22,7 @@ stop = DateTime(2000, 1, 1, 0, 0, 59)
 adapters = [
     TimerAdapter{DateTime}(exe, source_timer, interval=Dates.Second(5), start_time=start),
 ]
-@time run_simulation!(exe, adapters, start_time=start, end_time=stop)
+@time run_simulation!(exe, adapters, start, stop)
 
 println("Counter: ", get_state(counter.operation))
 
@@ -35,12 +35,14 @@ StreamOps.info(exe.states)
 # Dump the states struct to console
 dump(exe.states)
 
-# @code_warntype run_simulation!(exe, adapters, start_time=start, end_time=stop)
+# @code_warntype run_simulation!(exe, adapters, start, stop)
 
-@code_warntype run_simulation!(exe, adapters, start_time=start, end_time=stop)
+@code_warntype run_simulation!(exe, adapters, start, stop)
 
-# inspect code for executing an adapter
+# Inspect code for executing an adapter
 @code_warntype advance!(adapters[1], exe)
 
-# inspect generated computation graph code for adapter
+# Inspect generated computation graph code.
+# This is where the actual computation of nodes happens and the graph is traversed.
+# For best performance, this code should be type-stable.
 @code_warntype adapters[1].adapter_func(exe, adapters[1].current_time)

@@ -45,7 +45,12 @@ function compile_historic_executor(::Type{TTime}, graph::StreamGraph; debug=fals
     executor
 end
 
-function run_simulation!(executor::HistoricExecutor{TStates,TTime}, adapters; start_time::TTime, end_time::TTime) where {TStates,TTime}
+function run_simulation!(
+    executor::HistoricExecutor{TStates,TTime},
+    adapters,
+    start_time::TTime,
+    end_time::TTime
+) where {TStates,TTime}
     @assert start_time <= end_time "Start time cannot be after end time"
     @assert length(adapters) == length(executor.adapter_funcs) "Number of adapters must match number of source nodes"
 

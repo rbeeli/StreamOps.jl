@@ -50,7 +50,7 @@ adapters = [
 run_simulation!(
     exe,
     adapters,
-    start_time=DateTime(2000, 1, 1, 0, 0, 1),
-    end_time=DateTime(2000, 1, 1, 0, 0, 6))
+    DateTime(2000, 1, 1, 0, 0, 1),
+    DateTime(2000, 1, 1, 0, 0, 6))
 
 graphviz(exe.graph)

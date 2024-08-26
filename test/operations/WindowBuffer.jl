@@ -30,7 +30,7 @@ using StreamOps
                 (DateTime(2000, 1, 4), 4)
             ])
         ]
-        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        run_simulation!(exe, adapters, start, stop)
 
         # all the same values since it's a view into the buffer
         @test output.operation.buffer[1] == [2, 3, 4]
@@ -65,7 +65,7 @@ using StreamOps
                 (DateTime(2000, 1, 4), 4)
             ])
         ]
-        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        run_simulation!(exe, adapters, start, stop)
 
         @test output.operation.buffer[1] == [1, 2, 3]
         @test output.operation.buffer[2] == [2, 3, 4]

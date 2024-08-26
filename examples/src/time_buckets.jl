@@ -1,3 +1,8 @@
+"""
+This example demonstrates how to use the `Buffer` and `Func` nodes to create
+a time-based buffer that flushes its contents at regular intervals.
+""";
+
 using StreamOps
 using Dates
 
@@ -9,7 +14,7 @@ values = source!(g, :values, out=Float64, init=0.0)
 
 # Create operation nodes
 buffer = op!(g, :buffer, Buffer{Float64}(), out=Buffer{Float64})
-flush_buffer = op!(g, :flush_buffer, Func{Vector{Float64}}((exe, buf, dt) -> begin
+flush = op!(g, :flush, Func{Vector{Float64}}((exe, dt, buf) -> begin
     vals = copy(buf)
     empty!(buf)
     vals
@@ -20,9 +25,8 @@ output1 = sink!(g, :output1, Func((exe, x) -> println("output at time $(time(exe
 
 # Create edges between nodes (define the computation graph)
 bind!(g, values, buffer)
-bind!(g, buffer, flush_buffer, call_policies=[Never()])
-bind!(g, timer, flush_buffer)
-bind!(g, flush_buffer, output1)
+bind!(g, (timer, buffer), flush, call_policies=[IfExecuted(timer)])
+bind!(g, flush, output1)
 
 exe = compile_historic_executor(DateTime, g, debug=!true)
 
@@ -42,5 +46,5 @@ adapters = [
         (DateTime(2000, 1, 6, 0, 0, 0), 6.0)
     ])
 ]
-@time run_simulation!(exe, adapters, start_time=start, end_time=stop)
+@time run_simulation!(exe, adapters, start, stop)
 graphviz(exe.graph)

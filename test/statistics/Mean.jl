@@ -26,7 +26,7 @@ using StreamOps
                 (DateTime(2000, 1, 5), 1)
             ])
         ]
-        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        run_simulation!(exe, adapters, start, stop)
         @test output.operation.buffer ≈ [1, (1 + 2) / 2, (1 + 2 + 3) / 3, (2 + 3 + 4) / 3, (3 + 4 + 1) / 3]
     end
 
@@ -53,7 +53,7 @@ using StreamOps
                 (DateTime(2000, 1, 5), 1)
             ])
         ]
-        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        run_simulation!(exe, adapters, start, stop)
         @test output.operation.buffer ≈ [(1 + 2 + 3) / 3, (2 + 3 + 4) / 3, (3 + 4 + 1) / 3]
     end
 

@@ -38,5 +38,5 @@ adapters = [
     ]),
     IterableAdapter(exe, values4, []) # empty
 ]
-@time run_simulation!(exe, adapters, start_time=start, end_time=stop)
+@time run_simulation!(exe, adapters, start, stop)
 graphviz(exe.graph)

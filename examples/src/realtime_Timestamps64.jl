@@ -21,6 +21,6 @@ exe = compile_realtime_executor(Timestamp64, g, debug=!true)
 start = round_origin(now(Timestamp64), Dates.Second(1), mode=RoundUp)
 stop = start + Dates.Second(5)
 adapters = [
-    LiveTimerAdapter(exe, timer, interval=Dates.Millisecond(1000), start_time=start),
+    RealTimerAdapter(exe, timer, interval=Dates.Millisecond(1000), start_time=start),
 ]
 @time run_realtime!(exe, adapters, start_time=start, end_time=stop)

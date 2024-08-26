@@ -26,6 +26,6 @@ using StreamOps
             (DateTime(2000, 1, 5), 10)
         ])
     ]
-    run_simulation!(exe, adapters; start_time=start, end_time=stop)
+    run_simulation!(exe, adapters, start, stop)
     @test output.operation.buffer ≈ [-3, 8, -6, 10]
 end

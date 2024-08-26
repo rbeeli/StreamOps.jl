@@ -25,7 +25,7 @@ using Suppressor
             ])
         ]
         output = @capture_out begin
-            run_simulation!(exe, adapters; start_time=start, end_time=stop)
+            run_simulation!(exe, adapters, start, stop)
         end
         @test output == "1\n2\n3\n4\n"
     end

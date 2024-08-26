@@ -25,7 +25,7 @@ using StreamOps
                 (DateTime(2000, 1, 4), 4)
             ])
         ]
-        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        run_simulation!(exe, adapters, start, stop)
         @test get_state(buffer.operation) == [1, 2, 3, 4]
     end
 
@@ -53,7 +53,7 @@ using StreamOps
                 (DateTime(2000, 1, 4), 4)
             ])
         ]
-        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        run_simulation!(exe, adapters, start, stop)
         
         # output should only be called twice because of min_count=3
         @test get_state(output.operation) == 2
@@ -101,7 +101,7 @@ using StreamOps
                 (DateTime(2000, 1, 6), 6.0)
             ])
         ]
-        run_simulation!(exe, adapters; start_time=start, end_time=stop)
+        run_simulation!(exe, adapters, start, stop)
         @test collected[1] == Float64[]
         @test collected[2] == [1.0, 2.0]
         @test collected[3] == [3.0, 4.0]

@@ -26,5 +26,5 @@ adapters = [
         (DateTime(2000, 1, 7), 4.0),
     ])
 ]
-@time run_simulation!(exe, adapters, start_time=start, end_time=stop)
+@time run_simulation!(exe, adapters, start, stop)
 graphviz(exe.graph)
