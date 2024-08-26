@@ -1,3 +1,9 @@
+"""
+This example demonstrates how to capture a rolling window of values
+using a `WindowBuffer` node.
+The rolling window has a fixed window size.
+""";
+
 using StreamOps
 using Dates
 
@@ -11,8 +17,10 @@ output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe))
 bind!(g, values, rolling)
 bind!(g, rolling, output)
 
+# Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)
 
+# Run simulation
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 10)
 adapters = [
@@ -27,4 +35,6 @@ adapters = [
     ])
 ]
 @time run_simulation!(exe, adapters, start, stop)
+
+# Visualize the computation graph
 graphviz(exe.graph)

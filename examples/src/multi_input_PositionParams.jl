@@ -1,3 +1,10 @@
+"""
+This example demonstrates how to pass multiple bound input nodes
+into a function via positional parameters, i.e. the order of the
+parameters in the function signature must match the order of the
+bound input nodes.
+""";
+
 using StreamOps
 using Dates
 
@@ -14,8 +21,10 @@ output = sink!(g, :output, func, params_bind=PositionParams())
 # Create edges between nodes (define the computation graph)
 bind!(g, (timer, values), output)
 
+# Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)
 
+# Run simulation
 start = DateTime(2000, 1, 1, 0, 0, 0)
 stop = DateTime(2000, 1, 1, 0, 0, 59)
 adapters = [
@@ -31,4 +40,6 @@ adapters = [
     ]),
 ]
 @time run_simulation!(exe, adapters, start, stop)
+
+# Visualize the computation graph
 graphviz(exe.graph)

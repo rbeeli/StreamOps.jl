@@ -1,3 +1,8 @@
+"""
+This example demonstrates the visualization capabilities of the StreamOps.jl library
+on a more complex computation graph with multiple sources, compute nodes, and sinks.
+""";
+
 using StreamOps
 using Dates
 
@@ -28,8 +33,10 @@ bind!(g, (combine, source2, source3), final_multiply)
 bind!(g, final_multiply, output1)
 bind!(g, combine, output2)
 
+# Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)
 
+# Run simulation
 adapters = [
     IterableAdapter(exe, source1, [
         (DateTime(2000, 1, 1, 0, 0, 1), 2.0),
@@ -53,4 +60,5 @@ run_simulation!(
     DateTime(2000, 1, 1, 0, 0, 1),
     DateTime(2000, 1, 1, 0, 0, 6))
 
+# Visualize the computation graph
 graphviz(exe.graph)

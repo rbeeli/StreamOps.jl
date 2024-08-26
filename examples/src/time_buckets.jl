@@ -28,8 +28,10 @@ bind!(g, values, buffer)
 bind!(g, (timer, buffer), flush, call_policies=[IfExecuted(timer)])
 bind!(g, flush, output1)
 
+# Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)
 
+# Run simulation
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 6)
 adapters = [
@@ -47,4 +49,6 @@ adapters = [
     ])
 ]
 @time run_simulation!(exe, adapters, start, stop)
+
+# Visualize the computation graph
 graphviz(exe.graph)
