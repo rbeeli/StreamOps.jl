@@ -27,7 +27,7 @@ end
 
 @inline function (op::Mean{In})(executor, value::In) where {In<:Number}
     if isfull(op.buffer)
-        op.M1 -= @inbounds op.buffer[1]
+        op.M1 -= @inbounds first(op.buffer)
     end
     push!(op.buffer, value)
     op.M1 += value

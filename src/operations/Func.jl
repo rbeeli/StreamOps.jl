@@ -22,7 +22,7 @@ end
 @inline has_output(op::Func{T}) where {T} = true
 @inline has_output(op::Func{Nothing}) = false
 
-# no functor call overload needed, func is directly called, see StreamGraph.jl _gen_execute_call!
+# no functor call overload needed, func is directly called, see StreamGraph.jl: _gen_execute_call!
 
 # @inline function (op::Func{Nothing,TFunc})(args...; kwargs...) where {TFunc}
 #     op.func(args...; kwargs...)

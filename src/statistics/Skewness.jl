@@ -102,20 +102,20 @@ end
     nobs = length(op.buffer)
     
     if nobs < minp
-        return NaN
+        return Out(NaN)
     elseif op.num_consecutive_same_value >= nobs
-        return 0.0
+        return zero(Out)
     end
 
-    dnobs = Float64(nobs)
+    dnobs = Out(nobs)
     A = op.x / dnobs
     B = op.xx / dnobs - A * A
     C = op.xxx / dnobs - A * A * A - 3 * A * B
 
     return if B <= 1e-14
-        NaN
+        Out(NaN)
     else
         R = sqrt(B)
-        ((sqrt(dnobs * (dnobs - 1.0)) * C) / ((dnobs - 2) * R * R * R))
+        ((sqrt(dnobs * (dnobs - 1)) * C) / ((dnobs - 2) * R * R * R))
     end
 end

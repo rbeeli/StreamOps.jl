@@ -15,6 +15,6 @@ end
     nothing
 end
 
-@inline is_valid(op::Print, value) = true
+@inline is_valid(op::Print) = true
 
 @inline get_state(op::Print) = nothing
