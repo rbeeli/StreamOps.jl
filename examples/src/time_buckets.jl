@@ -1,6 +1,7 @@
 """
 This example demonstrates how to use the `Buffer` and `Func` nodes to create
 a time-based buffer that flushes its contents at regular intervals.
+The buffer is manually flushed by the `timer` source node every 5 seconds.
 """;
 
 using StreamOps

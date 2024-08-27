@@ -34,7 +34,7 @@ bind!(g, timer, output)
 exe = compile_realtime_executor(Timestamp64, g, debug=!true)
 
 # Run in realtime mode
-start = round_origin(now(Timestamp64), Dates.Second(1), mode=RoundUp)
+start = round_origin(now(Timestamp64), Dates.Second(1), RoundUp)
 stop = start + Dates.Second(5)
 adapters = [
     RealTimerAdapter(exe, timer, interval=Dates.Millisecond(1000), start_time=start),

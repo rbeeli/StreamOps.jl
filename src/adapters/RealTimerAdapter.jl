@@ -58,7 +58,7 @@ function _calc_next_time(timer::RealTimerAdapter{TPeriod,TTime}, executor::Realt
     round_origin(
         time(executor) + timer.interval,
         timer.interval,
-        mode=RoundDown,
+        RoundDown,
         origin=timer.start_time)
 end
 

@@ -42,3 +42,5 @@ end
 @inline function get_state(op::WindowBuffer{T,true}) where {T}
     collect(op.buffer)
 end
+
+@inline Base.empty!(op::WindowBuffer) = empty!(op.buffer)

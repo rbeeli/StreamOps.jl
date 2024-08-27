@@ -33,6 +33,6 @@ end
 
 @inline is_valid(op::Buffer) = length(op.buffer) >= op.min_count
 
-@inline Base.empty!(op::Buffer) = empty!(op.buffer)
-
 @inline get_state(op::Buffer) = op.buffer
+
+@inline Base.empty!(op::Buffer) = empty!(op.buffer)

@@ -1,25 +1,52 @@
 using Dates
 
 """
-Rounds a datetime object to the nearest period relative to an optional origin date.
-Default rounding mode is `RoundUp`.
+Rounds a Date/Time to the nearest period relative to an optional origin.
 
 # Examples
 
 ```jldoctest
-julia> round_origin(DateTime(2019, 1, 1, 12, 30, 0), Dates.Hour(1))
+julia> using Dates
+julia> round_origin(DateTime(2019, 1, 1, 12, 30, 0), Hour(1), RoundUp)
 "2019-01-01T13:00:00"
-````
+julia> origin = DateTime(2020, 1, 1, 12, 30, 0);
+julia> round_origin(DateTime(2019, 1, 1, 12, 30, 0), Hour(1), RoundUp, origin=origin)
+"2019-01-01T12:30:00"
+```
 """
 @inline function round_origin(
-    dt::D,
-    period::P
+    value::V,
+    period::P,
+    mode::Base.RoundingMode
     ;
-    mode::RoundingMode=RoundUp,
     origin=nothing
-) where {D<:Dates.TimeType,P<:Period}
-    isnothing(origin) && return round(dt, period, mode)
-    origin + round(dt - origin, period, mode)
+) where {V<:Union{Dates.AbstractDateTime,Dates.AbstractTime},P<:Dates.Period}
+    isnothing(origin) && return round(value, period, mode)
+    origin + round(value - origin, period, mode)
+end
+
+"""
+Rounds a numeric value to the nearest bucket relative to an optional origin.
+
+# Examples
+
+```jldoctest
+julia> round_origin(4.5, 1.0, RoundUp)
+5.0
+julia> origin = 0.5;
+julia> round_origin(1.0, 1.0, RoundDown, origin=origin)
+0.5
+```
+"""
+@inline function round_origin(
+    value::V,
+    bucket_width::P,
+    mode::Base.RoundingMode
+    ;
+    origin=nothing
+) where {V<:Real,P<:Real}
+    isnothing(origin) && return round(value / bucket_width, mode) * bucket_width
+    origin + round((value - origin) / bucket_width, mode) * bucket_width
 end
 
 # Function to recursively remove line number nodes

@@ -4,6 +4,7 @@ using Dates
 
 # To run a subset of tests, call Pkg.test as follows:
 #
+#   import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeBuffer.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["operations/WindowBuffer.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["operations/Print.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["statistics/Mean.jl"])
@@ -18,13 +19,14 @@ if isempty(requested_tests)
 
     include("multi_input.jl")
 
-    include("operations/Buffer.jl")
-    include("operations/WindowBuffer.jl")
-    include("operations/Lag.jl")
-    include("operations/Print.jl")
-    include("operations/Copy.jl")
     include("operations/Func.jl")
+    include("operations/Print.jl")
+    include("operations/Buffer.jl")
+    include("operations/Lag.jl")
+    include("operations/Copy.jl")
     include("operations/ForwardFill.jl")
+    include("operations/WindowBuffer.jl")
+    include("operations/TimeBuffer.jl")
 
     include("statistics/Counter.jl")
     include("statistics/Diff.jl")
