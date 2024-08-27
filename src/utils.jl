@@ -1,5 +1,9 @@
 using Dates
 
+
+@inline time_now(::Type{DateTime}) = Dates.now(Dates.UTC)
+@inline time_zero(::Type{DateTime}) = DateTime(0)
+
 """
 Rounds a Date/Time to the nearest period relative to an optional origin.
 

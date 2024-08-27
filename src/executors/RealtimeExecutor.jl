@@ -26,14 +26,11 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     end
 end
 
-@inline get_time(::Type{DateTime}) = Dates.now(Dates.UTC)
-@inline default_time(::Type{DateTime}) = DateTime(0)
-
 """
 Returns the current system time in UTC, i.e. real (wall-clock) time.
 """
 @inline function Base.time(executor::RealtimeExecutor{TStates,TTime})::TTime where {TStates,TTime}
-    get_time(TTime)
+    time_now(TTime)
 end
 
 @inline function start_time(executor::RealtimeExecutor{TStates,TTime})::TTime where {TStates,TTime}
@@ -49,8 +46,8 @@ function compile_realtime_executor(::Type{TTime}, graph::StreamGraph; debug=fals
     executor = RealtimeExecutor{TTime}(
         graph,
         states,
-        start_time=default_time(TTime),
-        end_time=default_time(TTime)
+        start_time=time_zero(TTime),
+        end_time=time_zero(TTime)
     )
 
     # Compile source functions

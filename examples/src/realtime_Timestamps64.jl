@@ -13,9 +13,9 @@ using Timestamps64
 
 println("Number of Julia threads: $(Threads.nthreads())")
 
-# provide overloads for custom time type
-StreamOps.get_time(::Type{Timestamp64}) = now(Timestamp64)
-StreamOps.default_time(::Type{Timestamp64}) = Timestamp64(0)
+# provide overloads for custom time type `Timestamp64`
+StreamOps.time_now(::Type{Timestamp64}) = now(Timestamp64)
+StreamOps.time_zero(::Type{Timestamp64}) = Timestamp64(0)
 
 g = StreamGraph()
 

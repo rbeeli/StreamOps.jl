@@ -5,13 +5,13 @@ The default print function is Julia's `println`.
 struct Print{F<:Function} <: StreamOperation
     print_fn::F
 
-    function Print(print_fn::F=println) where {F<:Function}
+    function Print(print_fn::F=(exe, x) -> println(x)) where {F<:Function}
         new{F}(print_fn)
     end
 end
 
 @inline function (op::Print)(executor, value)
-    op.print_fn(value)
+    op.print_fn(executor, value)
     nothing
 end
 
