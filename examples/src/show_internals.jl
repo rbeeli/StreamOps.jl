@@ -56,3 +56,5 @@ dump(exe.states)
 # For best performance, this code should be type-stable and
 # allocations should be minimized.
 @code_warntype adapters[1].adapter_func(exe, adapters[1].current_time)
+
+@code_native adapters[1].adapter_func(exe, adapters[1].current_time)
