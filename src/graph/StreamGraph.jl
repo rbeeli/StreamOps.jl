@@ -217,57 +217,6 @@ end
 
 @inline get_node_label(graph::StreamGraph, index::Int) = @inbounds label(graph.nodes[index])
 
-"""
-Compile the states struct for the given graph to store intermediate results
-of computation steps.
-"""
-function compile_states_struct(::Type{TTime}, graph::StreamGraph; debug::Bool=false) where {TTime}
-    # Generate a unique name for the struct
-    struct_name = Symbol("GraphStates$(time_ns())")
-
-    field_defs = []
-    ctor_args = []
-
-    push!(field_defs, :(__executed::BitVector))
-    push!(ctor_args, :(falses($(length(graph.nodes)))))
-
-    for (i, node) in enumerate(graph.nodes)
-        # state value field
-        # field_type = :($(Union{node.output_type,typeof(node.init_value)}))
-        field_type = typeof(node.operation)
-        push!(field_defs, Expr(:(::), node.field_name, field_type))
-        push!(ctor_args, node.operation)
-
-        # state time field
-        push!(field_defs, Expr(:(::), Symbol("$(node.field_name)__time"), TTime))
-        push!(ctor_args, :(zero($TTime)))
-    end
-
-    struct_def = Expr(:struct, true, struct_name, Expr(:block, field_defs...))
-    Core.eval(@__MODULE__, struct_def)
-
-    ctor_def = :($struct_name() = $struct_name($(ctor_args...)))
-    Core.eval(@__MODULE__, ctor_def)
-
-    debug && println("Generated states struct:")
-    debug && println(struct_def)
-    # println("Generated constructor:")
-    # println(ctor_def)
-
-    # function get_state(states::$struct_name, node::StreamNode)
-    Core.eval(@__MODULE__, :(function did_execute(states::$struct_name, node::StreamNode)
-        @inbounds states.__executed[node.index]
-    end))
-
-    # function get_state(states::$struct_name)
-    Core.eval(@__MODULE__, :(function info(states::$struct_name)
-        type = typeof(states)
-        OrderedDict(zip(fieldnames(type), fieldtypes(type)))
-    end))
-
-    getfield(@__MODULE__, struct_name)
-end
-
 function compile_graph!(::Type{TTime}, g::StreamGraph; debug::Bool=false) where {TTime}
     # verify that the graph is weakly connected and has at least one source node
     verify_graph(g)
@@ -292,7 +241,7 @@ function _gen_execute_call!(
     source_node::StreamNode,
     node::StreamNode,
     debug::Bool
-) where {TExecutor<:GraphExecutor}
+) where {TExecutor<:StreamGraphExecutor}
     tmp_exprs = Expr[]
     node_label = String(node.label)
 
@@ -497,7 +446,7 @@ function _gen_execute_call!(
     nothing
 end
 
-function compile_source!(executor::TExecutor, source_node::StreamNode; debug=false) where {TExecutor<:GraphExecutor}
+function compile_source!(executor::TExecutor, source_node::StreamNode; debug=false) where {TExecutor<:StreamGraphExecutor}
     graph = executor.graph
     nodes = graph.nodes
 

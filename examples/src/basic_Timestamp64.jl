@@ -23,16 +23,19 @@ function run()
     # Compile the graph with historic executor
     exe = compile_historic_executor(Timestamp64, g, debug=!true)
 
-    # Run simulation
-    start = Timestamp64(2000, 1, 1)
-    stop = Timestamp64(2000, 1, 10)
-    adapters = [
-        IterableAdapter(exe, values, [
-            (Timestamp64(2000, 1, 1), 1.0),
-            (Timestamp64(2000, 1, 2), 2.0),
-        ])
-    ]
-    @time run_simulation!(exe, adapters, start, stop)
+    # Must use invokelatest due to dynamically generated code
+    Base.invokelatest() do 
+        # Run simulation
+        start = Timestamp64(2000, 1, 1)
+        stop = Timestamp64(2000, 1, 10)
+        adapters = [
+            IterableAdapter(exe, values, [
+                (Timestamp64(2000, 1, 1), 1.0),
+                (Timestamp64(2000, 1, 2), 2.0),
+            ])
+        ]
+        @time run_simulation!(exe, adapters, start, stop)
+    end
 end
 
 run()
