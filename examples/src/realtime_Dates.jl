@@ -8,6 +8,9 @@ using StreamOps
 using Dates
 
 println("Number of Julia threads: $(Threads.nthreads())")
+if Threads.nthreads() == 1
+    @warn "Julia is running in single-threaded mode. Console output might be delayed."
+end
 
 g = StreamGraph()
 
