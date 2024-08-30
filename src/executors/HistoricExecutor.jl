@@ -58,32 +58,38 @@ function run_simulation!(
     executor.start_time = start_time
     executor.end_time = end_time
     executor.current_time = start_time
+    
+    # need invokelatest because states struct is dynamically compiled,
+    # which may live in a newer world age than the caller.
+    Base.invokelatest() do
+        # Initialize adapters
+        setup!.(adapters, Ref(executor))
 
-    # Initialize adapters
-    setup!.(adapters, Ref(executor))
+        # Process events in chronological order using a priority queue
+        while !isempty(executor.event_queue)
+            event = pop!(executor.event_queue)
+            index = event.source_index
+            timestamp = event.timestamp
 
-    # Process events in chronological order using a priority queue
-    while !isempty(executor.event_queue)
-        event = pop!(executor.event_queue)
-        index = event.source_index
-        timestamp = event.timestamp
+            # Check if before start time
+            if timestamp < start_time
+                error("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $(start_time)")
+            end
 
-        # Check if before start time
-        if timestamp < start_time
-            error("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $(start_time)")
+            # Check if past end time
+            if timestamp > end_time
+                break
+            end
+
+            # Update the current time of the executor
+            executor.current_time = timestamp
+
+            # Execute
+            adapter = @inbounds adapters[index]
+            advance!(adapter, executor)
         end
 
-        # Check if past end time
-        if timestamp > end_time
-            break
-        end
-
-        # Update the current time of the executor
-        executor.current_time = timestamp
-
-        # Execute
-        adapter = @inbounds adapters[index]
-        advance!(adapter, executor)
+        nothing
     end
 
     # println("HistoricExecutor: Simulation ended at time $(time(executor))")

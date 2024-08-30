@@ -67,10 +67,14 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}, adapters; star
     executor.start_time = start_time
     executor.end_time = end_time
 
-    # Initialize adapters
-    println("RealtimeExecutor: Setting up adapters...")
-    init_secs = @elapsed run!.(adapters, Ref(executor))
-    println("RealtimeExecutor: Adapters set up in $(round(sum(init_secs); digits=3))s")
+    # need invokelatest because states struct is dynamically compiled,
+    # which may live in a newer world age than the caller.
+    Base.invokelatest() do
+        # Initialize adapters
+        println("RealtimeExecutor: Setting up adapters...")
+        init_secs = @elapsed run!.(adapters, Ref(executor))
+        println("RealtimeExecutor: Adapters set up in $(round(sum(init_secs); digits=3))s")
+    end
 
     # Start periodic wake-up thread so that
     # the condition to end if current time is past end time
@@ -96,29 +100,33 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}, adapters; star
 
     # Process events using Channel (synchronized FIFO queue)
     try
-        while true
-            # wait for next event
-            event = take!(executor.event_queue)
-            index = event.source_index
-            timestamp = event.timestamp
+        # need invokelatest because states struct is dynamically compiled,
+        # which may live in a newer world age than the caller.
+        Base.invokelatest() do
+            while true
+                # wait for next event
+                event = take!(executor.event_queue)
+                index = event.source_index
+                timestamp = event.timestamp
 
-            # Check if past end time
-            if timestamp > end_time
-                println("RealtimeExecutor: Ended realtime stream at time $(time(executor))")
-                break
-            end
-
-            # Process event if not wake-up call
-            if index != -1
-                # Check if before start time
-                if timestamp < start_time
-                    println("RealtimeExecutor: Dropping event from source [$(get_node_label(executor.graph, index))] at time $timestamp before start time $(start_time)")
-                    continue
+                # Check if past end time
+                if timestamp > end_time
+                    println("RealtimeExecutor: Ended realtime stream at time $(time(executor))")
+                    break
                 end
 
-                # Execute source function
-                adapter = @inbounds adapters[index]
-                process_event!(adapter, executor, event)
+                # Process event if not wake-up call
+                if index != -1
+                    # Check if before start time
+                    if timestamp < start_time
+                        println("RealtimeExecutor: Dropping event from source [$(get_node_label(executor.graph, index))] at time $timestamp before start time $(start_time)")
+                        continue
+                    end
+
+                    # Execute source function
+                    adapter = @inbounds adapters[index]
+                    process_event!(adapter, executor, event)
+                end
             end
         end
     catch e

@@ -5,5 +5,6 @@ version = "0.1.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+ProfileView = "c46f51b8-102a-5cf2-8d2c-8597cb0e0da7"
 StreamOps = "a9627898-32a8-4203-afdc-bd07b9d6797f"
 Timestamps64 = "bb4eac3f-01a0-4c2b-bd7e-ee6d71616039"
