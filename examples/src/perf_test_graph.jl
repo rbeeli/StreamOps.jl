@@ -15,17 +15,17 @@ function run()
     values = source!(g, :values, out=Timestamp64, init=Timestamp64(0))
     rolling = op!(g, :rolling, TimeBuffer{Timestamp64,Timestamp64}(wnd, :closed), out=AbstractVector{Timestamp64})
     dts_node = op!(g, :dts_node, Func((exe, x) -> time(exe), Timestamp64(0)), out=Timestamp64)
-    counts_node = op!(g, :counts_node, Func((exe, x) -> Float32(length(x)), 0f32), out=Float32)
+    counts_node = op!(g, :counts_node, Func((exe, x) -> Float32(length(x)), 0.0f32), out=Float32)
     sink_dts = sink!(g, :sink_dts, Buffer(dts))
     sink_counts = sink!(g, :sink_counts, Buffer(counts))
-    
+
     # Create edges between nodes (define the computation graph)
     bind!(g, values, rolling)
     bind!(g, rolling, dts_node)
     bind!(g, rolling, counts_node)
     bind!(g, dts_node, sink_dts)
     bind!(g, counts_node, sink_counts)
-    
+
     # Compile the graph with historic executor
     exe = compile_historic_executor(Timestamp64, g, debug=!true)
 
@@ -34,12 +34,15 @@ function run()
     start = first(dts)
     stop = last(dts)
     adapters = [
-        IterableAdapter(exe, values, [
+        IterableAdapter(
+            Tuple{Timestamp64,Timestamp64},
+            exe,
+            values,
             (x, x) for x in dts
-        ])
+        )
     ]
     run_simulation!(exe, adapters, start, stop)
-       
+
     nothing
 end
 

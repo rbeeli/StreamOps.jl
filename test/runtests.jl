@@ -4,6 +4,7 @@ using Dates
 
 # To run a subset of tests, call Pkg.test as follows:
 #
+#   import Pkg;Pkg.test("StreamOps", test_args=["adapters/IterableAdapter.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeBuffer.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["operations/WindowBuffer.jl"])
 #   import Pkg;Pkg.test("StreamOps", test_args=["operations/Print.jl"])
@@ -39,6 +40,8 @@ if isempty(requested_tests)
     include("statistics/EWVariance.jl")
     include("statistics/EWZScore.jl")
     include("statistics/FractionalDiff.jl")
+
+    include("adapters/IterableAdapter.jl")
 else
     println('-'^60)
     println("Running subset of tests:")
