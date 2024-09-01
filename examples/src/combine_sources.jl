@@ -50,7 +50,7 @@ adapters = [
     IterableAdapter(exe, values3, [
         (DateTime(1999, 12, 31), 1000.0),
     ]),
-    IterableAdapter(exe, values4, []) # empty
+    IterableAdapter(exe, values4, Float64[]) # empty
 ]
 @time run_simulation!(exe, adapters, start, stop)
 
