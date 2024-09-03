@@ -15,6 +15,8 @@ struct IfSource{TNode} <: CallPolicy
     end
 end
 
+# TODO: Shall we move to exclusively node labels as reference?
+
 # If connected node is executed, REGARDLESS of valid output or not, trigger the node
 struct IfExecuted{TNode} <: CallPolicy
     nodes::Union{Symbol,Vector{TNode}} # :any, :all

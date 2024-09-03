@@ -2,7 +2,26 @@ using Test
 using Dates
 using StreamOps
 
-@testset verbose = true "multi-input bindings" begin
+@testset verbose = true "bind input nodes" begin
+
+    @testset "bind! single using symbols" begin
+        g = StreamGraph()
+
+        values = source!(g, :values, out=Float64, init=0.0)
+        output = sink!(g, :output, Print())
+
+        bind!(g, :values, :output)
+    end
+
+    @testset "bind! multiple using symbols" begin
+        g = StreamGraph()
+
+        values = source!(g, :values, out=Float64, init=0.0)
+        values2 = source!(g, :values2, out=Float64, init=0.0)
+        output = sink!(g, :output, Print())
+
+        bind!(g, (:values, :values2), :output)
+    end
 
     @testset "NamedParams" begin
         g = StreamGraph()
@@ -15,7 +34,7 @@ using StreamOps
                 @assert values isa Float64
                 @assert timer isa DateTime
                 called += 1
-            end), params_bind=NamedParams())
+            end, nothing), params_bind=NamedParams())
 
         bind!(g, timer, output, call_policies=[Always()])
         bind!(g, values, output, call_policies=[Always()])
@@ -48,7 +67,7 @@ using StreamOps
                 @assert a isa DateTime
                 @assert b isa Float64
                 called += 1
-            end), params_bind=PositionParams())
+            end, nothing), params_bind=PositionParams())
 
         bind!(g, timer, output, call_policies=[Always()])
         bind!(g, values, output, call_policies=[Always()])
@@ -80,7 +99,7 @@ using StreamOps
         output = sink!(g, :output, Func((exe, params) -> begin
                 @assert params isa Tuple{DateTime,Float64}
                 called += 1
-            end), params_bind=TupleParams())
+            end, nothing), params_bind=TupleParams())
 
         bind!(g, timer, output, call_policies=[Always()])
         bind!(g, values, output, call_policies=[Always()])

@@ -62,7 +62,7 @@ using StreamOps
         end
 
         values = source!(g, :values, out=Int, init=0)
-        buffer = op!(g, :buffer, Func((exe, x) -> do_nothing()), out=Nothing)
+        buffer = op!(g, :buffer, Func((exe, x) -> do_nothing(), nothing), out=Nothing)
         output = sink!(g, :output, Buffer{Nothing}())
 
         bind!(g, values, buffer)
@@ -79,6 +79,8 @@ using StreamOps
             ])
         ]
         run_simulation!(exe, adapters, start, stop)
+
+        @test is_valid(buffer.operation)
 
         @test all(isnothing.(output.operation.buffer))
     end

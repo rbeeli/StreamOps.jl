@@ -22,6 +22,7 @@ end
 Sort the nodes in the graph in topological order using a depth-first search (DFS).
 """
 function topological_sort!(graph::StreamGraph)
+    empty!(graph.topo_order)
     visited = falses(length(graph.nodes))
     temp_stack = Int[]
 
@@ -162,6 +163,13 @@ function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
     policies
 end
 
+function bind!(graph::StreamGraph, input_nodes, to::Symbol; call_policies=nothing)
+    if input_nodes isa Symbol
+        input_nodes = [input_nodes]
+    end
+    bind!(graph, get_node.(Ref(graph), input_nodes), get_node(graph, to), call_policies=call_policies)
+end
+
 function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=nothing)
     if input_nodes isa StreamNode
         input_nodes = [input_nodes]
@@ -214,6 +222,13 @@ function get_source_subgraph(graph::StreamGraph, source_node::StreamNode)
 end
 
 @inline get_node(graph::StreamGraph, index::Int) = @inbounds graph.nodes[index]
+
+# TODO: Optimize this function
+@inline function get_node(graph::StreamGraph, label::Symbol)
+    ix = findfirst(n -> n.label == label, graph.nodes)
+    isnothing(ix) && error("Node with label '$label' not found")
+    @inbounds graph.nodes[ix]
+end
 
 @inline get_node_label(graph::StreamGraph, index::Int) = @inbounds label(graph.nodes[index])
 

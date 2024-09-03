@@ -78,7 +78,7 @@ using StreamOps
 
         # Create sink nodes
         collected = []
-        output = sink!(g, :output, Func((exe, x) -> push!(collected, collect(x))))
+        output = sink!(g, :output, Func((exe, x) -> push!(collected, collect(x)), nothing))
 
         # Create edges between nodes (define the computation graph)
         bind!(g, values, buffer)

@@ -18,7 +18,7 @@ requested_tests = ARGS
 if isempty(requested_tests)
     include("utils.jl")
 
-    include("multi_input.jl")
+    include("bind.jl")
 
     include("operations/Func.jl")
     include("operations/Print.jl")
@@ -40,6 +40,8 @@ if isempty(requested_tests)
     include("statistics/EWVariance.jl")
     include("statistics/EWZScore.jl")
     include("statistics/FractionalDiff.jl")
+    include("statistics/TimeSum.jl")
+    include("statistics/TimeCount.jl")
 
     include("adapters/IterableAdapter.jl")
 else
