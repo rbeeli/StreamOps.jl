@@ -105,7 +105,6 @@ function _make_node!(
     is_source::Bool,
     is_sink::Bool,
     operation,
-    binding_mode::ParamsBinding,
     output_type::Type,
     label::Symbol
 )
@@ -118,7 +117,7 @@ function _make_node!(
     end
 
     # Create node and add to graph
-    node = StreamNode(index, is_source, is_sink, operation, binding_mode, output_type, label)
+    node = StreamNode(index, is_source, is_sink, operation, output_type, label)
     push!(graph.nodes, node)
     push!(graph.deps, Int[]) # The nodes that this node depends on
     push!(graph.reverse_deps, Int[]) # The nodes that depend on this node
@@ -130,15 +129,15 @@ function _make_node!(
 end
 
 function source!(graph::StreamGraph, label::Symbol; out::Type{TOutput}, init::TOutput) where {TOutput}
-    _make_node!(graph, true, false, AdapterStorage{TOutput}(init), PositionParams(), TOutput, label)
+    _make_node!(graph, true, false, AdapterStorage{TOutput}(init), TOutput, label)
 end
 
-function op!(graph::StreamGraph, label::Symbol, operation::StreamOperation; out::Type{TOutput}, params_bind=PositionParams()) where {TOutput}
-    _make_node!(graph, false, false, operation, params_bind, TOutput, label)
+function op!(graph::StreamGraph, label::Symbol, operation::StreamOperation; out::Type{TOutput}) where {TOutput}
+    _make_node!(graph, false, false, operation, TOutput, label)
 end
 
-function sink!(graph::StreamGraph, label::Symbol, operation::StreamOperation; params_bind=PositionParams())
-    _make_node!(graph, false, true, operation, params_bind, Nothing, label)
+function sink!(graph::StreamGraph, label::Symbol, operation::StreamOperation)
+    _make_node!(graph, false, true, operation, Nothing, label)
 end
 
 function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
@@ -146,15 +145,15 @@ function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
     policies = Vector{CallPolicy}()
     if isnothing(call_policies) || isempty(call_policies)
         # Default call policies
-        if length(input_nodes) == 1
-            # single input node
-            push!(policies, IfExecuted(:all))
-            push!(policies, IfValid(:all))
-        else
+        # if length(input_nodes) == 1
+        #     # single input node
+        #     push!(policies, IfExecuted(:all))
+        #     push!(policies, IfValid(:all))
+        # else
             # multiple input nodes
             push!(policies, IfExecuted(:any))
             push!(policies, IfValid(:all))
-        end
+        # end
     else
         append!(policies, call_policies)
     end
@@ -163,14 +162,16 @@ function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
     policies
 end
 
-function bind!(graph::StreamGraph, input_nodes, to::Symbol; call_policies=nothing)
+function bind!(graph::StreamGraph, input_nodes, to::Symbol; call_policies=nothing, params_bind=PositionParams())
     if input_nodes isa Symbol
         input_nodes = [input_nodes]
     end
-    bind!(graph, get_node.(Ref(graph), input_nodes), get_node(graph, to), call_policies=call_policies)
+    bind!(graph, get_node.(Ref(graph), input_nodes), get_node(graph, to), call_policies=call_policies, params_bind=params_bind)
 end
 
-function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=nothing)
+function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=nothing, params_bind=PositionParams())
+    call_policies isa CallPolicy && (call_policies = [call_policies])
+
     if input_nodes isa StreamNode
         input_nodes = [input_nodes]
     else
@@ -191,7 +192,7 @@ function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=no
     policies = _get_call_policies(input_nodes, call_policies)
 
     # Create binding of single input node to target node 
-    binding = InputBinding(input_nodes, policies)
+    binding = InputBinding(input_nodes, policies, params_bind)
     push!(to.input_bindings, binding)
     for input in input_nodes
         push!(graph.deps[to.index], input.index)
@@ -252,6 +253,46 @@ function compile_graph!(::Type{TTime}, g::StreamGraph; debug::Bool=false) where 
     states
 end
 
+function _gen_params_exprs(node)
+    input_names = String[]
+    input_exprs = Expr[]
+
+    for input_binding in node.input_bindings
+        if input_binding.params_bind isa PositionParams
+            # positional parameters
+            # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
+            for input in input_binding.input_nodes
+                push!(input_exprs, :(get_state(states.$(input.field_name))))
+                push!(input_names, String(input.field_name))
+            end
+            # call_expr = :(states.$(node.field_name)(executor, $(input_exprs...)))
+        elseif input_binding.params_bind isa NamedParams
+            # keyword parameters
+            # generates tuples of (input_name, input_value)
+            # input_exprs = ((input.node.field_name, :(get_state(states.$(input.node.field_name)))) for input in node.inputs)
+            for input in input_binding.input_nodes
+                push!(input_exprs, Expr(:kw, input.field_name, :(get_state(states.$(input.field_name)))))
+                push!(input_names, String(input.field_name))
+            end
+            # call_expr = Expr(:call, :(states.$(node.field_name)), :(executor), (Expr(:kw, k, v) for (k, v) in input_exprs)...)
+        elseif input_binding.params_bind isa TupleParams
+            # pack all input values into single tuple parameter
+            # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
+            tuple_exprs = Expr[]
+            for input in input_binding.input_nodes
+                push!(tuple_exprs, :(get_state(states.$(input.field_name))))
+                push!(input_names, String(input.field_name))
+            end
+            push!(input_exprs, :(($(tuple_exprs...),)))
+            # call_expr = :(states.$(node.field_name)(executor, ($(input_exprs...),)))
+        else
+            error("Unsupported parameter binding for node [$(label(node))]: $(typeof(input_binding.params_bind))")
+        end
+    end
+
+    input_names, input_exprs
+end
+
 function _gen_execute_call!(
     executor::TExecutor,
     node_expressions::Vector{Expr},
@@ -260,7 +301,6 @@ function _gen_execute_call!(
     debug::Bool
 ) where {TExecutor<:StreamGraphExecutor}
     tmp_exprs = Expr[]
-    node_label = String(node.label)
 
     # Input bindings
     has_active_bindings = false
@@ -336,7 +376,7 @@ function _gen_execute_call!(
                 end
                 has_active_bindings = true
             else
-                error("Unknown call policy for node [$node_label]: $(typeof(call_policy))")
+                error("Unknown call policy for node [$(label(node))]: $(typeof(call_policy))")
             end
         end
 
@@ -361,75 +401,38 @@ function _gen_execute_call!(
         # Single do_execute expression
         push!(tmp_exprs, :(do_execute = $(first(binding_exe_exprs))))
     else
-        # For multiple bindings to trigger the next node, any of them can be fulfilled,
-        # i.e. combine them using OR.
+        # For multiple bindings to trigger the next node, any of them may be fulfilled,
+        # i.e. use OR condition.
         exprs = foldl((e, b) -> begin push!(e.args, b); e end, binding_exe_exprs, init=Expr(:||))
         push!(tmp_exprs, :(do_execute = $exprs))
     end
 
-    # Call node function
-    # res_name = Symbol("$(node.field_name)__res")
-    state_time_field = Symbol("$(node.field_name)__time")
-    input_names = String[]
-    input_exprs = Expr[]
-    if node.binding_mode isa PositionParams
-        # positional parameters
-        # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
-        for input_binding in node.input_bindings
-            for input in input_binding.input_nodes
-                push!(input_exprs, :(get_state(states.$(input.field_name))))
-                push!(input_names, String(input.field_name))
-            end
-        end
-        # call_expr = :(states.$(node.field_name)(executor, $(input_exprs...)))
-    elseif node.binding_mode isa NamedParams
-        # keyword parameters
-        # generates tuples of (input_name, input_value)
-        # input_exprs = ((input.node.field_name, :(get_state(states.$(input.node.field_name)))) for input in node.inputs)
-        for input_binding in node.input_bindings
-            for input in input_binding.input_nodes
-                push!(input_exprs, Expr(:kw, input.field_name, :(get_state(states.$(input.field_name)))))
-                push!(input_names, String(input.field_name))
-            end
-        end
-        # call_expr = Expr(:call, :(states.$(node.field_name)), :(executor), (Expr(:kw, k, v) for (k, v) in input_exprs)...)
-    elseif node.binding_mode isa TupleParams
-        # pack all input values into single tuple parameter
-        # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
-        tuple_exprs = Expr[]
-        for input_binding in node.input_bindings
-            for input in input_binding.input_nodes
-                push!(tuple_exprs, :(get_state(states.$(input.field_name))))
-                push!(input_names, String(input.field_name))
-            end
-        end
-        push!(input_exprs, :(($(tuple_exprs...),)))
-        # call_expr = :(states.$(node.field_name)(executor, ($(input_exprs...),)))
-    else
-        error("Unknown parameter binding for node [$node_label]: $(typeof(node.binding_mode))")
-    end
+    # Generate function call parameter expressions
+    input_names, input_exprs = _gen_params_exprs(node)
 
-    # directly call func for Func operation (skip functor indirection)
     if node.operation isa Func
+        # Directly call func for Func operation (skip functor indirection)
         if has_output(node.operation)
             call_expr = :(states.$(node.field_name).last_value = states.$(node.field_name).func(executor, $(input_exprs...)))
         else
             call_expr = :(states.$(node.field_name).func(executor, $(input_exprs...)))
         end
     else
+        # Not a Func operation, call functor
         call_expr = :(states.$(node.field_name)(executor, $(input_exprs...)))
     end
 
+    state_time_field = Symbol("$(node.field_name)__time")
     result_expr = if debug
         :(
             if do_execute
                 states.$state_time_field = time(executor)
                 @inbounds states.__executed[$(node.index)] = true
                 try
-                    println("Executing node [$($node_label)] at time $(time(executor))...")
+                    println("Executing node [$($(label(node)))] at time $(time(executor))...")
                     $call_expr
                 catch e
-                    println("Error in node [$($node_label)] with input nodes [$(join(input_names, ","))] at time $(time(executor)): $e")
+                    println("Error in node [$($(label(node)))] with input nodes [$(join(input_names, ","))] at time $(time(executor)): $e")
                     throw(e)
                 end
             end

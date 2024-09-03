@@ -14,7 +14,6 @@ mutable struct StreamNode
     is_sink::Bool
     operation::StreamOperation
     input_bindings::Vector{InputBinding{StreamNode}}
-    binding_mode::ParamsBinding
     output_type::Type
     label::Symbol
     field_name::Symbol
@@ -23,14 +22,13 @@ mutable struct StreamNode
         is_source,
         is_sink,
         operation::StreamOperation,
-        binding_mode,
         output_type,
         label::Symbol
     )
         input_bindings = InputBinding{StreamNode}[]
         field_name = label
         new(index, is_source, is_sink, operation, input_bindings,
-            binding_mode, output_type, label, field_name)
+            output_type, label, field_name)
     end
 end
 
