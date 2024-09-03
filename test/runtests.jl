@@ -18,6 +18,7 @@ requested_tests = ARGS
 if isempty(requested_tests)
     include("utils.jl")
 
+    include("graph.jl")
     include("bind.jl")
 
     include("operations/Func.jl")

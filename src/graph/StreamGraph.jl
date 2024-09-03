@@ -223,6 +223,8 @@ end
 
 @inline get_node(graph::StreamGraph, index::Int) = @inbounds graph.nodes[index]
 
+@inline get_node_label(graph::StreamGraph, index::Int) = @inbounds label(graph.nodes[index])
+
 # TODO: Optimize this function
 @inline function get_node(graph::StreamGraph, label::Symbol)
     ix = findfirst(n -> n.label == label, graph.nodes)
@@ -230,7 +232,7 @@ end
     @inbounds graph.nodes[ix]
 end
 
-@inline get_node_label(graph::StreamGraph, index::Int) = @inbounds label(graph.nodes[index])
+@inline Base.getindex(graph::StreamGraph, label::Symbol) = get_node(graph, label)
 
 function compile_graph!(::Type{TTime}, g::StreamGraph; debug::Bool=false) where {TTime}
     # verify that the graph is weakly connected and has at least one source node
