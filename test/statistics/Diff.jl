@@ -5,12 +5,10 @@ using StreamOps
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)
-    diff_buffer = op!(g, :diff_buffer, WindowBuffer{Int}(2), out=AbstractVector{Int})
     diff = op!(g, :diff, Diff{Int}(), out=Int)
     output = sink!(g, :output, Buffer{Int}())
 
-    bind!(g, values, diff_buffer)
-    bind!(g, diff_buffer, diff)
+    bind!(g, values, diff)
     bind!(g, diff, output)
 
     exe = compile_historic_executor(DateTime, g; debug=!true)

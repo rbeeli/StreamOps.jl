@@ -1,30 +1,30 @@
 """
-Calculates percentage change of two numeric values.
-The input must be an iterable, where the first value represents
-`x\\_{t-1}`, and the second value represents `x\\_t`.
+Calculates the percentage change of consecutive values.
 
 # Formula
 `` y = x\\_t / x\\_{t-1} - 1 ``
 """
 mutable struct PctChange{In<:Number,Out<:Number} <: StreamOperation
-    current::Tuple{In,In}
-    called::Bool
+    current::In
+    prev::In
+    counter::Int
 
     PctChange{In,Out}(
         ;
-        init=(zero(In), zero(In))
+        init=zero(In)
     ) where {In<:Number,Out<:Number} =
-        new{In,Out}((init[1], init[2]), false)
+        new{In,Out}(init, init, 0)
 end
 
 @inline function (op::PctChange)(executor, value)
-    op.current = (first(value), last(value))
-    op.called = true
+    op.prev = op.current
+    op.current = value
+    op.counter += 1
     nothing
 end
 
-@inline is_valid(op::PctChange) = op.called
+@inline is_valid(op::PctChange) = op.counter > 1
 
 @inline function get_state(op::PctChange{In,Out})::Out where {In,Out}
-    last(op.current) / first(op.current) - one(Out)
+    op.current / op.prev - one(Out)
 end
