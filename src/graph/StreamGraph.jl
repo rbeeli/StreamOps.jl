@@ -145,15 +145,8 @@ function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
     policies = Vector{CallPolicy}()
     if isnothing(call_policies) || isempty(call_policies)
         # Default call policies
-        # if length(input_nodes) == 1
-        #     # single input node
-        #     push!(policies, IfExecuted(:all))
-        #     push!(policies, IfValid(:all))
-        # else
-            # multiple input nodes
-            push!(policies, IfExecuted(:any))
-            push!(policies, IfValid(:all))
-        # end
+        push!(policies, IfExecuted(:any))
+        push!(policies, IfValid(:all))
     else
         append!(policies, call_policies)
     end
