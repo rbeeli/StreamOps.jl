@@ -9,7 +9,7 @@ mutable struct IterableAdapter{TData,TItem,TAdapterFunc}
         executor::TExecutor,
         node::StreamNode, 
         data::TData
-    ) where {TExecutor<:StreamGraphExecutor,TItem,TData}
+    ) where {TExecutor<:GraphExecutor,TItem,TData}
         adapter_func = executor.adapter_funcs[node.index]
         new{TData,TItem,typeof(adapter_func)}(node, adapter_func, data, nothing)
     end
@@ -18,7 +18,7 @@ mutable struct IterableAdapter{TData,TItem,TAdapterFunc}
         executor::TExecutor,
         node::StreamNode,
         data::TData
-    ) where {TExecutor<:StreamGraphExecutor,TData}
+    ) where {TExecutor<:GraphExecutor,TData}
         eltype(data) != Any || throw(ArgumentError("Element type detected as Any. Use typed IterableAdapter constructor to avoid performance penality of Any."))
         adapter_func = executor.adapter_funcs[node.index]
         new{TData,eltype(data),typeof(adapter_func)}(node, adapter_func, data, nothing)

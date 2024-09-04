@@ -6,7 +6,7 @@ Time is always reported as the current system time, i.e. "now".
 The realtime mode is usually used for live data processing in productive environments
 where data flows in as time passes by.
 """
-mutable struct RealtimeExecutor{TStates,TTime} <: StreamGraphExecutor
+mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     graph::StreamGraph
     states::TStates
     start_time::TTime

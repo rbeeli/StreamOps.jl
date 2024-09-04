@@ -28,7 +28,7 @@ mutable struct TimeCount{TTime,TPeriod,interval_mode} <: StreamOperation
 end
 
 # tell executor to always sync time with this operation
-StreamOperationTimeSync(::TimeCount) = true
+OperationTimeSync(::TimeCount) = true
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.

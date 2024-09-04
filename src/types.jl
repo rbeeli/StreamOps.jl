@@ -4,11 +4,15 @@ abstract type ParamsBinding end
 
 abstract type StreamOperation end
 
-abstract type StreamGraphState end
+abstract type GraphState end
 
-abstract type StreamGraphExecutor end
+abstract type GraphExecutor end
 
 ## traits
-abstract type StreamOperationTimeSync end
 
-StreamOperationTimeSync(::Any) = false
+# Tell executor to call update_time! on operation
+# before execution of graph
+abstract type OperationTimeSync end
+
+# default = false
+OperationTimeSync(::Any) = false

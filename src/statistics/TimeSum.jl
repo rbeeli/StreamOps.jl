@@ -31,7 +31,7 @@ mutable struct TimeSum{TTime,TValue,TPeriod,interval_mode} <: StreamOperation
 end
 
 # tell executor to always sync time with this operation
-StreamOperationTimeSync(::TimeSum) = true
+OperationTimeSync(::TimeSum) = true
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.

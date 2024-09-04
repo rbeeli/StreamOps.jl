@@ -8,7 +8,7 @@ include("graph/params_bindings.jl")
 include("graph/InputBinding.jl")
 include("graph/StreamNode.jl")
 include("graph/StreamGraph.jl")
-include("graph/StreamGraphState.jl")
+include("graph/GraphState.jl")
 
 include("executors/ExecutionEvent.jl")
 include("executors/HistoricExecutor.jl")

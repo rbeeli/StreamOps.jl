@@ -43,7 +43,7 @@ mutable struct TimeBuffer{TTime,TValue,TPeriod,interval_mode,copy} <: StreamOper
 end
 
 # tell executor to always sync time with this operation
-StreamOperationTimeSync(::TimeBuffer) = true
+OperationTimeSync(::TimeBuffer) = true
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.

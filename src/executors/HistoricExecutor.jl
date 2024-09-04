@@ -5,7 +5,7 @@ An executor that runs a stream computation graph in historic mode.
 Historic means that the executor processes timestamped events that occurred in the past
 at full speed, i.e., the current time of the executor is updated to the timestamp of the event.
 """
-mutable struct HistoricExecutor{TStates,TTime} <: StreamGraphExecutor
+mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     graph::StreamGraph
     states::TStates
     start_time::TTime

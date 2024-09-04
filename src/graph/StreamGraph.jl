@@ -292,7 +292,7 @@ function _gen_execute_call!(
     source_node::StreamNode,
     node::StreamNode,
     debug::Bool
-) where {TExecutor<:StreamGraphExecutor}
+) where {TExecutor<:GraphExecutor}
     tmp_exprs = Expr[]
 
     # Input bindings
@@ -459,7 +459,7 @@ function _gen_execute_call!(
     nothing
 end
 
-function compile_source!(executor::TExecutor, source_node::StreamNode; debug=false) where {TExecutor<:StreamGraphExecutor}
+function compile_source!(executor::TExecutor, source_node::StreamNode; debug=false) where {TExecutor<:GraphExecutor}
     graph = executor.graph
     nodes = graph.nodes
 
@@ -496,7 +496,7 @@ function compile_source!(executor::TExecutor, source_node::StreamNode; debug=fal
     # Generate time sync calls.
     # If a node is only an input-node for any node in the current
     # subgraph, it would otherwise not update its time and drop old records.
-    time_sync_nodes = filter(n -> StreamOperationTimeSync(n.operation), nodes)
+    time_sync_nodes = filter(n -> OperationTimeSync(n.operation), nodes)
     time_sync_exprs = Expr[]
     for node in time_sync_nodes
         push!(time_sync_exprs, :(

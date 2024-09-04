@@ -5,14 +5,14 @@ Returns whether the given node has been executed
 for the current adapter (source) call.
 With each adapter call, the executed state of all nodes is reset to false.
 """
-function did_execute(states::T, node::StreamNode) where {T<:StreamGraphState}
+function did_execute(states::T, node::StreamNode) where {T<:GraphState}
     @inbounds states.__executed[node.index]
 end
 
 """
 Returns the field names and types of the given states struct.
 """
-function info(states::T) where {T<:StreamGraphState}
+function info(states::T) where {T<:GraphState}
     type = typeof(states)
     OrderedDict(zip(fieldnames(type), fieldtypes(type)))
 end
@@ -23,7 +23,7 @@ of computation steps.
 """
 function compile_states_struct(::Type{TTime}, graph::StreamGraph; debug::Bool=false) where {TTime}
     # Generate a unique name for the struct
-    struct_name = Symbol("StreamGraphState_$(time_ns())")
+    struct_name = Symbol("GraphState_$(time_ns())")
 
     field_defs = []
     ctor_args = []
@@ -42,7 +42,7 @@ function compile_states_struct(::Type{TTime}, graph::StreamGraph; debug::Bool=fa
         push!(ctor_args, :(zero($TTime)))
     end
 
-    struct_def = Expr(:struct, true, :($(struct_name) <: StreamOps.StreamGraphState), Expr(:block, field_defs...))
+    struct_def = Expr(:struct, true, :($(struct_name) <: StreamOps.GraphState), Expr(:block, field_defs...))
     eval(struct_def)
 
     ctor_def = :($struct_name() = $struct_name($(ctor_args...)))
