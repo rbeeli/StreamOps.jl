@@ -30,7 +30,7 @@ mutable struct TimeSum{TTime,TValue,TPeriod,interval_mode} <: StreamOperation
     end
 end
 
-# tell executor to always sync time with this operation
+# tell executor to always sync time with this operation (update_time!)
 OperationTimeSync(::TimeSum) = true
 
 # Internal function to remove old entries from the buffer,

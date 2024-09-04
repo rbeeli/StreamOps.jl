@@ -42,7 +42,7 @@ mutable struct TimeBuffer{TTime,TValue,TPeriod,interval_mode,copy} <: StreamOper
     end
 end
 
-# tell executor to always sync time with this operation
+# tell executor to always sync time with this operation (update_time!)
 OperationTimeSync(::TimeBuffer) = true
 
 # Internal function to remove old entries from the buffer,
