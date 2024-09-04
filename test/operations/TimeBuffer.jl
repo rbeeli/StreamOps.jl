@@ -12,7 +12,7 @@ using Dates
 
         @test rolling.operation.copy
         @test is_valid(values.operation) # != nothing -> is_valid
-        @test !is_valid(rolling.operation)
+        @test is_valid(rolling.operation) # valid_if_empty=true is default
 
         output = sink!(g, :output, Buffer{Vector{Int}}())
 
@@ -43,15 +43,15 @@ using Dates
         @test length(output.operation.buffer) == 5
     end
 
-    @testset "copy=true :open (excluded)" begin
+    @testset "copy=true :open (excluded) valid_if_empty=false" begin
         g = StreamGraph()
 
         values = source!(g, :values, out=Int, init=0)
-        rolling = op!(g, :rolling, TimeBuffer{DateTime,Int}(Minute(2), :open, copy=true), out=Vector{Int})
+        rolling = op!(g, :rolling, TimeBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=false), out=Vector{Int})
 
         @test rolling.operation.copy
         @test is_valid(values.operation) # != nothing -> is_valid
-        @test !is_valid(rolling.operation)
+        @test !is_valid(rolling.operation) # valid_if_empty=false
 
         output = sink!(g, :output, Buffer{Vector{Int}}())
 
@@ -90,8 +90,6 @@ using Dates
         rolling = op!(g, :rolling, TimeBuffer{DateTime,Int}(Minute(2), :closed; copy=false), out=AbstractVector{Int})
 
         @test !rolling.operation.copy
-        @test is_valid(values.operation) # != nothing -> is_valid
-        @test !is_valid(rolling.operation)
 
         output = sink!(g, :output, Buffer{AbstractVector{Int}}())
 
@@ -112,6 +110,51 @@ using Dates
         @test output.operation.buffer[1] == [1]
         @test typeof(output.operation.buffer[1]) !== Vector{Int}
         @test length(output.operation.buffer) == 1
+    end
+
+    @testset "multi-sources time update" begin
+        """
+        Ensure that time buffer is kept up-to-date when multiple sources are used,
+        i.e. ensure time is updated when the source with the latest time is updated,
+        even if time buffer itself is not called directly.
+        """
+
+        g = StreamGraph()
+
+        source!(g, :timer, out=DateTime, init=DateTime(0))
+        source!(g, :values, out=Int, init=0)
+
+        op!(g, :rolling, TimeBuffer{DateTime,Int}(Day(2), :closed; copy=true), out=Vector{Int})
+        bind!(g, :values, :rolling)
+
+        sink!(g, :output, Buffer{Tuple{DateTime,Vector{Int}}}())
+        bind!(g, (:timer, :rolling), :output,
+            params_bind=TupleParams(), call_policies=IfExecuted(g[:timer]))
+
+        exe = compile_historic_executor(DateTime, g; debug=!true)
+
+        start = DateTime(2000, 1, 1)
+        stop = DateTime(2000, 1, 7)
+        adapters = [
+            TimerAdapter{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start + Second(1)),
+            IterableAdapter(exe, g[:values], [
+                (DateTime(2000, 1, 1), 1),
+                (DateTime(2000, 1, 2), 2),
+                (DateTime(2000, 1, 6), 6),
+            ])
+        ]
+        run_simulation!(exe, adapters, start, stop)
+
+        buffer = g[:output].operation.buffer
+        # display(buffer)
+
+        @test length(buffer) == 6
+        @test buffer[1][2] == [1]
+        @test buffer[2][2] == [1, 2]
+        @test buffer[3][2] == [2]
+        @test buffer[4][2] == Int[] # :rolling not directly called, but executor calls update_time!
+        @test buffer[5][2] == Int[] # :rolling not directly called, but executor calls update_time!
+        @test buffer[6][2] == [6]
     end
 
 end

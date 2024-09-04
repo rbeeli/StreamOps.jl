@@ -27,12 +27,15 @@ mutable struct TimeCount{TTime,TPeriod,interval_mode} <: StreamOperation
     end
 end
 
+# tell executor to always sync time with this operation
+StreamOperationTimeSync(::TimeCount) = true
+
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.
-@inline function _remove_old!(op::TimeCount{TTime,TPeriod,:open}, current_time::TTime) where {TTime,TPeriod}
+@inline function update_time!(op::TimeCount{TTime,TPeriod,:open}, current_time::TTime) where {TTime,TPeriod}
     cutoff_time = current_time - op.time_period
     removed = 0
-    while !isempty(op.time_buffer) && (first(op.time_buffer) <= cutoff_time)
+    while !isempty(op.time_buffer) && first(op.time_buffer) <= cutoff_time
         popfirst!(op.time_buffer)
         removed += 1
     end
@@ -42,10 +45,10 @@ end
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is included.
-@inline function _remove_old!(op::TimeCount{TTime,TPeriod,:closed}, current_time::TTime) where {TTime,TPeriod}
+@inline function update_time!(op::TimeCount{TTime,TPeriod,:closed}, current_time::TTime) where {TTime,TPeriod}
     cutoff_time = current_time - op.time_period
     removed = 0
-    while !isempty(op.time_buffer) && (first(op.time_buffer) < cutoff_time)
+    while !isempty(op.time_buffer) && first(op.time_buffer) < cutoff_time
         popfirst!(op.time_buffer)
         removed += 1
     end
@@ -60,8 +63,8 @@ end
     push!(op.time_buffer, current_time)
     op.current_count += 1
 
-    # Remove old entries outside the time window
-    _remove_old!(op, current_time)
+    # # Remove old entries outside of time window
+    # update_time!(op, current_time)
 
     nothing
 end

@@ -422,10 +422,10 @@ function _gen_execute_call!(
                 states.$state_time_field = time(executor)
                 @inbounds states.__executed[$(node.index)] = true
                 try
-                    println("Executing node [$($(label(node)))] at time $(time(executor))...")
+                    println("Executing node [$($("$(label(node))"))] at time $(time(executor))...")
                     $call_expr
                 catch e
-                    println("Error in node [$($(label(node)))] with input nodes [$(join(input_names, ","))] at time $(time(executor)): $e")
+                    println("Error in node [$($("$(label(node))"))] with input nodes [$(join(input_names, ","))] at time $(time(executor)): $e")
                     throw(e)
                 end
             end
@@ -472,31 +472,49 @@ function compile_source!(executor::TExecutor, source_node::StreamNode; debug=fal
 
     # Generate code for each node in the subgraph.
     # The code is generated in a block of expressions that are executed sequentially.
-    node_expressions = Expr[]
+    exec_exprs = Expr[]
 
     # reset all __executed flags
-    push!(node_expressions, :(fill!(states.__executed, false)))
+    push!(exec_exprs, :(fill!(states.__executed, false)))
 
     # Save value in source storage
-    push!(node_expressions, :(states.$(source_node.field_name)(executor, event_value)))
+    push!(exec_exprs, :(states.$(source_node.field_name)(executor, event_value)))
 
     # Mark the source node as executed
-    push!(node_expressions, :(@inbounds states.__executed[$(source_node.index)] = true))
+    push!(exec_exprs, :(@inbounds states.__executed[$(source_node.index)] = true))
 
+    # Execute all expressions for the subgraph
     for (i, node_index) in enumerate(subgraph_indices[2:end])
         node = nodes[node_index]
 
         debug && println("\nNode [$(node.label)] index=$(node.index) output_type=$(node.output_type)")
 
         # Generate code to execute the node
-        _gen_execute_call!(executor, node_expressions, source_node, node, debug)
+        _gen_execute_call!(executor, exec_exprs, source_node, node, debug)
     end
+
+    # Generate time sync calls.
+    # If a node is only an input-node for any node in the current
+    # subgraph, it would otherwise not update its time and drop old records.
+    time_sync_nodes = filter(n -> StreamOperationTimeSync(n.operation), nodes)
+    time_sync_exprs = Expr[]
+    for node in time_sync_nodes
+        push!(time_sync_exprs, :(
+            # if !(@inbounds states.__executed[$(node.index)])
+            update_time!(states.$(node.field_name), time(executor))
+            # end
+        ))
+    end
+    debug && println("\nTime sync nodes: $(join([label(node) for node in time_sync_nodes], ","))")
 
     func_expression = :(function (executor::$TExecutor, event_value::$(source_node.output_type))
         states = executor.states
 
+        # Time synchronization
+        $(time_sync_exprs...)
+
         # Execute all expressions for the subgraph
-        $(node_expressions...)
+        $(exec_exprs...)
 
         nothing
     end)

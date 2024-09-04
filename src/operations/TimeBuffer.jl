@@ -23,27 +23,33 @@ mutable struct TimeBuffer{TTime,TValue,TPeriod,interval_mode,copy} <: StreamOper
     const time_period::TPeriod
     const interval_mode::Symbol
     const copy::Bool
+    const valid_if_empty::Bool
 
     function TimeBuffer{TTime,TValue}(
         time_period::TPeriod,
         interval_mode::Symbol,
         ;
-        copy::Bool=false
+        copy::Bool=false,
+        valid_if_empty::Bool=true
     ) where {TTime,TValue,TPeriod}
         new{TTime,TValue,TPeriod,interval_mode,copy}(
             Vector{TTime}(),
             Vector{TValue}(),
             time_period,
             interval_mode,
-            copy)
+            copy,
+            valid_if_empty)
     end
 end
 
+# tell executor to always sync time with this operation
+StreamOperationTimeSync(::TimeBuffer) = true
+
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.
-@inline function _remove_old!(op::TimeBuffer{TTime,TValue,TPeriod,:open}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(op::TimeBuffer{TTime,TValue,TPeriod,:open}, current_time::TTime) where {TTime,TValue,TPeriod}
     cutoff_time = current_time - op.time_period
-    while !isempty(op.time_buffer) & (first(op.time_buffer) <= cutoff_time)
+    while !isempty(op.time_buffer) && first(op.time_buffer) <= cutoff_time
         popfirst!(op.time_buffer)
         popfirst!(op.value_buffer)
     end
@@ -52,9 +58,9 @@ end
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is included.
-@inline function _remove_old!(op::TimeBuffer{TTime,TValue,TPeriod,:closed}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(op::TimeBuffer{TTime,TValue,TPeriod,:closed}, current_time::TTime) where {TTime,TValue,TPeriod}
     cutoff_time = current_time - op.time_period
-    while !isempty(op.time_buffer) & (first(op.time_buffer) < cutoff_time)
+    while !isempty(op.time_buffer) && first(op.time_buffer) < cutoff_time
         popfirst!(op.time_buffer)
         popfirst!(op.value_buffer)
     end
@@ -68,14 +74,14 @@ end
     push!(op.time_buffer, current_time)
     push!(op.value_buffer, value)
 
-    # Remove old entries outside the time window
-    _remove_old!(op, current_time)
+    # # Remove old entries outside of time window
+    # update_time!(op, current_time)
 
     nothing
 end
 
 @inline function is_valid(op::TimeBuffer{TTime,TValue,TPeriod}) where {TTime,TValue,TPeriod}
-    !isempty(op.value_buffer)
+    op.valid_if_empty || !isempty(op.value_buffer)
 end
 
 @inline function get_state(op::TimeBuffer{TTime,TValue,TPeriod,interval_mode,false}) where {TTime,TValue,TPeriod,interval_mode}

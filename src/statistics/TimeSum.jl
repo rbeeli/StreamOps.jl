@@ -30,11 +30,14 @@ mutable struct TimeSum{TTime,TValue,TPeriod,interval_mode} <: StreamOperation
     end
 end
 
+# tell executor to always sync time with this operation
+StreamOperationTimeSync(::TimeSum) = true
+
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.
-@inline function _remove_old!(op::TimeSum{TTime,TValue,TPeriod,:open}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(op::TimeSum{TTime,TValue,TPeriod,:open}, current_time::TTime) where {TTime,TValue,TPeriod}
     cutoff_time = current_time - op.time_period
-    while !isempty(op.time_buffer) && (first(op.time_buffer) <= cutoff_time)
+    while !isempty(op.time_buffer) && first(op.time_buffer) <= cutoff_time
         op.current_sum -= popfirst!(op.value_buffer)
         popfirst!(op.time_buffer)
     end
@@ -43,9 +46,9 @@ end
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is included.
-@inline function _remove_old!(op::TimeSum{TTime,TValue,TPeriod,:closed}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(op::TimeSum{TTime,TValue,TPeriod,:closed}, current_time::TTime) where {TTime,TValue,TPeriod}
     cutoff_time = current_time - op.time_period
-    while !isempty(op.time_buffer) && (first(op.time_buffer) < cutoff_time)
+    while !isempty(op.time_buffer) && first(op.time_buffer) < cutoff_time
         op.current_sum -= popfirst!(op.value_buffer)
         popfirst!(op.time_buffer)
     end
@@ -60,8 +63,8 @@ end
     push!(op.value_buffer, value)
     op.current_sum += value
 
-    # Remove old entries outside the time window
-    _remove_old!(op, current_time)
+    # # Remove old entries outside of time window
+    # update_time!(op, current_time)
 
     nothing
 end
