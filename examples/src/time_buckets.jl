@@ -22,7 +22,7 @@ flush = op!(g, :flush, Func{Vector{Float64}}((exe, dt, buf) -> begin
 end, Float64[]), out=Vector{Float64})
 
 # Create sink nodes
-output1 = sink!(g, :output1, Func((exe, x) -> println("output at time $(time(exe)): $x")))
+output1 = sink!(g, :output1, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)
 bind!(g, values, buffer)

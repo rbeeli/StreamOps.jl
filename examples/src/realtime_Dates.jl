@@ -20,7 +20,7 @@ timer = source!(g, :timer, out=DateTime, init=DateTime(0))
 # Create sink node
 output = sink!(g, :output, Func((exe, x) -> begin
     println("output at time $(Dates.format(time(exe), "yyyy-mm-ddTHH:MM:SS.sss")): $x")
-end))
+end, nothing))
 
 # Create edges between nodes (define the computation graph)
 bind!(g, timer, output)

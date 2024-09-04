@@ -11,7 +11,7 @@ g = StreamGraph()
 
 values = source!(g, :values, out=Float64, init=0.0)
 rolling = op!(g, :rolling, WindowBuffer{Float64}(3), out=AbstractVector{Float64})
-output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x")))
+output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)
 bind!(g, values, rolling)

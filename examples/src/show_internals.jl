@@ -15,7 +15,7 @@ g = StreamGraph()
 source_timer = source!(g, :source_timer, out=DateTime, init=DateTime(0))
 
 # Create sink nodes
-output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x")))
+output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 counter = sink!(g, :counter, Counter())
 
 # Create edges between nodes (define the computation graph)

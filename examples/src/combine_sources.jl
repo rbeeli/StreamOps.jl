@@ -19,7 +19,7 @@ values4 = source!(g, :values4, out=Float64, init=NaN)
 combine = op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)), out=NTuple{4,Any})
 
 # Create sink node
-output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x")))
+output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)
 bind!(g, (values1, values2, values3, values4), combine)

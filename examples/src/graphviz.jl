@@ -21,8 +21,8 @@ combine = op!(g, :combine, Func{Tuple{Float64,Float64}}((exe, x, y) -> (x, y), (
 final_multiply = op!(g, :final_multiply, Func{Tuple{Float64,Float64}}((exe, tuple, src2, src3) -> tuple .* src2 .+ src3, (0.0, 0.0)); out=Tuple{Float64,Float64})
 
 # Create sink nodes
-output1 = sink!(g, :output1, Func((exe, x) -> println("output #1 at time $(time(exe)): $x")))
-output2 = sink!(g, :output2, Func((exe, x) -> println("output #2 at time $(time(exe)): $x")))
+output1 = sink!(g, :output1, Func((exe, x) -> println("output #1 at time $(time(exe)): $x"), nothing))
+output2 = sink!(g, :output2, Func((exe, x) -> println("output #2 at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)
 bind!(g, source1, square)

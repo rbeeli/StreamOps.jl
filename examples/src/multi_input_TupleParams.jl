@@ -13,11 +13,11 @@ timer = source!(g, :timer, out=DateTime, init=DateTime(0))
 values = source!(g, :values, out=Float64, init=0.0)
 
 # Create sink node with named parameters
-func = Func((exe, tpl) -> println("output at time $(time(exe)): $tpl"))
-output = sink!(g, :output, func, params_bind=TupleParams())
+func = Func((exe, tpl) -> println("output at time $(time(exe)): $tpl"), nothing)
+output = sink!(g, :output, func)
 
 # Create edges between nodes (define the computation graph)
-bind!(g, (timer, values), output)
+bind!(g, (timer, values), output, params_bind=TupleParams())
 
 # Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)
