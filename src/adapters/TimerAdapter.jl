@@ -26,15 +26,21 @@ function setup!(timer::TimerAdapter{TPeriod,TTime}, executor::HistoricExecutor{T
     nothing
 end
 
-function advance!(timer::TimerAdapter{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function process_event!(
+    adapter::TimerAdapter{TPeriod,TTime},
+    executor::HistoricExecutor{TStates,TTime},
+    event::ExecutionEvent{TTime}
+) where {TPeriod,TStates,TTime}
     # Execute subgraph based on current value
-    timer.adapter_func(executor, timer.current_time)
+    adapter.adapter_func(executor, adapter.current_time)
+    nothing
+end
 
+function advance!(timer::TimerAdapter{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     # Schedule next event
     timer.current_time += timer.interval
     if timer.current_time <= end_time(executor)
         push!(executor.event_queue, ExecutionEvent(timer.current_time, timer.node.index))
     end
-
     nothing
 end

@@ -70,22 +70,25 @@ function run_simulation!(
             event = pop!(executor.event_queue)
             index = event.source_index
             timestamp = event.timestamp
+            adapter = @inbounds adapters[index]
 
-            # Check if before start time
-            if timestamp < start_time
-                error("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $(start_time)")
-            end
-
-            # Check if past end time
+            # Stop loop if reached end time
             if timestamp > end_time
                 break
             end
 
-            # Update the current time of the executor
-            executor.current_time = timestamp
+            # Ignore records before start time
+            if timestamp >= start_time
+                # Update the current time of the executor
+                executor.current_time = timestamp
 
-            # Execute
-            adapter = @inbounds adapters[index]
+                # Execute the event
+                process_event!(adapter, executor, event)
+            # else
+                # println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
+            end
+
+            # Schedule next event
             advance!(adapter, executor)
         end
 
