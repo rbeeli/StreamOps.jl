@@ -2,16 +2,17 @@
 A function operation that applies an arbitrary function to the input stream
 and stores the result as the last value.
 """
-mutable struct Func{T,TFunc} <: StreamOperation
+mutable struct Func{T,TFunc,TIsValid} <: StreamOperation
     const func::TFunc
+    const is_valid::TIsValid
     last_value::T
 
-    function Func(func::TFunc, init::T) where {T,TFunc}
-        new{T,TFunc}(func, init)
+    function Func(func::TFunc, init::T; is_valid::TIsValid=!isnothing) where {T,TFunc,TIsValid}
+        new{T,TFunc,TIsValid}(func, is_valid, init)
     end
 
-    function Func{T}(func::TFunc, init::T) where {T,TFunc}
-        new{T,TFunc}(func, init)
+    function Func{T}(func::TFunc, init::T; is_valid::TIsValid=!isnothing) where {T,TFunc,TIsValid}
+        new{T,TFunc,TIsValid}(func, is_valid, init)
     end
 
     # function Func(func::TFunc) where {TFunc}
@@ -35,6 +36,7 @@ end
 # end
 
 @inline is_valid(op::Func{Nothing}) = true
-@inline is_valid(op::Func{T}) where {T} = !isnothing(op.last_value)
+# @inline is_valid(op::Func{T}) where {T} = !isnothing(op.last_value)
+@inline is_valid(op::Func{T,TFunc,TIsValid}) where {T,TFunc,TIsValid} = op.is_valid(op.last_value)
 
 @inline get_state(op::Func{T}) where {T} = op.last_value

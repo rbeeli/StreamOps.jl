@@ -4,16 +4,17 @@ using Dates
 
 # To run a subset of tests, call Pkg.test as follows:
 #
-#   import Pkg;Pkg.test("StreamOps", test_args=["bind.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["adapters/IterableAdapter.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeBuffer.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeSampler.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["operations/WindowBuffer.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["operations/Print.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["statistics/Mean.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["statistics/EWZScore.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["statistics/FractionalDiff.jl"])
-#   import Pkg;Pkg.test("StreamOps", test_args=["statistics/Skewness.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["bind.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["adapters/IterableAdapter.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeBuffer.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeSampler.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["operations/WindowBuffer.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["operations/Func.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["operations/Print.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["statistics/Mean.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["statistics/EWZScore.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["statistics/FractionalDiff.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["statistics/Skewness.jl"])
 
 requested_tests = ARGS
 
