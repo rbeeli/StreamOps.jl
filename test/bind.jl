@@ -4,7 +4,7 @@ using StreamOps
 
 @testset verbose = true "bind! input nodes" begin
 
-    @testset "default params_bind=PositionParams" begin
+    @testset "default bind_as=PositionParams" begin
         g = StreamGraph()
 
         source!(g, :values, out=Float64, init=0.0)
@@ -13,7 +13,7 @@ using StreamOps
         bind!(g, :values, :output)
 
         @test length(g[:output].input_bindings) == 1
-        @test g[:output].input_bindings[1].params_bind isa PositionParams
+        @test g[:output].input_bindings[1].bind_as isa PositionParams
     end
 
     @testset "single default call_policies=[IfExecuted(:all),IfValid(:all)]" begin
@@ -119,7 +119,7 @@ using StreamOps
                 called += 1
             end, nothing))
 
-        bind!(g, (timer, values), output, call_policies=Always(), params_bind=NamedParams())
+        bind!(g, (timer, values), output, call_policies=Always(), bind_as=NamedParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
@@ -153,8 +153,8 @@ using StreamOps
                 called += 1
             end, nothing))
 
-        bind!(g, (timer, values), output, call_policies=Always(), params_bind=NamedParams())
-        bind!(g, (values2, values3), output, call_policies=Always(), params_bind=NamedParams())
+        bind!(g, (timer, values), output, call_policies=Always(), bind_as=NamedParams())
+        bind!(g, (values2, values3), output, call_policies=Always(), bind_as=NamedParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
@@ -196,7 +196,7 @@ using StreamOps
                 called += 1
             end, nothing))
 
-        bind!(g, (timer, values), output, call_policies=Always(), params_bind=PositionParams())
+        bind!(g, (timer, values), output, call_policies=Always(), bind_as=PositionParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
@@ -227,7 +227,7 @@ using StreamOps
                 called += 1
             end, nothing))
 
-        bind!(g, (timer, values), output, call_policies=Always(), params_bind=TupleParams())
+        bind!(g, (timer, values), output, call_policies=Always(), bind_as=TupleParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
@@ -260,8 +260,8 @@ using StreamOps
                 called += 1
             end, nothing))
 
-        bind!(g, (timer, values), output, call_policies=Always(), params_bind=TupleParams())
-        bind!(g, (values2, values3), output, call_policies=Always(), params_bind=TupleParams())
+        bind!(g, (timer, values), output, call_policies=Always(), bind_as=TupleParams())
+        bind!(g, (values2, values3), output, call_policies=Always(), bind_as=TupleParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
@@ -306,8 +306,8 @@ using StreamOps
                 called += 1
             end, nothing))
 
-        bind!(g, (values2, values3), output, call_policies=Always(), params_bind=TupleParams())
-        bind!(g, (timer, values), output, call_policies=Always(), params_bind=NamedParams())
+        bind!(g, (values2, values3), output, call_policies=Always(), bind_as=TupleParams())
+        bind!(g, (timer, values), output, call_policies=Always(), bind_as=NamedParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 

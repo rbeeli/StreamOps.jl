@@ -30,7 +30,7 @@ using StreamOps
         bind!(g, :timer, :never_valid)
 
         sink!(g, :output, Buffer{Tuple{DateTime,DateTime}}())
-        bind!(g, (:timer, :never_valid), :output, params_bind=TupleParams())
+        bind!(g, (:timer, :never_valid), :output, bind_as=TupleParams())
 
         # check default call policies
         @test length(g[:output].input_bindings[1].call_policies) == 2
@@ -69,7 +69,7 @@ using StreamOps
         source!(g, :b, out=Union{Nothing,Int}, init=nothing)
 
         sink!(g, :output, Buffer{NTuple{2,Int}}())
-        bind!(g, (:a, :b), :output, call_policies=IfValid(:a, :b), params_bind=TupleParams())
+        bind!(g, (:a, :b), :output, call_policies=IfValid(:a, :b), bind_as=TupleParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
@@ -104,7 +104,7 @@ using StreamOps
         source!(g, :b, out=Union{Nothing,Int}, init=nothing)
 
         sink!(g, :output, Buffer{NTuple{2,Int}}())
-        bind!(g, (:a, :b), :output, call_policies=IfValid(:all), params_bind=TupleParams())
+        bind!(g, (:a, :b), :output, call_policies=IfValid(:all), bind_as=TupleParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
@@ -139,7 +139,7 @@ using StreamOps
         source!(g, :b, out=Union{Nothing,Int}, init=nothing)
 
         sink!(g, :output, Buffer{NTuple{2,Union{Nothing,Int}}}())
-        bind!(g, (:a, :b), :output, call_policies=IfValid(:any), params_bind=TupleParams())
+        bind!(g, (:a, :b), :output, call_policies=IfValid(:any), bind_as=TupleParams())
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 

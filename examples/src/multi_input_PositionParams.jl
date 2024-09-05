@@ -19,7 +19,7 @@ func = Func((exe, timer, values) -> println("output at time $(time(exe)): timer=
 output = sink!(g, :output, func)
 
 # Create edges between nodes (define the computation graph)
-bind!(g, (timer, values), output, params_bind=PositionParams())
+bind!(g, (timer, values), output, bind_as=PositionParams())
 
 # Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)

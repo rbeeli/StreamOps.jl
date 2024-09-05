@@ -157,14 +157,14 @@ function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
     policies
 end
 
-function bind!(graph::StreamGraph, input_nodes, to::Symbol; call_policies=nothing, params_bind=PositionParams())
+function bind!(graph::StreamGraph, input_nodes, to::Symbol; call_policies=nothing, bind_as=PositionParams())
     if input_nodes isa Symbol
         input_nodes = [input_nodes]
     end
-    bind!(graph, get_node.(Ref(graph), input_nodes), get_node(graph, to), call_policies=call_policies, params_bind=params_bind)
+    bind!(graph, get_node.(Ref(graph), input_nodes), get_node(graph, to), call_policies=call_policies, bind_as=bind_as)
 end
 
-function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=nothing, params_bind=PositionParams())
+function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=nothing, bind_as=PositionParams())
     call_policies isa CallPolicy && (call_policies = [call_policies])
 
     if input_nodes isa StreamNode
@@ -187,7 +187,7 @@ function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=no
     policies = _get_call_policies(input_nodes, call_policies)
 
     # Create binding of single input node to target node 
-    binding = InputBinding(input_nodes, policies, params_bind)
+    binding = InputBinding(input_nodes, policies, bind_as)
     push!(to.input_bindings, binding)
     for input in input_nodes
         push!(graph.deps[to.index], input.index)
@@ -253,7 +253,7 @@ function _gen_params_exprs(node)
     input_exprs = Expr[]
 
     for input_binding in node.input_bindings
-        if input_binding.params_bind isa PositionParams
+        if input_binding.bind_as isa PositionParams
             # positional parameters
             # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
             for input in input_binding.input_nodes
@@ -261,7 +261,7 @@ function _gen_params_exprs(node)
                 push!(input_names, String(input.field_name))
             end
             # call_expr = :(states.$(node.field_name)(executor, $(input_exprs...)))
-        elseif input_binding.params_bind isa NamedParams
+        elseif input_binding.bind_as isa NamedParams
             # keyword parameters
             # generates tuples of (input_name, input_value)
             # input_exprs = ((input.node.field_name, :(get_state(states.$(input.node.field_name)))) for input in node.inputs)
@@ -270,7 +270,7 @@ function _gen_params_exprs(node)
                 push!(input_names, String(input.field_name))
             end
             # call_expr = Expr(:call, :(states.$(node.field_name)), :(executor), (Expr(:kw, k, v) for (k, v) in input_exprs)...)
-        elseif input_binding.params_bind isa TupleParams
+        elseif input_binding.bind_as isa TupleParams
             # pack all input values into single tuple parameter
             # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
             tuple_exprs = Expr[]
@@ -281,7 +281,7 @@ function _gen_params_exprs(node)
             push!(input_exprs, :(($(tuple_exprs...),)))
             # call_expr = :(states.$(node.field_name)(executor, ($(input_exprs...),)))
         else
-            error("Unsupported parameter binding for node [$(label(node))]: $(typeof(input_binding.params_bind))")
+            error("Unsupported parameter binding for node [$(label(node))]: $(typeof(input_binding.bind_as))")
         end
     end
 
