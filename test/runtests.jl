@@ -16,6 +16,7 @@ using Dates
 # import Pkg;Pkg.test("StreamOps", test_args=["statistics/EWZScore.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["statistics/FractionalDiff.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["statistics/Skewness.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["statistics/TimeMean.jl"])
 
 requested_tests = ARGS
 

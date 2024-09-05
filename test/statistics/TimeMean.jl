@@ -4,14 +4,37 @@ using Dates
 
 @testset verbose = true "TimeMean" begin
 
-    @testset "default" begin
+    @testset "defaults" begin
         g = StreamGraph()
 
         values = source!(g, :values, out=Int, init=0)
         rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed), out=Float64)
 
-        @test is_valid(values.operation) # != nothing -> is_valid
+        # empty by default valid with value "empty_value=NaN"
+        @test is_valid(rolling.operation)
+        @test isnan(get_state(rolling.operation))
+    end
+
+    @testset "empty_valid=false" begin
+        g = StreamGraph()
+
+        values = source!(g, :values, out=Int, init=0)
+        rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed, empty_valid=false), out=Float64)
+
         @test !is_valid(rolling.operation)
+    end
+
+    @testset "rolling mean with gaps" begin
+        g = StreamGraph()
+
+        values = source!(g, :values, out=Int, init=0)
+        rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed), out=Float64)
+
+        @test is_valid(values.operation)
+
+        # empty by default valid with value "empty_value=NaN"
+        @test is_valid(rolling.operation)
+        @test isnan(get_state(rolling.operation))
 
         output = sink!(g, :output, Buffer{Float64}())
 
@@ -40,6 +63,53 @@ using Dates
         @test output.operation.buffer[4] == sum([2, 3, 4]) / 3.0
         @test output.operation.buffer[5] == sum([10]) / 1.0
         @test length(output.operation.buffer) == 5
+    end
+
+    @testset "use timer to fetch value" begin
+        g = StreamGraph()
+
+        source!(g, :timer, out=DateTime, init=DateTime(0))
+        source!(g, :values, out=Int, init=0)
+
+        op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Day(2), :closed), out=Float64)
+        bind!(g, :values, :rolling)
+
+        @test is_valid(g[:values].operation)
+
+        # empty by default valid with value "empty_value=NaN"
+        @test is_valid(g[:rolling].operation)
+        @test isnan(get_state(g[:rolling].operation))
+
+        output = sink!(g, :output, Buffer{Tuple{DateTime,Float64}}())
+        bind!(g, (:timer, :rolling), :output, call_policies=IfExecuted(:timer), bind_as=TupleParams())
+
+        exe = compile_historic_executor(DateTime, g; debug=!true)
+
+        start = DateTime(2000, 1, 1)
+        stop = DateTime(2000, 1, 8)
+        adapters = [
+            TimerAdapter{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start),
+            IterableAdapter(exe, g[:values], [
+                (DateTime("2000-01-01T00:00:00"), 1),
+                (DateTime("2000-01-02T00:00:00"), 2),
+                (DateTime("2000-01-03T00:00:00"), 3),
+                (DateTime("2000-01-04T00:00:00"), 4),
+                (DateTime("2000-01-08T00:00:00"), 8)
+            ])
+        ]
+        run_simulation!(exe, adapters, start, stop)
+
+        buffer = output.operation.buffer
+        @test buffer[1][1] == DateTime("2000-01-01T00:00:00")
+        @test isnan(buffer[1][2])
+        @test buffer[2] == (DateTime("2000-01-02T00:00:00"), 1.0)
+        @test buffer[3] == (DateTime("2000-01-03T00:00:00"), 1.5)
+        @test buffer[4] == (DateTime("2000-01-04T00:00:00"), 2.5)
+        @test buffer[5] == (DateTime("2000-01-05T00:00:00"), 3.5)
+        @test buffer[6] == (DateTime("2000-01-06T00:00:00"), 4.0)
+        @test buffer[7][1] == DateTime("2000-01-07T00:00:00")
+        @test isnan(buffer[7][2])
+        @test buffer[8] == (DateTime("2000-01-08T00:00:00"), 8.0)
     end
 
 end

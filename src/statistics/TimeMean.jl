@@ -16,17 +16,24 @@ mutable struct TimeMean{TTime,TIn,TOut,TPeriod,interval_mode} <: StreamOperation
     const value_buffer::Vector{TIn}
     const time_period::TPeriod
     const interval_mode::Symbol
+    const empty_valid::Bool
+    const empty_value::TOut
     current_sum::TIn
 
     function TimeMean{TTime,TIn,TOut}(
         time_period::TPeriod,
         interval_mode::Symbol
+        ;
+        empty_valid::Bool=true,
+        empty_value::TOut=TOut(NaN)
     ) where {TTime,TIn,TOut,TPeriod}
         new{TTime,TIn,TOut,TPeriod,interval_mode}(
             Vector{TTime}(),
             Vector{TIn}(),
             time_period,
             interval_mode,
+            empty_valid,
+            empty_value,
             zero(TIn))
     end
 end
@@ -71,11 +78,12 @@ end
 end
 
 @inline function is_valid(op::TimeMean{TTime,TIn,TOut,TPeriod}) where {TTime,TIn,TOut,TPeriod}
-    !isempty(op.value_buffer)
+    op.empty_valid || !isempty(op.value_buffer)
 end
 
 @inline function get_state(op::TimeMean{TTime,TIn,TOut,TPeriod,interval_mode})::TOut where {TTime,TIn,TOut,TPeriod,interval_mode}
-    op.current_sum / length(op.value_buffer)
+    n = length(op.value_buffer)
+    n == 0 ? op.empty_value : op.current_sum / n
 end
 
 @inline function Base.empty!(op::TimeMean{TTime,TIn}) where {TTime,TIn}

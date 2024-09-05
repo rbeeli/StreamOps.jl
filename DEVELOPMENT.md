@@ -11,4 +11,5 @@
 
 - IfExecuted with inputs from different sources should NOT be possible, will never be executed
 
-- how to get rid of invokelatest for dynamically compiled graph states struct?
+- Should there be validation policies to check before executing a node,
+  independent of the inputs? (e.g. check if all inputs are valid)
