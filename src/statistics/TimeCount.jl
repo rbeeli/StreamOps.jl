@@ -73,7 +73,7 @@ end
     !isempty(op.time_buffer)
 end
 
-@inline function get_state(op::TimeCount{TTime,TPeriod,interval_mode}) where {TTime,TPeriod,interval_mode}
+@inline function get_state(op::TimeCount{TTime,TPeriod,interval_mode})::Int where {TTime,TPeriod,interval_mode}
     op.current_count
 end
 

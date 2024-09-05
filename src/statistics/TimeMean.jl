@@ -1,41 +1,42 @@
 """
-Maintains the sum of values over a time period.
+Maintains the mean of values over a time period.
 The time period type must be compatible with the `TTime` type used by the executor.
 
 # Type Parameters
 - `TTime`: The type used for timestamps (e.g., DateTime, Float64)
-- `TValue`: The type of values being summed
+- `TIn`: The type of values being averages
+- `TOut`: The type of the mean value
 
 # Arguments
-- `time_period::Period`: The time period to maintain the sum for (e.g., Second(30), Minute(5)).
+- `time_period::Period`: The time period to maintain the average for (e.g., Second(30), Minute(5)).
 - `interval_mode::Symbol`: Either :open or :closed. Open means the oldest value is excluded, closed means it is included.
 """
-mutable struct TimeSum{TTime,TValue,TPeriod,interval_mode} <: StreamOperation
+mutable struct TimeMean{TTime,TIn,TOut,TPeriod,interval_mode} <: StreamOperation
     const time_buffer::Vector{TTime}
-    const value_buffer::Vector{TValue}
+    const value_buffer::Vector{TIn}
     const time_period::TPeriod
     const interval_mode::Symbol
-    current_sum::TValue
+    current_sum::TIn
 
-    function TimeSum{TTime,TValue}(
+    function TimeMean{TTime,TIn,TOut}(
         time_period::TPeriod,
         interval_mode::Symbol
-    ) where {TTime,TValue,TPeriod}
-        new{TTime,TValue,TPeriod,interval_mode}(
+    ) where {TTime,TIn,TOut,TPeriod}
+        new{TTime,TIn,TOut,TPeriod,interval_mode}(
             Vector{TTime}(),
-            Vector{TValue}(),
+            Vector{TIn}(),
             time_period,
             interval_mode,
-            zero(TValue))
+            zero(TIn))
     end
 end
 
 # tell executor to always sync time with this operation (update_time!)
-OperationTimeSync(::TimeSum) = true
+OperationTimeSync(::TimeMean) = true
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.
-@inline function update_time!(op::TimeSum{TTime,TValue,TPeriod,:open}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(op::TimeMean{TTime,TIn,TOut,TPeriod,:open}, current_time::TTime) where {TTime,TIn,TOut,TPeriod}
     cutoff_time = current_time - op.time_period
     while !isempty(op.time_buffer) && first(op.time_buffer) <= cutoff_time
         op.current_sum -= popfirst!(op.value_buffer)
@@ -46,7 +47,7 @@ end
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is included.
-@inline function update_time!(op::TimeSum{TTime,TValue,TPeriod,:closed}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(op::TimeMean{TTime,TIn,TOut,TPeriod,:closed}, current_time::TTime) where {TTime,TIn,TOut,TPeriod}
     cutoff_time = current_time - op.time_period
     while !isempty(op.time_buffer) && first(op.time_buffer) < cutoff_time
         op.current_sum -= popfirst!(op.value_buffer)
@@ -55,7 +56,7 @@ end
     nothing
 end
 
-@inline function (op::TimeSum{TTime,TValue,TPeriod,interval_mode})(executor, value) where {TTime,TValue,TPeriod,interval_mode}
+@inline function (op::TimeMean{TTime,TIn,TOut,TPeriod,interval_mode})(executor, value) where {TTime,TIn,TOut,TPeriod,interval_mode}
     current_time = time(executor)
 
     # Add new entry
@@ -69,17 +70,17 @@ end
     nothing
 end
 
-@inline function is_valid(op::TimeSum{TTime,TValue,TPeriod}) where {TTime,TValue,TPeriod}
+@inline function is_valid(op::TimeMean{TTime,TIn,TOut,TPeriod}) where {TTime,TIn,TOut,TPeriod}
     !isempty(op.value_buffer)
 end
 
-@inline function get_state(op::TimeSum{TTime,TValue,TPeriod,interval_mode}) where {TTime,TValue,TPeriod,interval_mode}
-    op.current_sum
+@inline function get_state(op::TimeMean{TTime,TIn,TOut,TPeriod,interval_mode})::TOut where {TTime,TIn,TOut,TPeriod,interval_mode}
+    op.current_sum / length(op.value_buffer)
 end
 
-@inline function Base.empty!(op::TimeSum{TTime,TValue}) where {TTime,TValue}
+@inline function Base.empty!(op::TimeMean{TTime,TIn}) where {TTime,TIn}
     empty!(op.time_buffer)
     empty!(op.value_buffer)
-    op.current_sum = zero(TValue)
+    op.current_sum = zero(TIn)
     nothing
 end

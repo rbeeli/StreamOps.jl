@@ -40,8 +40,9 @@ include("statistics/EWMean.jl")
 include("statistics/EWVariance.jl")
 include("statistics/EWZScore.jl")
 include("statistics/FractionalDiff.jl")
-include("statistics/TimeSum.jl")
 include("statistics/TimeCount.jl")
+include("statistics/TimeSum.jl")
+include("statistics/TimeMean.jl")
 
 # export all
 for n in names(@__MODULE__; all=true)
