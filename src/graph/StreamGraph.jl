@@ -142,8 +142,7 @@ function sink!(graph::StreamGraph, label::Symbol, operation::StreamOperation)
     _make_node!(graph, false, true, operation, Nothing, label)
 end
 
-function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
-    # Call policies
+function _get_call_policies(graph::StreamGraph, input_nodes::Vector{StreamNode}, call_policies)
     policies = Vector{CallPolicy}()
     if isnothing(call_policies) || isempty(call_policies)
         # Default call policies
@@ -157,15 +156,51 @@ function _get_call_policies(input_nodes::Vector{StreamNode}, call_policies)
     policies
 end
 
-function bind!(graph::StreamGraph, input_nodes, to::Symbol; call_policies=nothing, bind_as=PositionParams())
+# function _get_validation_policies(graph::StreamGraph, input_nodes::Vector{StreamNode}, val_policies)
+#     policies = Vector{CallPolicy}()
+#     if isnothing(val_policies) || isempty(val_policies)
+#         # Default validation policies
+#         push!(policies, IfValid(:all))
+#     else
+#         append!(policies, val_policies)
+#     end
+#     all(p -> p isa CallPolicy, policies) || error("Invalid validation policy passed in parameter 'val_policies'")
+#     any(p -> p isa Never, policies) && length(policies) > 1 && error("Never policy cannot be combined with other policies")
+#     policies
+# end
+
+function bind!(
+    graph::StreamGraph,
+    input_nodes,
+    to::Symbol
+    ;
+    call_policies=nothing,
+    val_policies=nothing,
+    bind_as=PositionParams()
+)
     if input_nodes isa Symbol
         input_nodes = [input_nodes]
     end
-    bind!(graph, get_node.(Ref(graph), input_nodes), get_node(graph, to), call_policies=call_policies, bind_as=bind_as)
+    bind!(
+        graph,
+        get_node.(Ref(graph), input_nodes),
+        get_node(graph, to),
+        call_policies=call_policies,
+        val_policies=val_policies,
+        bind_as=bind_as)
 end
 
-function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=nothing, bind_as=PositionParams())
+function bind!(
+    graph::StreamGraph,
+    input_nodes,
+    to::StreamNode
+    ;
+    call_policies=nothing,
+    val_policies=nothing,
+    bind_as=PositionParams()
+)
     call_policies isa CallPolicy && (call_policies = [call_policies])
+    val_policies isa CallPolicy && (val_policies = [call_policies])
 
     if input_nodes isa StreamNode
         input_nodes = [input_nodes]
@@ -184,10 +219,10 @@ function bind!(graph::StreamGraph, input_nodes, to::StreamNode; call_policies=no
     end
 
     # Call policies
-    policies = _get_call_policies(input_nodes, call_policies)
+    policies1 = _get_call_policies(graph, input_nodes, call_policies)
 
     # Create binding of single input node to target node 
-    binding = InputBinding(input_nodes, policies, bind_as)
+    binding = InputBinding(input_nodes, policies1, bind_as)
     push!(to.input_bindings, binding)
     for input in input_nodes
         push!(graph.deps[to.index], input.index)
