@@ -255,31 +255,24 @@ function _gen_params_exprs(node)
     for input_binding in node.input_bindings
         if input_binding.bind_as isa PositionParams
             # positional parameters
-            # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
             for input in input_binding.input_nodes
                 push!(input_exprs, :(get_state(states.$(input.field_name))))
                 push!(input_names, String(input.field_name))
             end
-            # call_expr = :(states.$(node.field_name)(executor, $(input_exprs...)))
         elseif input_binding.bind_as isa NamedParams
-            # keyword parameters
-            # generates tuples of (input_name, input_value)
-            # input_exprs = ((input.node.field_name, :(get_state(states.$(input.node.field_name)))) for input in node.inputs)
+            # keyword parameters - generates tuples of (input_name, input_value)
             for input in input_binding.input_nodes
                 push!(input_exprs, Expr(:kw, input.field_name, :(get_state(states.$(input.field_name)))))
                 push!(input_names, String(input.field_name))
             end
-            # call_expr = Expr(:call, :(states.$(node.field_name)), :(executor), (Expr(:kw, k, v) for (k, v) in input_exprs)...)
         elseif input_binding.bind_as isa TupleParams
             # pack all input values into single tuple parameter
-            # input_exprs = (:(get_state(states.$(input.node.field_name))) for input in node.inputs)
             tuple_exprs = Expr[]
             for input in input_binding.input_nodes
                 push!(tuple_exprs, :(get_state(states.$(input.field_name))))
                 push!(input_names, String(input.field_name))
             end
             push!(input_exprs, :(($(tuple_exprs...),)))
-            # call_expr = :(states.$(node.field_name)(executor, ($(input_exprs...),)))
         else
             error("Unsupported parameter binding for node [$(label(node))]: $(typeof(input_binding.bind_as))")
         end
@@ -343,7 +336,6 @@ function _gen_execute_call!(
                 has_active_bindings = true
             elseif call_policy isa IfValid
                 # Only trigger the node if the connected node has a valid output
-                # push!(call_policy_exprs, :(is_valid(states.$(binding.node.field_name))))
                 if call_policy.nodes == :any
                     # Any of the connected nodes must have a valid output
                     valid_exprs = [:(is_valid(states.$(node.field_name))) for node in binding_nodes]
@@ -361,7 +353,6 @@ function _gen_execute_call!(
                 has_active_bindings = true
             elseif call_policy isa IfInvalid
                 # Only trigger the node if the connected node has an invalid output
-                # push!(call_policy_exprs, :(!is_valid(states.$(binding.node.field_name))))
                 if call_policy.nodes == :any
                     # Any of the connected nodes must have an invalid output
                     invalid_exprs = [:(!is_valid(states.$(node.field_name))) for node in binding_nodes]
@@ -448,19 +439,7 @@ function _gen_execute_call!(
             end
         )
     end
-    # push!(node_expressions, :($res_name = $result_expr))
     push!(tmp_exprs, :($result_expr))
-
-    # # Store execution result in state variables
-    # # push!(node_expressions, :(if !isnothing($res_name)
-    # push!(tmp_exprs, :(
-    #     # if !isnothing($res_name)
-    #         # # update state value of node
-    #         # states.$(node.field_name) = $res_name
-    #         # update state time of node
-    #         states.$state_time_field = time(executor)
-    #     # end
-    # ))
 
     # append all expressions to the node expressions
     append!(node_expressions, tmp_exprs)
