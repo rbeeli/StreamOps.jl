@@ -108,6 +108,8 @@ function _make_node!(
     output_type::Type,
     label::Symbol
 )
+    label ∈ [:all, :any] && error("Invalid node label '$label'")
+
     # Array index of node in graph
     index = length(graph.nodes) + 1
 
@@ -293,6 +295,7 @@ function _gen_execute_call!(
     node::StreamNode,
     debug::Bool
 ) where {TExecutor<:GraphExecutor}
+    g = executor.graph
     tmp_exprs = Expr[]
 
     # Input bindings
@@ -313,8 +316,11 @@ function _gen_execute_call!(
                 # Never trigger the node by this binding
                 break
             elseif call_policy isa IfSource
+                policy_node = g[call_policy.source_node]
+                is_source(policy_node) || error("Node [$(call_policy.source_node)] not a source node")
+
                 # Only trigger the node if execution was initiated by a given source node
-                if call_policy.source_node != source_node
+                if policy_node != source_node
                     return nothing # Skip execution
                 end
                 has_active_bindings = true
@@ -330,7 +336,8 @@ function _gen_execute_call!(
                     push!(call_policy_exprs, foldl((e, b) -> begin push!(e.args, b); e end, executed_exprs, init=Expr(:&&)))
                 else
                     # Specific nodes must have been executed
-                    executed_exprs = [:(@inbounds states.__executed[$(node.index)]) for node in call_policy.nodes]
+                    policy_nodes = [get_node(g, node) for node in call_policy.nodes]
+                    executed_exprs = [:(@inbounds states.__executed[$(node.index)]) for node in policy_nodes]
                     push!(call_policy_exprs, foldl((e, b) -> begin push!(e.args, b); e end, executed_exprs, init=Expr(:&&)))
                 end
                 has_active_bindings = true
@@ -347,7 +354,8 @@ function _gen_execute_call!(
                     push!(call_policy_exprs, foldl((e, b) -> begin push!(e.args, b); e end, valid_exprs, init=Expr(:&&)))
                 else
                     # Specific nodes must have a valid output
-                    valid_exprs = [:(is_valid(states.$(node.field_name))) for node in call_policy.nodes]
+                    policy_nodes = [get_node(g, node) for node in call_policy.nodes]
+                    valid_exprs = [:(is_valid(states.$(node.field_name))) for node in policy_nodes]
                     push!(call_policy_exprs, foldl((e, b) -> begin push!(e.args, b); e end, valid_exprs, init=Expr(:&&)))
                 end
                 has_active_bindings = true
@@ -364,7 +372,8 @@ function _gen_execute_call!(
                     push!(call_policy_exprs, foldl((e, b) -> begin push!(e.args, b); e end, invalid_exprs, init=Expr(:&&)))
                 else
                     # Specific nodes must have an invalid output
-                    invalid_exprs = [:(!is_valid(states.$(node.field_name))) for node in call_policy.nodes]
+                    policy_nodes = [get_node(g, node) for node in call_policy.nodes]
+                    invalid_exprs = [:(!is_valid(states.$(node.field_name))) for node in policy_nodes]
                     push!(call_policy_exprs, foldl((e, b) -> begin push!(e.args, b); e end, invalid_exprs, init=Expr(:&&)))
                 end
                 has_active_bindings = true

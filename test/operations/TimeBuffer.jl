@@ -129,7 +129,7 @@ using Dates
 
         sink!(g, :output, Buffer{Tuple{DateTime,Vector{Int}}}())
         bind!(g, (:timer, :rolling), :output,
-            params_bind=TupleParams(), call_policies=IfExecuted(g[:timer]))
+            params_bind=TupleParams(), call_policies=IfExecuted(:timer))
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 

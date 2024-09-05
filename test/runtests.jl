@@ -5,6 +5,7 @@ using Dates
 # To run a subset of tests, call Pkg.test as follows:
 #
 # import Pkg;Pkg.test("StreamOps", test_args=["bind.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["call_policies.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["adapters/IterableAdapter.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeBuffer.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeSampler.jl"])
@@ -23,6 +24,7 @@ if isempty(requested_tests)
 
     include("graph.jl")
     include("bind.jl")
+    include("call_policies.jl")
 
     include("operations/Func.jl")
     include("operations/Print.jl")

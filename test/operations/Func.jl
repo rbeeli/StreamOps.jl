@@ -108,7 +108,6 @@ using StreamOps
         ]
         run_simulation!(exe, adapters, start, stop)
 
-        display(output.operation.buffer)
         @test output.operation.buffer == [2, 3, 3]
     end
 
