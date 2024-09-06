@@ -120,5 +120,5 @@ end
             return (num / denom) * op.var
         end
     end
-    return Out(NaN)
+    Out(NaN)
 end
