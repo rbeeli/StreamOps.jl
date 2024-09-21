@@ -6,28 +6,32 @@ Calculates the simple moving variance with fixed window size in O(1) time.
 # Arguments
 - `window_size`: The number of observations to consider in the moving window.
 - `corrected=true`: Use Bessel's correction to compute the unbiased sample variance.
+- `std=false`: Compute the standard deviation instead of the variance by taking the square root of the variance.
 
 # References
 https://web.archive.org/web/20181222175223/http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
 https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
 """
-mutable struct Variance{In<:Number,Out<:Number,corrected} <: StreamOperation
+mutable struct Variance{In<:Number,Out<:Number,corrected,std} <: StreamOperation
     const buffer::CircularBuffer{In}
     const window_size::Int
     const corrected::Bool
+    const std::Bool
     M1::Out
     M2::Out
 
     function Variance{In,Out}(
         window_size::Int
         ;
-        corrected::Bool=true
+        corrected::Bool=true,
+        std::Bool=false,
     ) where {In<:Number,Out<:Number}
         @assert window_size > 0 "Window size must be greater than 0"
-        new{In,Out,corrected}(
+        new{In,Out,corrected,std}(
             CircularBuffer{In}(window_size),
             window_size,
             corrected,
+            std,
             zero(Out), # M1
             zero(Out), # M2
         )
@@ -63,12 +67,22 @@ end
     isfull(op.buffer)
 end
 
-# biased
-@inline function get_state(op::Variance{In,Out,false})::Out where {In,Out}
+# biased variance
+@inline function get_state(op::Variance{In,Out,false,false})::Out where {In,Out}
     op.M2 / op.window_size
 end
 
-# unbiased
-@inline function get_state(op::Variance{In,Out,true})::Out where {In,Out}
+# biased std. deviation
+@inline function get_state(op::Variance{In,Out,false,true})::Out where {In,Out}
+    sqrt(op.M2 / op.window_size)
+end
+
+# unbiased variance
+@inline function get_state(op::Variance{In,Out,true,false})::Out where {In,Out}
     op.M2 / (op.window_size - 1)
+end
+
+# unbiased std. deviation
+@inline function get_state(op::Variance{In,Out,true,true})::Out where {In,Out}
+    sqrt(op.M2 / (op.window_size - 1))
 end
