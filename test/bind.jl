@@ -138,6 +138,38 @@ using StreamOps
         @test called == 6 # 3 values * 2 sources
     end
 
+    @testset "NoBind" begin
+        g = StreamGraph()
+
+        timer = source!(g, :timer, out=DateTime, init=DateTime(0))
+        values = source!(g, :values, out=Float64, init=0.0)
+
+        called = 0
+        output = sink!(g, :output, Func((exe, values) -> begin
+                @assert values isa Float64
+                called += 1
+            end, nothing))
+
+        bind!(g, timer, output, call_policies=Always(), bind_as=NoBind())
+        bind!(g, values, output, call_policies=Always(), bind_as=PositionParams())
+
+        exe = compile_historic_executor(DateTime, g; debug=!true)
+
+        start = DateTime(2000, 1, 1)
+        stop = DateTime(2000, 1, 3)
+        adapters = [
+            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            IterableAdapter(exe, values, [
+                (DateTime(2000, 1, 1), 1.0),
+                (DateTime(2000, 1, 2), 2.0),
+                (DateTime(2000, 1, 3), 4.0),
+            ]),
+        ]
+        run_simulation!(exe, adapters, start, stop)
+
+        @test called == 6 # 3 values * 2 sources
+    end
+
     @testset "NamedParams 2x" begin
         g = StreamGraph()
 

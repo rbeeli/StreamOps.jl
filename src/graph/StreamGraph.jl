@@ -308,6 +308,9 @@ function _gen_params_exprs(node)
                 push!(input_names, String(input.field_name))
             end
             push!(input_exprs, :(($(tuple_exprs...),)))
+        elseif input_binding.bind_as isa NoBind
+            # no input binding
+            nothing
         else
             error("Unsupported parameter binding for node [$(label(node))]: $(typeof(input_binding.bind_as))")
         end

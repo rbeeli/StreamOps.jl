@@ -15,3 +15,9 @@ The input nodes are passed as a single tuple parameter.
 """
 struct TupleParams <: ParamsBinding
 end
+
+"""
+The input node is not passed as a parameter.
+"""
+struct NoBind <: ParamsBinding
+end
