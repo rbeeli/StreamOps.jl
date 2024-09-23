@@ -1,6 +1,6 @@
 """
 This example demonstrates how to capture a rolling window of values
-using a `TimeBuffer` node, which maintains a buffer of values within a time window
+using a `TimeWindowBuffer` node, which maintains a buffer of values within a time window
 instead of a fixed number of values.
 """;
 
@@ -10,7 +10,7 @@ using Dates
 g = StreamGraph()
 
 values = source!(g, :values, out=Float64, init=0.0)
-rolling = op!(g, :rolling, TimeBuffer{DateTime,Float64}(Day(3), :closed), out=AbstractVector{Float64})
+rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Float64}(Day(3), :closed), out=AbstractVector{Float64})
 output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)

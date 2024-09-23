@@ -26,7 +26,7 @@ include("operations/Lag.jl")
 include("operations/Buffer.jl")
 include("operations/ForwardFill.jl")
 include("operations/WindowBuffer.jl")
-include("operations/TimeBuffer.jl")
+include("operations/TimeWindowBuffer.jl")
 include("operations/TimeSampler.jl")
 
 include("statistics/Counter.jl")

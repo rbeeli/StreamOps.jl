@@ -13,7 +13,7 @@ function run()
 
     g = StreamGraph()
     values = source!(g, :values, out=Timestamp64, init=Timestamp64(0))
-    rolling = op!(g, :rolling, TimeBuffer{Timestamp64,Timestamp64}(wnd, :closed), out=AbstractVector{Timestamp64})
+    rolling = op!(g, :rolling, TimeWindowBuffer{Timestamp64,Timestamp64}(wnd, :closed), out=AbstractVector{Timestamp64})
     dts_node = op!(g, :dts_node, Func((exe, x) -> time(exe), Timestamp64(0)), out=Timestamp64)
     counts_node = op!(g, :counts_node, Func((exe, x) -> Float32(length(x)), 0.0f32), out=Float32)
     sink_dts = sink!(g, :sink_dts, Buffer(dts))

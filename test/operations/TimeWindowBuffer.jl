@@ -2,13 +2,13 @@ using Test
 using StreamOps
 using Dates
 
-@testset verbose = true "TimeBuffer" begin
+@testset verbose = true "TimeWindowBuffer" begin
 
     @testset "copy=true :closed (included)" begin
         g = StreamGraph()
 
         values = source!(g, :values, out=Int, init=0)
-        rolling = op!(g, :rolling, TimeBuffer{DateTime,Int}(Minute(2), :closed, copy=true), out=Vector{Int})
+        rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed, copy=true), out=Vector{Int})
 
         @test rolling.operation.copy
         @test is_valid(values.operation) # != nothing -> is_valid
@@ -47,7 +47,7 @@ using Dates
         g = StreamGraph()
 
         values = source!(g, :values, out=Int, init=0)
-        rolling = op!(g, :rolling, TimeBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=false), out=Vector{Int})
+        rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=false), out=Vector{Int})
 
         @test rolling.operation.copy
         @test is_valid(values.operation) # != nothing -> is_valid
@@ -87,7 +87,7 @@ using Dates
         g = StreamGraph()
 
         values = source!(g, :values, out=Int, init=0)
-        rolling = op!(g, :rolling, TimeBuffer{DateTime,Int}(Minute(2), :closed; copy=false), out=AbstractVector{Int})
+        rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed; copy=false), out=AbstractVector{Int})
 
         @test !rolling.operation.copy
 
@@ -124,7 +124,7 @@ using Dates
         source!(g, :timer, out=DateTime, init=DateTime(0))
         source!(g, :values, out=Int, init=0)
 
-        op!(g, :rolling, TimeBuffer{DateTime,Int}(Day(2), :closed; copy=true), out=Vector{Int})
+        op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Day(2), :closed; copy=true), out=Vector{Int})
         bind!(g, :values, :rolling)
 
         sink!(g, :output, Buffer{Tuple{DateTime,Vector{Int}}}())
