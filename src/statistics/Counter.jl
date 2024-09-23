@@ -18,3 +18,8 @@ end
 @inline function get_state(op::Counter{T})::T where {T}
     op.counter
 end
+
+@inline function reset!(op::Counter{T}) where {T}
+    op.counter = zero(T)
+    nothing
+end

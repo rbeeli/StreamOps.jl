@@ -17,4 +17,7 @@ using StreamOps
     ]
     run_simulation!(exe, adapters, start, stop)
     @test get_state(counter.operation) == 4 # 0, 5, 10, 15
+
+    reset!(counter.operation)
+    @test get_state(counter.operation) == 0
 end
