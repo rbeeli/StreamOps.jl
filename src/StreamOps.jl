@@ -19,6 +19,7 @@ include("adapters/TimerAdapter.jl")
 include("adapters/RealTimerAdapter.jl")
 include("adapters/IterableAdapter.jl")
 
+include("operations/Constant.jl")
 include("operations/Func.jl")
 include("operations/Print.jl")
 include("operations/Copy.jl")

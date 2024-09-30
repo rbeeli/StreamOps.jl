@@ -7,17 +7,8 @@ using Dates
 # import Pkg;Pkg.test("StreamOps", test_args=["bind.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["call_policies.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["adapters/IterableAdapter.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeWindowBuffer.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeSampler.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["operations/WindowBuffer.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["operations/TimeTupleBuffer.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["operations/Func.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["operations/Print.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["statistics/Mean.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["statistics/EWZScore.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["statistics/FractionalDiff.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["operations/Constant.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["statistics/Skewness.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["statistics/TimeMean.jl"])
 
 requested_tests = ARGS
 
@@ -29,6 +20,7 @@ if isempty(requested_tests)
     include("call_policies.jl")
 
     include("operations/Func.jl")
+    include("operations/Constant.jl")
     include("operations/Print.jl")
     include("operations/Buffer.jl")
     include("operations/TimeTupleBuffer.jl")

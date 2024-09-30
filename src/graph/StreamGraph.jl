@@ -91,10 +91,12 @@ function verify_graph(graph::StreamGraph)
         end
     end
 
-    if !all(visited)
+    # only nodes of type Constant{T} are allowed to have no input bindings
+    unvisited = findall(i -> !visited[i] & !isa(graph.nodes[i].operation, Constant), eachindex(visited))
+    if any(unvisited)
         msg = "Following nodes are not reachable from the source nodes, i.e. computation graph is not weakly connected: "
-        for ix in findall(.!visited)
-            msg *= "\n[$ix] $(graph.nodes[ix].label)"
+        for ix in unvisited
+            msg *= "\n [$ix] $(graph.nodes[ix].label)"
         end
         error(msg)
     end
