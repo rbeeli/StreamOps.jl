@@ -45,6 +45,7 @@ if isempty(requested_tests)
     include("statistics/TimeCount.jl")
     include("statistics/TimeSum.jl")
     include("statistics/TimeMean.jl")
+    include("statistics/SavitzkyGolay.jl")
 
     include("adapters/IterableAdapter.jl")
 else

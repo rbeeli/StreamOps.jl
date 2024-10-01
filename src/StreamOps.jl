@@ -45,6 +45,7 @@ include("statistics/FractionalDiff.jl")
 include("statistics/TimeCount.jl")
 include("statistics/TimeSum.jl")
 include("statistics/TimeMean.jl")
+include("statistics/SavitzkyGolay.jl")
 
 # export all
 for n in names(@__MODULE__; all=true)
