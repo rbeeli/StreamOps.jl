@@ -28,7 +28,6 @@ using DataStructures
         @test length(exe.event_queue) == 1
         evt = pop!(exe.event_queue)
         @test evt.timestamp == DateTime(2000, 1, 1)
-        @test evt.source_index == 1
 
         # second event is executed
         advance!(adapter, exe)
@@ -36,7 +35,6 @@ using DataStructures
         @test length(exe.event_queue) == 1
         evt = pop!(exe.event_queue)
         @test evt.timestamp == DateTime(2000, 1, 2)
-        @test evt.source_index == 1
 
         # third event is executed
         advance!(adapter, exe)
@@ -44,7 +42,6 @@ using DataStructures
         @test length(exe.event_queue) == 1
         evt = pop!(exe.event_queue)
         @test evt.timestamp == DateTime(2000, 1, 3)
-        @test evt.source_index == 1
 
         # no more events
         advance!(adapter, exe)

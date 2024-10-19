@@ -19,12 +19,12 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), input)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         @test output.operation.buffer[1] == input # same contents
         @test output.operation.buffer[1] !== input # different objects (copy)
     end
@@ -45,12 +45,12 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), input)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         @test output.operation.buffer[1] == input # same contents
         @test output.operation.buffer[1] !== input # different objects (copy)
     end

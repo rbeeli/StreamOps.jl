@@ -18,13 +18,13 @@ using StreamOps
         vals = [2, 3, -1, 0, 3]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test output.operation.buffer == [4, 9, 1, 0, 9]
     end
@@ -44,13 +44,13 @@ using StreamOps
         vals = [2, 3, -1, 0, 3]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test output.operation.buffer == [4, 9, 1, 0, 9]
     end
@@ -72,13 +72,13 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 2)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test is_valid(buffer.operation)
 
@@ -100,13 +100,13 @@ using StreamOps
         vals = [2, 3, -1, 0, 3]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test output.operation.buffer == [2, 3, 3]
     end

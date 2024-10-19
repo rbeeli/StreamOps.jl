@@ -20,14 +20,14 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
+        ])
 
-        run_simulation!(exe, adapters, start, stop)
+        run_simulation!(exe, start, stop)
         @test output.operation.buffer == expected
     end
 
@@ -48,14 +48,14 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
+        ])
 
-        run_simulation!(exe, adapters, start, stop)
+        run_simulation!(exe, start, stop)
         @test output.operation.buffer == expected
     end
 
@@ -76,14 +76,14 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
+        ])
 
-        run_simulation!(exe, adapters, start, stop)
+        run_simulation!(exe, start, stop)
         @test output.operation.buffer == expected
     end
 

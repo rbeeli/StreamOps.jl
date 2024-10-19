@@ -55,10 +55,10 @@ using LinearAlgebra
             exe = compile_historic_executor(DateTime, g; debug=!true)
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-            adapters = [
+            set_adapters!(exe, [
                 HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
-            ]
-            run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            ])
+            run_simulation!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 1)
         end
     end
@@ -76,10 +76,10 @@ using LinearAlgebra
             exe = compile_historic_executor(DateTime, g; debug=!true)
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-            adapters = [
+            set_adapters!(exe, [
                 HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
-            ]
-            run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            ])
+            run_simulation!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 2)
         end
     end
@@ -97,10 +97,10 @@ using LinearAlgebra
             exe = compile_historic_executor(DateTime, g; debug=!true)
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-            adapters = [
+            set_adapters!(exe, [
                 HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
-            ]
-            run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            ])
+            run_simulation!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 3)
         end
     end

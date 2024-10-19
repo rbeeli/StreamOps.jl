@@ -125,15 +125,15 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
             ]),
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -157,15 +157,15 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
             ]),
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -192,7 +192,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
@@ -209,8 +209,8 @@ using StreamOps
                 (DateTime(2000, 1, 2), 20.0),
                 (DateTime(2000, 1, 3), 40.0),
             ]),
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test called == 12 # 3 values * 4 sources
     end
@@ -234,15 +234,15 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
             ]),
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -265,15 +265,15 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
             ]),
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -299,7 +299,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
@@ -316,8 +316,8 @@ using StreamOps
                 (DateTime(2000, 1, 2), 20.0),
                 (DateTime(2000, 1, 3), 40.0),
             ]),
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test called == 12 # 3 values * 4 sources
     end
@@ -345,7 +345,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
@@ -362,8 +362,8 @@ using StreamOps
                 (DateTime(2000, 1, 2), 20.0),
                 (DateTime(2000, 1, 3), 40.0),
             ]),
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test called == 12 # 3 values * 4 sources
     end

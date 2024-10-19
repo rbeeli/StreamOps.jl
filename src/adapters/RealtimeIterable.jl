@@ -76,7 +76,7 @@ function worker(adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecut
 
         # If we've reached or passed next_time, schedule the event and calculate the next time
         if time_now >= next_time
-            put!(executor.event_queue, ExecutionEvent(time_now, adapter.node.index))
+            put!(executor.event_queue, ExecutionEvent(time_now, adapter))
             put!(adapter.process_queue, next_item)
             # next item in iterable
             adapter.iterate_state = iterate(adapter.data, (@inbounds adapter.iterate_state[2]))

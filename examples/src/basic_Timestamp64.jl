@@ -26,12 +26,12 @@ function run()
     # Run simulation
     start = Timestamp64(2000, 1, 1)
     stop = Timestamp64(2000, 1, 10)
-    adapters = [
+    set_adapters!(exe, [
         HistoricIterable(exe, g[:values], [
             (Timestamp64(2000, 1, 1), 1.0),
             (Timestamp64(2000, 1, 2), 2.0),
         ])
-    ]
+    ])
     @time run_simulation!(exe, start, stop)
 end
 

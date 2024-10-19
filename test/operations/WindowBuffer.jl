@@ -22,15 +22,15 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # all the same values since it's a view into the buffer
         @test output.operation.buffer[1] == [2, 3, 4]
@@ -57,15 +57,15 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test output.operation.buffer[1] == [1, 2, 3]
         @test output.operation.buffer[2] == [2, 3, 4]

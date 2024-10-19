@@ -12,10 +12,10 @@ using StreamOps
 
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 0, 15)
-    adapters = [
+    set_adapters!(exe, [
         HistoricTimer{DateTime}(exe, timer; interval=Dates.Second(5), start_time=start),
-    ]
-    run_simulation!(exe, adapters, start, stop)
+    ])
+    run_simulation!(exe, start, stop)
     @test get_state(counter.operation) == 4 # 0, 5, 10, 15
 
     reset!(counter.operation)

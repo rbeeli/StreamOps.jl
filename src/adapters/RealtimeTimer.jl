@@ -25,9 +25,9 @@ mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     end
 end
 
-function worker(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function worker(adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     time_now = time(executor)
-    next_time = _calc_next_time(timer, executor)
+    next_time = _calc_next_time(adapter, executor)
 
     while true
         time_now = time(executor)
@@ -36,7 +36,7 @@ function worker(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{
         time_now >= end_time(executor) && break
 
         # Calculate sleep duration
-        sleep_us = Dates.Microsecond(min(next_time - time_now, timer.stop_check_interval))
+        sleep_us = Dates.Microsecond(min(next_time - time_now, adapter.stop_check_interval))
 
         # Wait until next event (or stop flag check)
         # use Libc.systemsleep(secs) instead of Base.sleep(secs) for more accurate sleep time
@@ -44,28 +44,28 @@ function worker(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{
 
         # If we've reached or passed next_time, schedule the event and calculate the next time
         if time_now >= next_time
-            put!(executor.event_queue, ExecutionEvent(time_now, timer.node.index))
-            next_time = _calc_next_time(timer, executor)
+            put!(executor.event_queue, ExecutionEvent(time_now, adapter))
+            next_time = _calc_next_time(adapter, executor)
         end
 
-        # Check if to stop timer
-        timer.stop_flag[] && break
+        # Check if to stop
+        adapter.stop_flag[] && break
     end
 
-    println("RealtimeTimer: Timer [$(timer.node.label)] thread ended")
+    println("RealtimeTimer: Timer [$(adapter.node.label)] thread ended")
 end
 
-function _calc_next_time(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function _calc_next_time(adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     round_origin(
-        time(executor) + timer.interval,
-        timer.interval,
+        time(executor) + adapter.interval,
+        adapter.interval,
         RoundDown,
-        origin=timer.start_time)
+        origin=adapter.start_time)
 end
 
-function run!(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
-    timer.task = Threads.@spawn worker(timer, executor)
-    println("RealtimeTimer: Timer [$(timer.node.label)] thread started")
+function run!(adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+    adapter.task = Threads.@spawn worker(adapter, executor)
+    println("RealtimeTimer: Timer [$(adapter.node.label)] thread started")
     nothing
 end
 
@@ -79,11 +79,11 @@ function process_event!(
     nothing
 end
 
-function destroy!(timer::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime}
-    if !isnothing(timer.task)
-        timer.stop_flag[] = true
-        wait(timer.task) # will also catch and rethrow any exceptions
-        timer.task = nothing
+function destroy!(adapter::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime}
+    if !isnothing(adapter.task)
+        adapter.stop_flag[] = true
+        wait(adapter.task) # will also catch and rethrow any exceptions
+        adapter.task = nothing
     end
     nothing
 end

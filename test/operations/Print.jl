@@ -16,16 +16,16 @@ using Suppressor
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
-        ]
+        ])
         output = @capture_out begin
-            run_simulation!(exe, adapters, start, stop)
+            run_simulation!(exe, start, stop)
         end
         @test output == "1\n2\n3\n4\n"
     end
@@ -42,16 +42,16 @@ using Suppressor
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
-        ]
+        ])
         output = @capture_out begin
-            run_simulation!(exe, adapters, start, stop)
+            run_simulation!(exe, start, stop)
         end
         @test output == "x=1\nx=2\nx=3\nx=4\n"
     end

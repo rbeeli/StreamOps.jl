@@ -22,10 +22,10 @@ using StreamOps
         ]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, input)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         actual = get_state(buffer.operation)
         @test length(actual) == 4
@@ -53,10 +53,10 @@ using StreamOps
         ]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, input)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         
         # output should only be called twice because of min_count=3
         @test get_state(output.operation) == 2
@@ -100,11 +100,11 @@ using StreamOps
         ]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 6)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(2), start_time=start),
             HistoricIterable(exe, values, input)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         @test collected[1] == Tuple{DateTime,Float64}[]
         @test collected[2] == input[1:2]
         @test collected[3] == input[3:4]

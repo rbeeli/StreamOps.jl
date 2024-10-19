@@ -21,13 +21,13 @@ using Statistics
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         for i in window_size:length(vals)
             @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=true)
         end
@@ -50,13 +50,13 @@ using Statistics
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         for i in window_size:length(vals)
             @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=false)
         end
@@ -81,13 +81,13 @@ using Statistics
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test length(output.operation.buffer) == length(expected)
         @test output.operation.buffer ≈ expected
@@ -111,13 +111,13 @@ using Statistics
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         for i in window_size:length(vals)
             @test output.operation.buffer[i-window_size+1] ≈ std(vals[i-window_size+1:i], corrected=true)
         end

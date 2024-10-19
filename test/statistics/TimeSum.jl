@@ -22,7 +22,7 @@ using Dates
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
                 (DateTime(2000, 1, 1, 0, 1, 0), 2),
@@ -30,8 +30,8 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 3, 0), 4),
                 (DateTime(2000, 1, 1, 0, 10, 0), 10)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # values right on the cutoff time are included
         @test output.operation.buffer[1] == sum([1])

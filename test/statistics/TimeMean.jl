@@ -45,7 +45,7 @@ using Dates
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
                 (DateTime(2000, 1, 1, 0, 1, 0), 2),
@@ -53,8 +53,8 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 3, 0), 4),
                 (DateTime(2000, 1, 1, 0, 10, 0), 10)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # values right on the cutoff time are included
         @test output.operation.buffer[1] == sum([1]) / 1.0
@@ -87,7 +87,7 @@ using Dates
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 8)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start),
             HistoricIterable(exe, g[:values], [
                 (DateTime("2000-01-01T00:00:00"), 1),
@@ -96,8 +96,8 @@ using Dates
                 (DateTime("2000-01-04T00:00:00"), 4),
                 (DateTime("2000-01-08T00:00:00"), 8)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = output.operation.buffer
         @test buffer[1][1] == DateTime("2000-01-01T00:00:00")

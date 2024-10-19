@@ -83,9 +83,8 @@ function run_simulation!(
         # Process events in chronological order using a priority queue
         while !isempty(event_queue)
             event = pop!(event_queue)
-            index = event.source_index
             timestamp = event.timestamp
-            adapter = @inbounds adapters[index]
+            adapter = event.adapter
 
             # Stop loop if reached end time
             if timestamp > end_time

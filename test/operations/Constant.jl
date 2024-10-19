@@ -18,13 +18,14 @@ using StreamOps
         vals = [2, 3, -1, 0, 3]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test output.operation.buffer == [999, 999, 999, 999, 999]
     end
@@ -44,13 +45,13 @@ using StreamOps
         vals = [2, 3, -1, 0, 3]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test output.operation.buffer == [999, 999, 999, 999, 999]
     end
@@ -72,13 +73,13 @@ using StreamOps
     #     vals = [2, 3, -1, 0, 3]
     #     start = DateTime(2000, 1, 1)
     #     stop = DateTime(2000, 1, length(vals))
-    #     adapters = [
+    #     set_adapters!(exe, [
     #         HistoricIterable(exe, values, [
     #             (DateTime(2000, 1, i), x)
     #             for (i, x) in enumerate(vals)
     #         ])
-    #     ]
-    #     run_simulation!(exe, adapters, start, stop)
+    #     ])
+    #     run_simulation!(exe, start, stop)
 
     #     println(output.operation.buffer)
     #     # @test output.operation.buffer == [999, 999, 999, 999, 999]

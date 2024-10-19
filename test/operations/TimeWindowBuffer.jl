@@ -23,7 +23,7 @@ using Dates
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
                 (DateTime(2000, 1, 1, 0, 1, 0), 2),
@@ -31,8 +31,8 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 3, 0), 4),
                 (DateTime(2000, 1, 1, 0, 10, 0), 10)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # values right on the cutoff time are included
         @test output.operation.buffer[1] == [1]
@@ -62,7 +62,7 @@ using Dates
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
                 (DateTime(2000, 1, 1, 0, 1, 0), 2),
@@ -70,8 +70,8 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 3, 0), 4),
                 (DateTime(2000, 1, 1, 0, 10, 0), 10)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # values right on the cutoff time are excluded
         @test output.operation.buffer[1] isa Vector{Int}
@@ -100,12 +100,12 @@ using Dates
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 1, 0)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         @test output.operation.buffer[1] == [1]
         @test typeof(output.operation.buffer[1]) !== Vector{Int}
@@ -135,15 +135,15 @@ using Dates
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 7)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start + Second(1)),
             HistoricIterable(exe, g[:values], [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
                 (DateTime(2000, 1, 6), 6),
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         # display(buffer)

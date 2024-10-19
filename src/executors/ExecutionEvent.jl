@@ -1,8 +1,8 @@
-struct ExecutionEvent{TTime}
+struct ExecutionEvent{TTime,TAdapter}
     timestamp::TTime
-    source_index::Int
-    function ExecutionEvent(timestamp::TTime, source_index::Int) where {TTime}
-        new{TTime}(timestamp, source_index)
+    adapter::TAdapter
+    function ExecutionEvent(timestamp::TTime, adapter::TAdapter) where {TTime,TAdapter}
+        new{TTime,TAdapter}(timestamp, adapter)
     end
 end
 

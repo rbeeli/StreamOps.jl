@@ -24,7 +24,7 @@ using Dates
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 8, 0)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, g[:values], [
                 (DateTime("2000-01-01T00:00:00"), 0),
                 (DateTime("2000-01-01T00:00:10"), 10),
@@ -35,8 +35,8 @@ using Dates
                 (DateTime("2000-01-01T00:04:00"), 400),
                 (DateTime("2000-01-01T00:08:00"), 800)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = output.operation.buffer
         display(buffer)
@@ -72,7 +72,7 @@ using Dates
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 8, 0)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, g[:values], [
                 (DateTime("2000-01-01T00:00:00"), 0),   # 00:00:30 next sample (first)
                 (DateTime("2000-01-01T00:00:10"), 10),  # 00:00:30 next sample (skip)
@@ -86,8 +86,8 @@ using Dates
                 (DateTime("2000-01-01T00:04:00"), 400), # 00:04:30 next sample (skip)
                 (DateTime("2000-01-01T00:08:00"), 800)  # 00:08:30 next sample
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = output.operation.buffer
         display(buffer)

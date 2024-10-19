@@ -10,18 +10,18 @@ mutable struct HistoricTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     end
 end
 
-function setup!(timer::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function setup!(adapter::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     # Initialize current time of the timer
-    if timer.current_time < start_time(executor)
-        timer.current_time = start_time(executor)
+    if adapter.current_time < start_time(executor)
+        adapter.current_time = start_time(executor)
     end
 
-    if timer.current_time > end_time(executor)
+    if adapter.current_time > end_time(executor)
         return
     end
 
     # Schedule first event
-    push!(executor.event_queue, ExecutionEvent(timer.current_time, timer.node.index))
+    push!(executor.event_queue, ExecutionEvent(adapter.current_time, adapter))
 
     nothing
 end
@@ -36,11 +36,11 @@ function process_event!(
     nothing
 end
 
-function advance!(timer::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function advance!(adapter::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     # Schedule next event
-    timer.current_time += timer.interval
-    if timer.current_time <= end_time(executor)
-        push!(executor.event_queue, ExecutionEvent(timer.current_time, timer.node.index))
+    adapter.current_time += adapter.interval
+    if adapter.current_time <= end_time(executor)
+        push!(executor.event_queue, ExecutionEvent(adapter.current_time, adapter))
     end
     nothing
 end

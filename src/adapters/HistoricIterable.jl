@@ -31,7 +31,7 @@ function setup!(adapter::HistoricIterable{TData}, executor::HistoricExecutor{TSt
     if !isnothing(adapter.iterate_state)
         # Schedule first record
         timestamp, _ = @inbounds adapter.iterate_state[1]
-        push!(executor.event_queue, ExecutionEvent(timestamp, adapter.node.index))
+        push!(executor.event_queue, ExecutionEvent(timestamp, adapter))
     end
 
     nothing
@@ -53,7 +53,7 @@ function advance!(adapter::HistoricIterable{TData}, executor::HistoricExecutor{T
     adapter.iterate_state = iterate(adapter.data, (@inbounds adapter.iterate_state[2]))
     if !isnothing(adapter.iterate_state)
         timestamp, _ = @inbounds adapter.iterate_state[1]
-        push!(executor.event_queue, ExecutionEvent(timestamp, adapter.node.index))
+        push!(executor.event_queue, ExecutionEvent(timestamp, adapter))
     end
     nothing
 end

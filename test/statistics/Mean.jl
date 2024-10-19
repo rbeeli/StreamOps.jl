@@ -17,7 +17,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 5)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
@@ -25,8 +25,8 @@ using StreamOps
                 (DateTime(2000, 1, 4), 4),
                 (DateTime(2000, 1, 5), 1)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         @test output.operation.buffer ≈ [1, (1 + 2) / 2, (1 + 2 + 3) / 3, (2 + 3 + 4) / 3, (3 + 4 + 1) / 3]
     end
 
@@ -44,7 +44,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 5)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
@@ -52,8 +52,8 @@ using StreamOps
                 (DateTime(2000, 1, 4), 4),
                 (DateTime(2000, 1, 5), 1)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
         @test output.operation.buffer ≈ [(1 + 2 + 3) / 3, (2 + 3 + 4) / 3, (3 + 4 + 1) / 3]
     end
 

@@ -32,6 +32,11 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     end
 end
 
+# Fake adapter to indicate a wake-up call for executor
+struct WakeUpAdapter <: SourceAdapter
+end
+const WAKE_UP_ADAPTER = WakeUpAdapter();
+
 """
 Returns the current system time in UTC, i.e. real (wall-clock) time.
 """
@@ -97,7 +102,7 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}; start_time::TT
 
                 # Wake-up call if no events in queue
                 if !isready(executor.event_queue)
-                    put!(executor.event_queue, ExecutionEvent(time(executor), -1))
+                    put!(executor.event_queue, ExecutionEvent(time(executor), WAKE_UP_ADAPTER))
                 end
             end
         catch e
@@ -118,8 +123,8 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}; start_time::TT
             while true
                 # wait for next event
                 event = take!(executor.event_queue)
-                index = event.source_index
                 timestamp = event.timestamp
+                adapter = event.adapter
 
                 # Check if past end time
                 if timestamp > end_time
@@ -128,15 +133,14 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}; start_time::TT
                 end
 
                 # Process event if not wake-up call
-                if index != -1
+                if !isa(adapter, WakeUpAdapter)
                     # Check if before start time
                     if timestamp < start_time
-                        println("RealtimeExecutor: Dropping event from source [$(get_node_label(executor.graph, index))] at time $timestamp before start time $(start_time)")
+                        println("RealtimeExecutor: Dropping event from source [$(label(adapter.node))] at time $timestamp before start time $(start_time)")
                         continue
                     end
 
                     # Execute source function
-                    adapter = @inbounds adapters[index]
                     process_event!(adapter, executor, event)
                 end
             end

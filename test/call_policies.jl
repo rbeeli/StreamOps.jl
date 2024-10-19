@@ -53,10 +53,10 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         @test length(buffer) == 0
@@ -75,7 +75,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, g[:a], [
                 (DateTime(2000, 1, 1), nothing),
                 (DateTime(2000, 1, 2), nothing),
@@ -88,8 +88,8 @@ using StreamOps
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         @test length(buffer) == 2
@@ -110,7 +110,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, g[:a], [
                 (DateTime(2000, 1, 1), nothing),
                 (DateTime(2000, 1, 2), nothing),
@@ -123,8 +123,8 @@ using StreamOps
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         @test length(buffer) == 2
@@ -145,7 +145,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, g[:a], [
                 (DateTime(2000, 1, 1), nothing),
                 (DateTime(2000, 1, 2), nothing),
@@ -158,8 +158,8 @@ using StreamOps
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         
@@ -186,10 +186,10 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         
@@ -213,11 +213,11 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
             HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         
@@ -240,11 +240,11 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
             HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
 
@@ -267,11 +267,11 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
-        adapters = [
+        set_adapters!(exe, [
             HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
             HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         

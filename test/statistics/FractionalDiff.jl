@@ -20,13 +20,13 @@ using StreamOps
             50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # Reference values generated using Python script ./FractionalDiff.py
         expected = [3.0735819920702734, -6.859030168988753, 153.02035742475738,
@@ -52,7 +52,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 5)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 3.0),
@@ -60,8 +60,8 @@ using StreamOps
                 (DateTime(2000, 1, 4), 10.0),
                 (DateTime(2000, 1, 5), 15.0)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # For order 1, we expect first differences
         expected = [2.0, 3.0, 4.0, 5.0]
@@ -82,7 +82,7 @@ using StreamOps
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 5)
-        adapters = [
+        set_adapters!(exe, [
             HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
@@ -90,8 +90,8 @@ using StreamOps
                 (DateTime(2000, 1, 4), 4.0),
                 (DateTime(2000, 1, 5), 5.0)
             ])
-        ]
-        run_simulation!(exe, adapters, start, stop)
+        ])
+        run_simulation!(exe, start, stop)
 
         # For order 0, we expect the original values
         expected = [1.0, 2.0, 3.0, 4.0, 5.0]
