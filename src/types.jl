@@ -8,6 +8,8 @@ abstract type GraphState end
 
 abstract type GraphExecutor end
 
+abstract type SourceAdapter end
+
 ## traits
 
 # Tell executor to call update_time! on operation

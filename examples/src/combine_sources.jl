@@ -22,8 +22,8 @@ combine = op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1
 output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)
-bind!(g, (values1, values2, values3, values4), combine)
-bind!(g, combine, output)
+bind!(g, (:values1, :values2, :values3, :values4), :combine)
+bind!(g, :combine, :output)
 
 # Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)
@@ -31,8 +31,8 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 # Run simulation
 start = DateTime(1999, 12, 31)
 stop = DateTime(2000, 1, 10)
-adapters = [
-    HistoricIterable(exe, values1, [
+set_adapters!(exe, [
+    HistoricIterable(exe, g[:values1], [
         (DateTime(2000, 1, 1), 1.0),
         (DateTime(2000, 1, 2), 2.0),
         (DateTime(2000, 1, 3), 3.0),
@@ -41,18 +41,18 @@ adapters = [
         (DateTime(2000, 1, 6), 6.0),
         (DateTime(2000, 1, 7), 7.0),
     ]),
-    HistoricIterable(exe, values2, [
+    HistoricIterable(exe, g[:values2], [
         (DateTime(2000, 1, 2), 20.0),
         (DateTime(2000, 1, 4), 40.0),
         (DateTime(2000, 1, 6), 60.0),
         (DateTime(2000, 1, 8), 80.0),
     ]),
-    HistoricIterable(exe, values3, [
+    HistoricIterable(exe, g[:values3], [
         (DateTime(1999, 12, 31), 1000.0),
     ]),
-    HistoricIterable(exe, values4, Float64[]) # empty
-]
-@time run_simulation!(exe, adapters, start, stop)
+    HistoricIterable(exe, g[:values4], Float64[]) # empty
+])
+@time run_simulation!(exe, start, stop)
 
 # Visualize the computation graph
 graphviz(exe.graph)

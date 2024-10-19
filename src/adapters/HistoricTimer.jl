@@ -1,4 +1,4 @@
-mutable struct HistoricTimer{TPeriod,TTime,TAdapterFunc}
+mutable struct HistoricTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     node::StreamNode
     adapter_func::TAdapterFunc
     interval::TPeriod

@@ -29,10 +29,10 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 start = DateTime(2000, 1, 1, 0, 0, 0)
 stop = DateTime(2000, 1, 1, 0, 0, 59)
 
-adapters = [
+set_adapters!(exe, [
     HistoricTimer{DateTime}(exe, source_timer, interval=Dates.Second(5), start_time=start),
-]
-@time run_simulation!(exe, adapters, start, stop)
+])
+@time run_simulation!(exe, start, stop)
 
 println("Counter: ", get_state(counter.operation))
 
@@ -46,15 +46,15 @@ StreamOps.info(exe.states)
 dump(exe.states)
 
 # Inspect code of simulation loop
-@code_warntype run_simulation!(exe, adapters, start, stop)
+@code_warntype run_simulation!(exe, start, stop)
 
 # Inspect code for executing a source adapter
-@code_warntype advance!(adapters[1], exe)
+@code_warntype advance!(exe.adapters[1], exe)
 
 # Inspect generated computation graph code of the source node (adapter).
 # This is where the actual computation of nodes happens and the graph is traversed.
 # For best performance, this code should be type-stable and
 # allocations should be minimized.
-@code_warntype adapters[1].adapter_func(exe, adapters[1].current_time)
+@code_warntype exe.adapters[1].adapter_func(exe, exe.adapters[1].current_time)
 
-@code_native adapters[1].adapter_func(exe, adapters[1].current_time)
+@code_native exe.adapters[1].adapter_func(exe, exe.adapters[1].current_time)

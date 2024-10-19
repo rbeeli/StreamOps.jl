@@ -1,5 +1,3 @@
-using Dates
-
 """
 An executor that runs a stream computation graph in realtime mode.
 Time is always reported as the current system time, i.e. "now".
@@ -12,6 +10,7 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     start_time::TTime
     end_time::TTime
     event_queue::Channel{ExecutionEvent{TTime}}
+    adapters::Vector{SourceAdapter}
     adapter_funcs::Vector{Function}
     function RealtimeExecutor{TTime}(
         graph::StreamGraph,
@@ -20,9 +19,16 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
         start_time::TTime,
         end_time::TTime
     ) where {TStates,TTime}
-        event_queue = Channel{ExecutionEvent{TTime}}(128)
+        event_queue = Channel{ExecutionEvent{TTime}}(1024)
         adapter_funcs = Vector{Function}()
-        new{TStates,TTime}(graph, states, start_time, end_time, event_queue, adapter_funcs)
+        new{TStates,TTime}(
+            graph,
+            states,
+            start_time,
+            end_time,
+            event_queue,
+            Vector{SourceAdapter}(),
+            adapter_funcs)
     end
 end
 
@@ -59,9 +65,13 @@ function compile_realtime_executor(::Type{TTime}, graph::StreamGraph; debug=fals
     executor
 end
 
-function run_realtime!(executor::RealtimeExecutor{TStates,TTime}, adapters; start_time::TTime, end_time::TTime) where {TStates,TTime}
-    @assert start_time < end_time "Start time '$start_time' must be before end time '$end_time'"
+function set_adapters!(executor::RealtimeExecutor, adapters)
     @assert length(adapters) == length(executor.adapter_funcs) "Number of adapters must match number of source nodes"
+    executor.adapters = collect(adapters)
+end
+
+function run_realtime!(executor::RealtimeExecutor{TStates,TTime}; start_time::TTime, end_time::TTime) where {TStates,TTime}
+    @assert start_time < end_time "Start time '$start_time' must be before end time '$end_time'"
 
     # Set executor time bounds
     executor.start_time = start_time
@@ -72,7 +82,7 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}, adapters; star
     Base.invokelatest() do
         # Initialize adapters
         println("RealtimeExecutor: Setting up adapters...")
-        init_secs = @elapsed run!.(adapters, Ref(executor))
+        init_secs = @elapsed run!.(executor.adapters, Ref(executor))
         println("RealtimeExecutor: Adapters set up in $(round(sum(init_secs); digits=3))s")
     end
 
@@ -103,6 +113,8 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}, adapters; star
         # need invokelatest because states struct is dynamically compiled,
         # which may live in a newer world age than the caller.
         Base.invokelatest() do
+            adapters = executor.adapters
+
             while true
                 # wait for next event
                 event = take!(executor.event_queue)
@@ -143,7 +155,7 @@ function run_realtime!(executor::RealtimeExecutor{TStates,TTime}, adapters; star
 
         # Destroy adapters
         println("RealtimeExecutor: Destroying adapters...")
-        destroy!.(adapters)
+        destroy!.(executor.adapters)
         println("RealtimeExecutor: Adapters destroyed")
     end
 

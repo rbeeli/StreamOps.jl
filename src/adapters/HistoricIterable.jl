@@ -1,4 +1,4 @@
-mutable struct HistoricIterable{TData,TItem,TAdapterFunc}
+mutable struct HistoricIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
     node::StreamNode
     adapter_func::TAdapterFunc
     data::TData

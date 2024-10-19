@@ -21,7 +21,7 @@ function run()
         adapter = HistoricIterable(exe, values, 
             [(Timestamp64(x), x) for x in 1:10_000_000]
         )
-
+        
         setup!(adapter, exe)
         display(@code_native advance!(adapter, exe))
         # for _ in 1:10_000_000

@@ -8,11 +8,11 @@ using Dates
 
 g = StreamGraph()
 
-values = source!(g, :values, out=Float64, init=0.0)
-output = sink!(g, :output, Print())
+source!(g, :values, out=Float64, init=0.0)
+sink!(g, :output, Print())
 
 # Create edges between nodes (define the computation graph)
-bind!(g, values, output)
+bind!(g, :values, :output)
 
 # Compile the graph with historic executor
 exe = compile_historic_executor(DateTime, g, debug=!true)
@@ -20,13 +20,13 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 # Run simulation
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 10)
-adapters = [
-    HistoricIterable(exe, values, [
+set_adapters!(exe, [
+    HistoricIterable(exe, g[:values], [
         (DateTime(2000, 1, 1), 1.0),
         (DateTime(2000, 1, 2), 2.0),
     ])
-]
-@time run_simulation!(exe, adapters, start, stop)
+])
+@time run_simulation!(exe, start, stop)
 
 # Visualize the computation graph
 graphviz(exe.graph)

@@ -46,7 +46,7 @@ values = [
     (start + Second(3), 3.0),
     (start + Second(4), 4.0),
 ]
-adapters = [
+set_adapters!(exe, [
     RealtimeIterable(exe, g[:number], values)
-]
-@time run_realtime!(exe, adapters, start_time=start, end_time=stop)
+])
+@time run_realtime!(exe, start_time=start, end_time=stop)

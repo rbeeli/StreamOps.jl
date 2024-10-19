@@ -23,7 +23,7 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 # Run simulation
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 10)
-adapters = [
+set_adapters!(exe,  [
     HistoricIterable(exe, values, [
         (DateTime(2000, 1, 1), 1.0),
         (DateTime(2000, 1, 2), 2.0),
@@ -33,8 +33,8 @@ adapters = [
         (DateTime(2000, 1, 6), 3.0),
         (DateTime(2000, 1, 7), 4.0),
     ])
-]
-@time run_simulation!(exe, adapters, start, stop)
+])
+@time run_simulation!(exe, start, stop)
 
 # Visualize the computation graph
 graphviz(exe.graph)

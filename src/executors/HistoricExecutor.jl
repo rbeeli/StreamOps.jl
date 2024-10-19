@@ -12,11 +12,20 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     end_time::TTime
     current_time::TTime
     event_queue::BinaryMinHeap{ExecutionEvent{TTime}}
+    adapters::Vector{SourceAdapter}
     adapter_funcs::Vector{Function}
     function HistoricExecutor{TTime}(graph::StreamGraph, states::TStates, start_time::TTime, end_time::TTime) where {TStates,TTime}
         event_queue = BinaryMinHeap{ExecutionEvent{TTime}}()
         adapter_funcs = Vector{Function}()
-        new{TStates,TTime}(graph, states, start_time, end_time, zero(TTime), event_queue, adapter_funcs)
+        new{TStates,TTime}(
+            graph,
+            states,
+            start_time,
+            end_time,
+            zero(TTime),
+            event_queue,
+            Vector{SourceAdapter}(),
+            adapter_funcs)
     end
 end
 
@@ -45,14 +54,17 @@ function compile_historic_executor(::Type{TTime}, graph::StreamGraph; debug=fals
     executor
 end
 
+function set_adapters!(executor::HistoricExecutor, adapters)
+    @assert length(adapters) == length(executor.adapter_funcs) "Number of adapters must match number of source nodes"
+    executor.adapters = collect(adapters)
+end
+
 function run_simulation!(
     executor::HistoricExecutor{TStates,TTime},
-    adapters,
     start_time::TTime,
     end_time::TTime
 ) where {TStates,TTime}
     @assert start_time <= end_time "Start time cannot be after end time"
-    @assert length(adapters) == length(executor.adapter_funcs) "Number of adapters must match number of source nodes"
 
     # Set executor time bounds
     executor.start_time = start_time
@@ -62,12 +74,15 @@ function run_simulation!(
     # need invokelatest because states struct is dynamically compiled,
     # which may live in a newer world age than the caller.
     Base.invokelatest() do
+        adapters = executor.adapters
+        event_queue = executor.event_queue
+
         # Initialize adapters
         setup!.(adapters, Ref(executor))
 
         # Process events in chronological order using a priority queue
-        while !isempty(executor.event_queue)
-            event = pop!(executor.event_queue)
+        while !isempty(event_queue)
+            event = pop!(event_queue)
             index = event.source_index
             timestamp = event.timestamp
             adapter = @inbounds adapters[index]

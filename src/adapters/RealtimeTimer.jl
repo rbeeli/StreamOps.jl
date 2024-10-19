@@ -1,7 +1,7 @@
 using Dates
 import Base.Libc: systemsleep
 
-mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc}
+mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     node::StreamNode
     adapter_func::TAdapterFunc
     interval::TPeriod

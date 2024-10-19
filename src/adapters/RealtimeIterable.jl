@@ -1,7 +1,7 @@
 using Dates
 import Base.Libc: systemsleep
 
-mutable struct RealtimeIterable{TData,TItem,TAdapterFunc}
+mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
     node::StreamNode
     adapter_func::TAdapterFunc
     data::TData
@@ -9,7 +9,7 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc}
     task::Union{Task,Nothing}
     stop_flag::Threads.Atomic{Bool}
     stop_check_interval::Dates.Millisecond
-    process_queue::Vector{TItem}
+    process_queue::Channel{TItem}
 
     function RealtimeIterable(
         ::Type{TItem},
@@ -17,7 +17,8 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc}
         node::StreamNode,
         data::TData
         ;
-        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50)
+        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50),
+        max_queue_size=1024
     ) where {TExecutor<:GraphExecutor,TData,TItem}
         adapter_func = executor.adapter_funcs[node.index]
         stop_flag = Threads.Atomic{Bool}(false)
@@ -29,7 +30,7 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc}
             nothing, # task
             stop_flag,
             stop_check_interval,
-            TItem[], # process_queue
+            Channel{TItem}(max_queue_size), # process_queue
         )
     end
 
@@ -38,7 +39,8 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc}
         node::StreamNode,
         data::TData
         ;
-        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50)
+        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50),
+        max_queue_size=1024
     ) where {TExecutor<:GraphExecutor,TData}
         eltype(data) != Any || throw(ArgumentError("Element type detected as Any. Use typed HistoricIterable constructor to avoid performance penality of Any."))
         adapter_func = executor.adapter_funcs[node.index]
@@ -51,7 +53,7 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc}
             nothing, # task
             stop_flag,
             stop_check_interval,
-            Vector{eltype(data)}(), # process_queue
+            Channel{eltype(data)}(max_queue_size), # process_queue
         )
     end
 end
@@ -75,7 +77,7 @@ function worker(adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecut
         # If we've reached or passed next_time, schedule the event and calculate the next time
         if time_now >= next_time
             put!(executor.event_queue, ExecutionEvent(time_now, adapter.node.index))
-            push!(adapter.process_queue, next_item)
+            put!(adapter.process_queue, next_item)
             # next item in iterable
             adapter.iterate_state = iterate(adapter.data, (@inbounds adapter.iterate_state[2]))
         end
@@ -106,7 +108,10 @@ function process_event!(
     event::ExecutionEvent{TTime}
 ) where {TData,TItem,TStates,TTime}
     # Execute subgraph based on current value
-    time, input_data = popfirst!(adapter.process_queue)
+    if !isready(adapter.process_queue)
+        throw(ErrorException("Logic error: process_queue is empty when calling process_event!"))
+    end
+    time, input_data = take!(adapter.process_queue)
     adapter.adapter_func(executor, input_data)
     nothing
 end
