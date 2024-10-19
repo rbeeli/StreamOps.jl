@@ -54,7 +54,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start)
+            HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start)
         ]
         run_simulation!(exe, adapters, start, stop)
 
@@ -76,13 +76,13 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         adapters = [
-            IterableAdapter(exe, g[:a], [
+            HistoricIterable(exe, g[:a], [
                 (DateTime(2000, 1, 1), nothing),
                 (DateTime(2000, 1, 2), nothing),
                 (DateTime(2000, 1, 3), nothing),
                 (DateTime(2000, 1, 4), 4)
             ])
-            IterableAdapter(exe, g[:b], [
+            HistoricIterable(exe, g[:b], [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), nothing),
                 (DateTime(2000, 1, 3), 3),
@@ -111,13 +111,13 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         adapters = [
-            IterableAdapter(exe, g[:a], [
+            HistoricIterable(exe, g[:a], [
                 (DateTime(2000, 1, 1), nothing),
                 (DateTime(2000, 1, 2), nothing),
                 (DateTime(2000, 1, 3), nothing),
                 (DateTime(2000, 1, 4), 4)
             ])
-            IterableAdapter(exe, g[:b], [
+            HistoricIterable(exe, g[:b], [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), nothing),
                 (DateTime(2000, 1, 3), 3),
@@ -146,13 +146,13 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         adapters = [
-            IterableAdapter(exe, g[:a], [
+            HistoricIterable(exe, g[:a], [
                 (DateTime(2000, 1, 1), nothing),
                 (DateTime(2000, 1, 2), nothing),
                 (DateTime(2000, 1, 3), nothing),
                 (DateTime(2000, 1, 4), 4)
             ])
-            IterableAdapter(exe, g[:b], [
+            HistoricIterable(exe, g[:b], [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), nothing),
                 (DateTime(2000, 1, 3), 3),
@@ -187,7 +187,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start)
+            HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start)
         ]
         run_simulation!(exe, adapters, start, stop)
 
@@ -214,8 +214,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
-            TimerAdapter{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
+            HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
+            HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
         ]
         run_simulation!(exe, adapters, start, stop)
 
@@ -241,8 +241,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
-            TimerAdapter{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
+            HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
+            HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
         ]
         run_simulation!(exe, adapters, start, stop)
 
@@ -268,8 +268,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
-            TimerAdapter{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
+            HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
+            HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
         ]
         run_simulation!(exe, adapters, start, stop)
 

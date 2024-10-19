@@ -6,7 +6,7 @@ using Dates
 #
 # import Pkg;Pkg.test("StreamOps", test_args=["bind.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["call_policies.jl"])
-# import Pkg;Pkg.test("StreamOps", test_args=["adapters/IterableAdapter.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["adapters/HistoricIterable.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["operations/Constant.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["statistics/Skewness.jl"])
 
@@ -47,7 +47,7 @@ if isempty(requested_tests)
     include("statistics/TimeMean.jl")
     include("statistics/SavitzkyGolay.jl")
 
-    include("adapters/IterableAdapter.jl")
+    include("adapters/HistoricIterable.jl")
 else
     println('-'^60)
     println("Running subset of tests:")

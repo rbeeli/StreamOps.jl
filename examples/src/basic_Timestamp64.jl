@@ -27,7 +27,7 @@ function run()
     start = Timestamp64(2000, 1, 1)
     stop = Timestamp64(2000, 1, 10)
     adapters = [
-        IterableAdapter(exe, values, [
+        HistoricIterable(exe, values, [
             (Timestamp64(2000, 1, 1), 1.0),
             (Timestamp64(2000, 1, 2), 2.0),
         ])

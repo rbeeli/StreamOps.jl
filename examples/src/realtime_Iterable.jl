@@ -1,7 +1,8 @@
 """
 This example demonstrates how to use the StreamOps.jl library to create a simple
-realtime computation graph with a timer source and a sink node that prints the
-current time every second.
+realtime computation graph with a predefined iterable source where the values are emitted
+as soon as their scheduled times are reached, and a sink node that prints the
+current value received.
 
 What's special about this example is that it uses the `Timestamps64` time type
 instead of Julia's `DateTime` type.
@@ -23,7 +24,7 @@ StreamOps.time_zero(::Type{Timestamp64}) = Timestamp64(0)
 g = StreamGraph()
 
 # Create source nodes
-source!(g, :timer, out=Timestamp64, init=Timestamp64(0))
+source!(g, :number, out=Float64, init=NaN)
 
 # Create sink node
 sink!(g, :output, Func((exe, x) -> begin
@@ -31,7 +32,7 @@ sink!(g, :output, Func((exe, x) -> begin
 end, nothing))
 
 # Create edges between nodes (define the computation graph)
-bind!(g, :timer, :output)
+bind!(g, :number, :output)
 
 # Compile the graph with realtime executor
 exe = compile_realtime_executor(Timestamp64, g, debug=!true)
@@ -39,7 +40,13 @@ exe = compile_realtime_executor(Timestamp64, g, debug=!true)
 # Run in realtime mode
 start = round_origin(now(Timestamp64), Dates.Second(1), RoundUp)
 stop = start + Dates.Second(5)
+values = [
+    (start + Second(1), 1.0),
+    (start + Second(2), 2.0),
+    (start + Second(3), 3.0),
+    (start + Second(4), 4.0),
+]
 adapters = [
-    RealtimeTimer(exe, g[:timer], interval=Dates.Millisecond(1000), start_time=start),
+    RealtimeIterable(exe, g[:number], values)
 ]
 @time run_realtime!(exe, adapters, start_time=start, end_time=stop)

@@ -18,7 +18,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 7)
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 50.0),
                 (DateTime(2000, 1, 2), 1.5),
                 (DateTime(2000, 1, 3), 1.1),
@@ -58,7 +58,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 7)
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 50.0),
                 (DateTime(2000, 1, 2), 1.5),
                 (DateTime(2000, 1, 3), 1.1),
@@ -99,7 +99,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])

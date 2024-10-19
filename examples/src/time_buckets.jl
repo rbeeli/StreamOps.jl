@@ -36,8 +36,8 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 6)
 adapters = [
-    TimerAdapter{DateTime}(exe, timer, interval=Dates.Day(2), start_time=start),
-    IterableAdapter(exe, values, [
+    HistoricTimer{DateTime}(exe, timer, interval=Dates.Day(2), start_time=start),
+    HistoricIterable(exe, values, [
         (DateTime(2000, 1, 1, 0, 1, 1), 1.0),
         (DateTime(2000, 1, 1, 0, 1, 2), 1.5),
         (DateTime(2000, 1, 2, 0, 0, 0), 2.0),

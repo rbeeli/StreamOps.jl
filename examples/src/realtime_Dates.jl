@@ -32,6 +32,6 @@ exe = compile_realtime_executor(DateTime, g, debug=!true)
 start = round_origin(now(UTC), Dates.Second(1), RoundUp)
 stop = start + Dates.Second(5)
 adapters = [
-    OnlineTimerAdapter(exe, g[:timer], interval=Dates.Millisecond(1000), start_time=start),
+    RealtimeTimer(exe, g[:timer], interval=Dates.Millisecond(1000), start_time=start),
 ]
 @time run_realtime!(exe, adapters, start_time=start, end_time=stop)

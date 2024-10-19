@@ -23,7 +23,7 @@ using Dates
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
                 (DateTime(2000, 1, 1, 0, 1, 0), 2),
                 (DateTime(2000, 1, 1, 0, 2, 0), 3),

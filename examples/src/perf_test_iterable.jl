@@ -18,7 +18,7 @@ function run()
     exe = compile_historic_executor(Timestamp64, g; debug=!true)
 
     Base.invokelatest() do
-        adapter = IterableAdapter(exe, values, 
+        adapter = HistoricIterable(exe, values, 
             [(Timestamp64(x), x) for x in 1:10_000_000]
         )
 

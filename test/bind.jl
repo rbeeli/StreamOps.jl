@@ -126,8 +126,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
-            IterableAdapter(exe, values, [
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
@@ -158,8 +158,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
-            IterableAdapter(exe, values, [
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
@@ -193,18 +193,18 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
-            IterableAdapter(exe, values, [
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
             ]),
-            IterableAdapter(exe, values2, [
+            HistoricIterable(exe, values2, [
                 (DateTime(2000, 1, 1), -1.0),
                 (DateTime(2000, 1, 2), -2.0),
                 (DateTime(2000, 1, 3), -4.0),
             ]),
-            IterableAdapter(exe, values3, [
+            HistoricIterable(exe, values3, [
                 (DateTime(2000, 1, 1), 10.0),
                 (DateTime(2000, 1, 2), 20.0),
                 (DateTime(2000, 1, 3), 40.0),
@@ -235,8 +235,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
-            IterableAdapter(exe, values, [
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
@@ -266,8 +266,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
-            IterableAdapter(exe, values, [
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
@@ -300,18 +300,18 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
-            IterableAdapter(exe, values, [
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
             ]),
-            IterableAdapter(exe, values2, [
+            HistoricIterable(exe, values2, [
                 (DateTime(2000, 1, 1), -1.0),
                 (DateTime(2000, 1, 2), -2.0),
                 (DateTime(2000, 1, 3), -4.0),
             ]),
-            IterableAdapter(exe, values3, [
+            HistoricIterable(exe, values3, [
                 (DateTime(2000, 1, 1), 10.0),
                 (DateTime(2000, 1, 2), 20.0),
                 (DateTime(2000, 1, 3), 40.0),
@@ -346,18 +346,18 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
-            IterableAdapter(exe, values, [
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(1), start_time=start),
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 4.0),
             ]),
-            IterableAdapter(exe, values2, [
+            HistoricIterable(exe, values2, [
                 (DateTime(2000, 1, 1), -1.0),
                 (DateTime(2000, 1, 2), -2.0),
                 (DateTime(2000, 1, 3), -4.0),
             ]),
-            IterableAdapter(exe, values3, [
+            HistoricIterable(exe, values3, [
                 (DateTime(2000, 1, 1), 10.0),
                 (DateTime(2000, 1, 2), 20.0),
                 (DateTime(2000, 1, 3), 40.0),

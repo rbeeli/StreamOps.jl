@@ -23,7 +23,7 @@ using Statistics
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
@@ -54,7 +54,7 @@ using Statistics
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
@@ -78,7 +78,7 @@ using Statistics
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
-        adapters = [IterableAdapter(exe, values, [(DateTime(2000, 1, 1), 1.0)])]
+        adapters = [HistoricIterable(exe, values, [(DateTime(2000, 1, 1), 1.0)])]
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 1)
         run_simulation!(exe, adapters, start, stop)
@@ -101,7 +101,7 @@ using Statistics
 
         constant_vals = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(constant_vals)
             ])

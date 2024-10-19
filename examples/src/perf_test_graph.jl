@@ -34,7 +34,7 @@ function run()
     start = first(dts)
     stop = last(dts)
     adapters = [
-        IterableAdapter(
+        HistoricIterable(
             Tuple{Timestamp64,Timestamp64},
             exe,
             values,

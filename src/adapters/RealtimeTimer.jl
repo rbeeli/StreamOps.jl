@@ -1,7 +1,7 @@
 using Dates
-import Base.Libc
+import Base.Libc: systemsleep
 
-mutable struct OnlineTimerAdapter{TPeriod,TTime,TAdapterFunc}
+mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc}
     node::StreamNode
     adapter_func::TAdapterFunc
     interval::TPeriod
@@ -10,7 +10,7 @@ mutable struct OnlineTimerAdapter{TPeriod,TTime,TAdapterFunc}
     stop_flag::Threads.Atomic{Bool}
     stop_check_interval::Dates.Millisecond
 
-    function OnlineTimerAdapter(
+    function RealtimeTimer(
         executor,
         node::StreamNode
         ;
@@ -25,7 +25,7 @@ mutable struct OnlineTimerAdapter{TPeriod,TTime,TAdapterFunc}
     end
 end
 
-function worker(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function worker(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     time_now = time(executor)
     next_time = _calc_next_time(timer, executor)
 
@@ -39,7 +39,8 @@ function worker(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExec
         sleep_us = Dates.Microsecond(min(next_time - time_now, timer.stop_check_interval))
 
         # Wait until next event (or stop flag check)
-        Dates.value(sleep_us) > 0 && _sleep(Dates.value(sleep_us) / 1_000_000.0)
+        # use Libc.systemsleep(secs) instead of Base.sleep(secs) for more accurate sleep time
+        Dates.value(sleep_us) > 0 && systemsleep(Dates.value(sleep_us) / 1_000_000.0)
 
         # If we've reached or passed next_time, schedule the event and calculate the next time
         if time_now >= next_time
@@ -51,10 +52,10 @@ function worker(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExec
         timer.stop_flag[] && break
     end
 
-    println("OnlineTimerAdapter: Timer [$(timer.node.label)] thread ended")
+    println("RealtimeTimer: Timer [$(timer.node.label)] thread ended")
 end
 
-function _calc_next_time(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function _calc_next_time(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     round_origin(
         time(executor) + timer.interval,
         timer.interval,
@@ -62,20 +63,14 @@ function _calc_next_time(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::Rea
         origin=timer.start_time)
 end
 
-function _sleep(secs::Real)
-    # use Libc.systemsleep(secs) instead of Base.sleep(secs)
-    # for more accurate sleep time
-    Libc.systemsleep(secs)
-end
-
-function run!(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function run!(timer::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     timer.task = Threads.@spawn worker(timer, executor)
-    println("OnlineTimerAdapter: Timer [$(timer.node.label)] thread started")
+    println("RealtimeTimer: Timer [$(timer.node.label)] thread started")
     nothing
 end
 
 function process_event!(
-    adapter::OnlineTimerAdapter{TPeriod,TTime},
+    adapter::RealtimeTimer{TPeriod,TTime},
     executor::RealtimeExecutor{TStates,TTime},
     event::ExecutionEvent{TTime}
 ) where {TPeriod,TStates,TTime}
@@ -84,7 +79,7 @@ function process_event!(
     nothing
 end
 
-function destroy!(timer::OnlineTimerAdapter{TPeriod,TTime}) where {TPeriod,TTime}
+function destroy!(timer::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime}
     if !isnothing(timer.task)
         timer.stop_flag[] = true
         wait(timer.task) # will also catch and rethrow any exceptions

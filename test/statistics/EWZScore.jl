@@ -22,7 +22,7 @@ using Statistics
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
@@ -59,7 +59,7 @@ using Statistics
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, length(vals))
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, i), x)
                 for (i, x) in enumerate(vals)
             ])
@@ -91,7 +91,7 @@ using Statistics
         bind!(g, ewzscore, output)
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
-        adapters = [IterableAdapter(exe, values, [(DateTime(2000, 1, 1), 1.0)])]
+        adapters = [HistoricIterable(exe, values, [(DateTime(2000, 1, 1), 1.0)])]
         run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, 1))
 
         @test isnan(output.operation.buffer[1])
@@ -112,7 +112,7 @@ using Statistics
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
         constant_vals = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
-        adapters = [IterableAdapter(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(constant_vals)])]
+        adapters = [HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(constant_vals)])]
         run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, length(constant_vals)))
 
         @test all(isnan.(output.operation.buffer))

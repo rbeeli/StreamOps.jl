@@ -46,7 +46,7 @@ using Dates
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
         adapters = [
-            IterableAdapter(exe, values, [
+            HistoricIterable(exe, values, [
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
                 (DateTime(2000, 1, 1, 0, 1, 0), 2),
                 (DateTime(2000, 1, 1, 0, 2, 0), 3),
@@ -88,8 +88,8 @@ using Dates
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 8)
         adapters = [
-            TimerAdapter{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start),
-            IterableAdapter(exe, g[:values], [
+            HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start),
+            HistoricIterable(exe, g[:values], [
                 (DateTime("2000-01-01T00:00:00"), 1),
                 (DateTime("2000-01-02T00:00:00"), 2),
                 (DateTime("2000-01-03T00:00:00"), 3),

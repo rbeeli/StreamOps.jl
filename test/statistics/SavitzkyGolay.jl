@@ -56,7 +56,7 @@ using LinearAlgebra
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             adapters = [
-                IterableAdapter(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
+                HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
             ]
             run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 1)
@@ -77,7 +77,7 @@ using LinearAlgebra
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             adapters = [
-                IterableAdapter(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
+                HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
             ]
             run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 2)
@@ -98,7 +98,7 @@ using LinearAlgebra
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             adapters = [
-                IterableAdapter(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
+                HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
             ]
             run_simulation!(exe, adapters, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 3)

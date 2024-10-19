@@ -25,7 +25,7 @@ using Dates
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 8, 0)
         adapters = [
-            IterableAdapter(exe, g[:values], [
+            HistoricIterable(exe, g[:values], [
                 (DateTime("2000-01-01T00:00:00"), 0),
                 (DateTime("2000-01-01T00:00:10"), 10),
                 (DateTime("2000-01-01T00:01:00"), 100),
@@ -73,7 +73,7 @@ using Dates
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 8, 0)
         adapters = [
-            IterableAdapter(exe, g[:values], [
+            HistoricIterable(exe, g[:values], [
                 (DateTime("2000-01-01T00:00:00"), 0),   # 00:00:30 next sample (first)
                 (DateTime("2000-01-01T00:00:10"), 10),  # 00:00:30 next sample (skip)
                 (DateTime("2000-01-01T00:00:40"), 40),  # 00:01:30 next sample

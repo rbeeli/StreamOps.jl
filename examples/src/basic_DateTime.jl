@@ -21,7 +21,7 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 10)
 adapters = [
-    IterableAdapter(exe, values, [
+    HistoricIterable(exe, values, [
         (DateTime(2000, 1, 1), 1.0),
         (DateTime(2000, 1, 2), 2.0),
     ])

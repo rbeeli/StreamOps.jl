@@ -2,7 +2,7 @@ using Test
 using StreamOps
 using DataStructures
 
-@testset verbose = true "IterableAdapter" begin
+@testset verbose = true "HistoricIterable" begin
 
     @testset "default" begin
         g = StreamGraph()
@@ -16,7 +16,7 @@ using DataStructures
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
-        adapter = IterableAdapter(exe, values, [
+        adapter = HistoricIterable(exe, values, [
             (DateTime(2000, 1, 1), 1),
             (DateTime(2000, 1, 2), 2),
             (DateTime(2000, 1, 3), 3)

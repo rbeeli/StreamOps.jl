@@ -30,7 +30,7 @@ start = DateTime(2000, 1, 1, 0, 0, 0)
 stop = DateTime(2000, 1, 1, 0, 0, 59)
 
 adapters = [
-    TimerAdapter{DateTime}(exe, source_timer, interval=Dates.Second(5), start_time=start),
+    HistoricTimer{DateTime}(exe, source_timer, interval=Dates.Second(5), start_time=start),
 ]
 @time run_simulation!(exe, adapters, start, stop)
 

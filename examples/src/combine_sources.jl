@@ -32,7 +32,7 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 start = DateTime(1999, 12, 31)
 stop = DateTime(2000, 1, 10)
 adapters = [
-    IterableAdapter(exe, values1, [
+    HistoricIterable(exe, values1, [
         (DateTime(2000, 1, 1), 1.0),
         (DateTime(2000, 1, 2), 2.0),
         (DateTime(2000, 1, 3), 3.0),
@@ -41,16 +41,16 @@ adapters = [
         (DateTime(2000, 1, 6), 6.0),
         (DateTime(2000, 1, 7), 7.0),
     ]),
-    IterableAdapter(exe, values2, [
+    HistoricIterable(exe, values2, [
         (DateTime(2000, 1, 2), 20.0),
         (DateTime(2000, 1, 4), 40.0),
         (DateTime(2000, 1, 6), 60.0),
         (DateTime(2000, 1, 8), 80.0),
     ]),
-    IterableAdapter(exe, values3, [
+    HistoricIterable(exe, values3, [
         (DateTime(1999, 12, 31), 1000.0),
     ]),
-    IterableAdapter(exe, values4, Float64[]) # empty
+    HistoricIterable(exe, values4, Float64[]) # empty
 ]
 @time run_simulation!(exe, adapters, start, stop)
 

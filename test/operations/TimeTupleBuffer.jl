@@ -23,7 +23,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         adapters = [
-            IterableAdapter(exe, values, input)
+            HistoricIterable(exe, values, input)
         ]
         run_simulation!(exe, adapters, start, stop)
 
@@ -54,7 +54,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         adapters = [
-            IterableAdapter(exe, values, input)
+            HistoricIterable(exe, values, input)
         ]
         run_simulation!(exe, adapters, start, stop)
         
@@ -101,8 +101,8 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 6)
         adapters = [
-            TimerAdapter{DateTime}(exe, timer; interval=Dates.Day(2), start_time=start),
-            IterableAdapter(exe, values, input)
+            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(2), start_time=start),
+            HistoricIterable(exe, values, input)
         ]
         run_simulation!(exe, adapters, start, stop)
         @test collected[1] == Tuple{DateTime,Float64}[]
