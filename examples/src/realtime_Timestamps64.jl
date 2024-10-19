@@ -23,15 +23,15 @@ StreamOps.time_zero(::Type{Timestamp64}) = Timestamp64(0)
 g = StreamGraph()
 
 # Create source nodes
-timer = source!(g, :timer, out=Timestamp64, init=Timestamp64(0))
+source!(g, :timer, out=Timestamp64, init=Timestamp64(0))
 
 # Create sink node
-output = sink!(g, :output, Func((exe, x) -> begin
+sink!(g, :output, Func((exe, x) -> begin
     println("output at time $(time(exe)): $x")
 end, nothing))
 
 # Create edges between nodes (define the computation graph)
-bind!(g, timer, output)
+bind!(g, :timer, :output)
 
 # Compile the graph with realtime executor
 exe = compile_realtime_executor(Timestamp64, g, debug=!true)
@@ -40,6 +40,6 @@ exe = compile_realtime_executor(Timestamp64, g, debug=!true)
 start = round_origin(now(Timestamp64), Dates.Second(1), RoundUp)
 stop = start + Dates.Second(5)
 adapters = [
-    RealTimerAdapter(exe, timer, interval=Dates.Millisecond(1000), start_time=start),
+    OnlineTimerAdapter(exe, g[:timer], interval=Dates.Millisecond(1000), start_time=start),
 ]
 @time run_realtime!(exe, adapters, start_time=start, end_time=stop)

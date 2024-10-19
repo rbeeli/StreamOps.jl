@@ -1,7 +1,7 @@
 using Dates
 import Base.Libc
 
-mutable struct RealTimerAdapter{TPeriod,TTime,TAdapterFunc}
+mutable struct OnlineTimerAdapter{TPeriod,TTime,TAdapterFunc}
     node::StreamNode
     adapter_func::TAdapterFunc
     interval::TPeriod
@@ -10,7 +10,7 @@ mutable struct RealTimerAdapter{TPeriod,TTime,TAdapterFunc}
     stop_flag::Threads.Atomic{Bool}
     stop_check_interval::Dates.Millisecond
 
-    function RealTimerAdapter(
+    function OnlineTimerAdapter(
         executor,
         node::StreamNode
         ;
@@ -25,7 +25,7 @@ mutable struct RealTimerAdapter{TPeriod,TTime,TAdapterFunc}
     end
 end
 
-function worker(timer::RealTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function worker(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     time_now = time(executor)
     next_time = _calc_next_time(timer, executor)
 
@@ -51,10 +51,10 @@ function worker(timer::RealTimerAdapter{TPeriod,TTime}, executor::RealtimeExecut
         timer.stop_flag[] && break
     end
 
-    println("RealTimerAdapter: Timer [$(timer.node.label)] thread ended")
+    println("OnlineTimerAdapter: Timer [$(timer.node.label)] thread ended")
 end
 
-function _calc_next_time(timer::RealTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function _calc_next_time(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     round_origin(
         time(executor) + timer.interval,
         timer.interval,
@@ -68,14 +68,14 @@ function _sleep(secs::Real)
     Libc.systemsleep(secs)
 end
 
-function run!(timer::RealTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function run!(timer::OnlineTimerAdapter{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
     timer.task = Threads.@spawn worker(timer, executor)
-    println("RealTimerAdapter: Timer [$(timer.node.label)] thread started")
+    println("OnlineTimerAdapter: Timer [$(timer.node.label)] thread started")
     nothing
 end
 
 function process_event!(
-    adapter::RealTimerAdapter{TPeriod,TTime},
+    adapter::OnlineTimerAdapter{TPeriod,TTime},
     executor::RealtimeExecutor{TStates,TTime},
     event::ExecutionEvent{TTime}
 ) where {TPeriod,TStates,TTime}
@@ -84,7 +84,7 @@ function process_event!(
     nothing
 end
 
-function destroy!(timer::RealTimerAdapter{TPeriod,TTime}) where {TPeriod,TTime}
+function destroy!(timer::OnlineTimerAdapter{TPeriod,TTime}) where {TPeriod,TTime}
     if !isnothing(timer.task)
         timer.stop_flag[] = true
         wait(timer.task) # will also catch and rethrow any exceptions

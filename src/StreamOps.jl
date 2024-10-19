@@ -16,7 +16,7 @@ include("executors/RealtimeExecutor.jl")
 
 include("adapters/AdapterStorage.jl")
 include("adapters/TimerAdapter.jl")
-include("adapters/RealTimerAdapter.jl")
+include("adapters/OnlineTimerAdapter.jl")
 include("adapters/IterableAdapter.jl")
 
 include("operations/Constant.jl")
