@@ -71,7 +71,7 @@ function compile_realtime_executor(::Type{TTime}, graph::StreamGraph; debug=fals
 end
 
 function set_adapters!(executor::RealtimeExecutor, adapters)
-    @assert length(adapters) == length(executor.adapter_funcs) "Number of adapters must match number of source nodes"
+    @assert length(adapters) >= length(executor.adapter_funcs) "Number of executor adapters must be greater than or equal to number of source nodes"
     executor.adapters = collect(adapters)
 end
 
