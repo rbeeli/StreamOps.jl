@@ -3,96 +3,123 @@ using StreamOps
 
 @testset verbose = true "Buffer" begin
 
-    @testset "default" begin
+    @testset "Buffer{Int}()" begin
         g = StreamGraph()
 
-        values = source!(g, :values, out=Int, init=0)
-        buffer = sink!(g, :buffer, Buffer{Int}())
+        source!(g, :values, out=Int, init=0)
+        sink!(g, :buffer, Buffer{Int}())
 
-        @test buffer.operation.min_count == 0
+        @test g[:buffer].operation.min_count == 0
 
-        bind!(g, values, buffer)
+        bind!(g, :values, :buffer)
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         set_adapters!(exe, [
-            HistoricIterable(exe, values, [
+            HistoricIterable(exe, g[:values], [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
         ])
-        run_simulation!(exe, start, stop)
-        @test get_state(buffer.operation) == [1, 2, 3, 4]
+        run!(exe, start, stop)
+        @test get_state(g[:buffer].operation) == [1, 2, 3, 4]
     end
 
-    @testset "min_count" begin
+    @testset "Buffer{Int}(storage)" begin
         g = StreamGraph()
 
-        values = source!(g, :values, out=Int, init=0)
-        buffer = op!(g, :buffer, Buffer{Int}(min_count=3), out=Vector{Int})
-        output = sink!(g, :output, Counter())
+        storage = Int[]
+        source!(g, :values, out=Int, init=0)
+        sink!(g, :buffer, Buffer{Int}(storage))
 
-        @test buffer.operation.min_count == 3
+        @test g[:buffer].operation.min_count == 0
 
-        bind!(g, values, buffer)
-        bind!(g, buffer, output)
+        bind!(g, :values, :buffer)
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
         set_adapters!(exe, [
-            HistoricIterable(exe, values, [
+            HistoricIterable(exe, g[:values], [
                 (DateTime(2000, 1, 1), 1),
                 (DateTime(2000, 1, 2), 2),
                 (DateTime(2000, 1, 3), 3),
                 (DateTime(2000, 1, 4), 4)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
+        @test storage == [1, 2, 3, 4]
+    end
+
+    @testset "Buffer{Int}(min_count=3)" begin
+        g = StreamGraph()
+
+        source!(g, :values, out=Int, init=0)
+        op!(g, :buffer, Buffer{Int}(min_count=3), out=Vector{Int})
+        sink!(g, :output, Counter())
+
+        @test g[:buffer].operation.min_count == 3
+
+        bind!(g, :values, :buffer)
+        bind!(g, :buffer, :output)
+
+        exe = compile_historic_executor(DateTime, g; debug=!true)
+
+        start = DateTime(2000, 1, 1)
+        stop = DateTime(2000, 1, 4)
+        set_adapters!(exe, [
+            HistoricIterable(exe, g[:values], [
+                (DateTime(2000, 1, 1), 1),
+                (DateTime(2000, 1, 2), 2),
+                (DateTime(2000, 1, 3), 3),
+                (DateTime(2000, 1, 4), 4)
+            ])
+        ])
+        run!(exe, start, stop)
         
         # output should only be called twice because of min_count=3
-        @test get_state(output.operation) == 2
+        @test get_state(g[:output].operation) == 2
     end
 
-    @testset "w/ flush" begin
+    @testset "Buffer{Float64}() w/ flush" begin
         g = StreamGraph()
 
         # Create source nodes
-        timer = source!(g, :timer, out=DateTime, init=DateTime(0))
-        values = source!(g, :values, out=Float64, init=0.0)
+        source!(g, :timer, out=DateTime, init=DateTime(0))
+        source!(g, :values, out=Float64, init=0.0)
 
         # Create operation nodes
-        buffer = op!(g, :buffer, Buffer{Float64}(), out=Buffer{Float64})
-        flush_buffer = op!(g, :flush_buffer, Func{Vector{Float64}}((exe, buf, dt) -> begin
-                    vals = copy(buf)
-                    empty!(buf)
-                    vals
-                end, Float64[]), out=Vector{Float64})
+        op!(g, :buffer, Buffer{Float64}(), out=Buffer{Float64})
+        op!(g, :flush_buffer, Func{Vector{Float64}}((exe, buf, dt) -> begin
+                vals = copy(buf)
+                empty!(buf)
+                vals
+            end, Float64[]), out=Vector{Float64})
 
-        @test buffer.operation.min_count == 0
+        @test g[:buffer].operation.min_count == 0
 
         # Create sink nodes
         collected = []
-        output = sink!(g, :output, Func((exe, x) -> push!(collected, collect(x)), nothing))
+        sink!(g, :output, Func((exe, x) -> push!(collected, collect(x)), nothing))
 
         # Create edges between nodes (define the computation graph)
-        bind!(g, values, buffer)
-        bind!(g, buffer, flush_buffer; call_policies=[Never()])
-        bind!(g, timer, flush_buffer)
-        bind!(g, flush_buffer, output)
+        bind!(g, :values, :buffer)
+        bind!(g, :buffer, :flush_buffer; call_policies=[Never()])
+        bind!(g, :timer, :flush_buffer)
+        bind!(g, :flush_buffer, :output)
 
         exe = compile_historic_executor(DateTime, g; debug=!true)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 6)
         set_adapters!(exe, [
-            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(2), start_time=start),
-            HistoricIterable(exe, values, [
+            HistoricTimer{DateTime}(exe, g[:timer]; interval=Dates.Day(2), start_time=start),
+            HistoricIterable(exe, g[:values], [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),
                 (DateTime(2000, 1, 3), 3.0),
@@ -101,7 +128,7 @@ using StreamOps
                 (DateTime(2000, 1, 6), 6.0)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         @test collected[1] == Float64[]
         @test collected[2] == [1.0, 2.0]
         @test collected[3] == [3.0, 4.0]

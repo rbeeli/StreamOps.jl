@@ -10,16 +10,16 @@ using Dates
 g = StreamGraph()
 
 # Create source nodes
-values1 = source!(g, :values1, out=Float64, init=NaN)
-values2 = source!(g, :values2, out=Float64, init=NaN)
-values3 = source!(g, :values3, out=Float64, init=NaN)
-values4 = source!(g, :values4, out=Float64, init=NaN)
+source!(g, :values1, out=Float64, init=NaN)
+source!(g, :values2, out=Float64, init=NaN)
+source!(g, :values3, out=Float64, init=NaN)
+source!(g, :values4, out=Float64, init=NaN)
 
 # Create combine node
-combine = op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)), out=NTuple{4,Any})
+op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)), out=NTuple{4,Any})
 
 # Create sink node
-output = sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
+sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)
 bind!(g, (:values1, :values2, :values3, :values4), :combine)
@@ -52,7 +52,7 @@ set_adapters!(exe, [
     ]),
     HistoricIterable(exe, g[:values4], Float64[]) # empty
 ])
-@time run_simulation!(exe, start, stop)
+@time run!(exe, start, stop)
 
 # Visualize the computation graph
 graphviz(exe.graph)

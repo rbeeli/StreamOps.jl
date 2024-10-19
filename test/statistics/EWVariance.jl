@@ -35,7 +35,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test output.operation.buffer ≈ expected
     end
@@ -72,7 +72,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test output.operation.buffer ≈ expected
     end
@@ -109,7 +109,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test isnan(output.operation.buffer[1])
         @test output.operation.buffer[2:end] ≈ expected[2:end]
@@ -138,7 +138,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test output.operation.buffer ≈ expected
     end
@@ -166,7 +166,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test isnan(output.operation.buffer[1])
         @test output.operation.buffer[2:end] ≈ expected[2:end]

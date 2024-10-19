@@ -32,7 +32,7 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 10, 0), 10)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         # values right on the cutoff time are included
         @test output.operation.buffer[1] == [1]
@@ -71,7 +71,7 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 10, 0), 10)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         # values right on the cutoff time are excluded
         @test output.operation.buffer[1] isa Vector{Int}
@@ -105,7 +105,7 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 0, 0), 1),
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test output.operation.buffer[1] == [1]
         @test typeof(output.operation.buffer[1]) !== Vector{Int}
@@ -143,7 +143,7 @@ using Dates
                 (DateTime(2000, 1, 6), 6),
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         buffer = g[:output].operation.buffer
         # display(buffer)

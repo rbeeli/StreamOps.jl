@@ -4,13 +4,22 @@ mutable struct HistoricTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     interval::TPeriod
     current_time::TTime
     
-    function HistoricTimer{TTime}(executor, node::StreamNode; interval::TPeriod, start_time::TTime) where {TPeriod,TTime}
+    function HistoricTimer{TTime}(
+        executor,
+        node::StreamNode
+        ;
+        interval::TPeriod,
+        start_time::TTime
+    ) where {TPeriod,TTime}
         adapter_func = executor.adapter_funcs[node.index]
         new{TPeriod,TTime,typeof(adapter_func)}(node, adapter_func, interval, start_time)
     end
 end
 
-function setup!(adapter::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function setup!(
+    adapter::HistoricTimer{TPeriod,TTime},
+    executor::HistoricExecutor{TStates,TTime}
+) where {TPeriod,TStates,TTime}
     # Initialize current time of the timer
     if adapter.current_time < start_time(executor)
         adapter.current_time = start_time(executor)
@@ -36,7 +45,10 @@ function process_event!(
     nothing
 end
 
-function advance!(adapter::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function advance!(
+    adapter::HistoricTimer{TPeriod,TTime},
+    executor::HistoricExecutor{TStates,TTime}
+) where {TPeriod,TStates,TTime}
     # Schedule next event
     adapter.current_time += adapter.interval
     if adapter.current_time <= end_time(executor)

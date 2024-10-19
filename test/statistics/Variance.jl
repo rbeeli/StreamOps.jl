@@ -27,7 +27,7 @@ using Statistics
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         for i in window_size:length(vals)
             @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=true)
         end
@@ -56,7 +56,7 @@ using Statistics
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         for i in window_size:length(vals)
             @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=false)
         end
@@ -87,7 +87,7 @@ using Statistics
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test length(output.operation.buffer) == length(expected)
         @test output.operation.buffer ≈ expected
@@ -117,7 +117,7 @@ using Statistics
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         for i in window_size:length(vals)
             @test output.operation.buffer[i-window_size+1] ≈ std(vals[i-window_size+1:i], corrected=true)
         end

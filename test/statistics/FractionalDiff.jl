@@ -26,7 +26,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         # Reference values generated using Python script ./FractionalDiff.py
         expected = [3.0735819920702734, -6.859030168988753, 153.02035742475738,
@@ -61,7 +61,7 @@ using StreamOps
                 (DateTime(2000, 1, 5), 15.0)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         # For order 1, we expect first differences
         expected = [2.0, 3.0, 4.0, 5.0]
@@ -91,7 +91,7 @@ using StreamOps
                 (DateTime(2000, 1, 5), 5.0)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         # For order 0, we expect the original values
         expected = [1.0, 2.0, 3.0, 4.0, 5.0]

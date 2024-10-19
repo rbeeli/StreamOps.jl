@@ -59,13 +59,14 @@ function set_adapters!(executor::HistoricExecutor, adapters)
     executor.adapters = collect(adapters)
 end
 
-function run_simulation!(
+function run!(
     executor::HistoricExecutor{TStates,TTime},
     start_time::TTime,
     end_time::TTime
 ) where {TStates,TTime}
     @assert start_time <= end_time "Start time cannot be after end time"
-
+    @assert !isempty(executor.adapters) "No adapters have been defined for HistoricExecutor"
+    
     # Set executor time bounds
     executor.start_time = start_time
     executor.end_time = end_time

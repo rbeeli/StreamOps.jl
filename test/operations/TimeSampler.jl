@@ -36,7 +36,7 @@ using Dates
                 (DateTime("2000-01-01T00:08:00"), 800)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         buffer = output.operation.buffer
         display(buffer)
@@ -87,7 +87,7 @@ using Dates
                 (DateTime("2000-01-01T00:08:00"), 800)  # 00:08:30 next sample
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         buffer = output.operation.buffer
         display(buffer)

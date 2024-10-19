@@ -54,7 +54,7 @@ using Dates
                 (DateTime(2000, 1, 1, 0, 10, 0), 10)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         # values right on the cutoff time are included
         @test output.operation.buffer[1] == sum([1]) / 1.0
@@ -97,7 +97,7 @@ using Dates
                 (DateTime("2000-01-08T00:00:00"), 8)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         buffer = output.operation.buffer
         @test buffer[1][1] == DateTime("2000-01-01T00:00:00")

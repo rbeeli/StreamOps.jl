@@ -133,7 +133,7 @@ using StreamOps
                 (DateTime(2000, 1, 3), 4.0),
             ]),
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -165,7 +165,7 @@ using StreamOps
                 (DateTime(2000, 1, 3), 4.0),
             ]),
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -210,7 +210,7 @@ using StreamOps
                 (DateTime(2000, 1, 3), 40.0),
             ]),
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test called == 12 # 3 values * 4 sources
     end
@@ -242,7 +242,7 @@ using StreamOps
                 (DateTime(2000, 1, 3), 4.0),
             ]),
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -273,7 +273,7 @@ using StreamOps
                 (DateTime(2000, 1, 3), 4.0),
             ]),
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test called == 6 # 3 values * 2 sources
     end
@@ -317,7 +317,7 @@ using StreamOps
                 (DateTime(2000, 1, 3), 40.0),
             ]),
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test called == 12 # 3 values * 4 sources
     end
@@ -363,7 +363,7 @@ using StreamOps
                 (DateTime(2000, 1, 3), 40.0),
             ]),
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test called == 12 # 3 values * 4 sources
     end

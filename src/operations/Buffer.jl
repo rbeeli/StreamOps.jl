@@ -23,6 +23,10 @@ mutable struct Buffer{T} <: StreamOperation
     function Buffer(storage::Vector{T}; min_count=0) where {T}
         new{T}(storage, min_count)
     end
+
+    function Buffer{T}(storage::Vector{T}; min_count=0) where {T}
+        new{T}(storage, min_count)
+    end
 end
 
 @inline function (op::Buffer)(executor, val)

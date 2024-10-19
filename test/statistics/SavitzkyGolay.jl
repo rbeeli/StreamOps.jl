@@ -58,7 +58,7 @@ using LinearAlgebra
             set_adapters!(exe, [
                 HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
             ])
-            run_simulation!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 1)
         end
     end
@@ -79,7 +79,7 @@ using LinearAlgebra
             set_adapters!(exe, [
                 HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
             ])
-            run_simulation!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 2)
         end
     end
@@ -100,7 +100,7 @@ using LinearAlgebra
             set_adapters!(exe, [
                 HistoricIterable(exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)])
             ])
-            run_simulation!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
             @test output.operation.buffer ≈ savitzky_golay(vals, window_size, 3)
         end
     end

@@ -58,7 +58,10 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
     end
 end
 
-function worker(adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecutor{TStates,TTime}) where {TData,TItem,TStates,TTime}
+function worker(
+    adapter::RealtimeIterable{TData,TItem},
+    executor::RealtimeExecutor{TStates,TTime}
+) where {TData,TItem,TStates,TTime}
     while !isnothing(adapter.iterate_state)
         next_item = @inbounds adapter.iterate_state[1]
         next_time = @inbounds next_item[1]

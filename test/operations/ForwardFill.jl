@@ -27,7 +27,7 @@ using StreamOps
             ])
         ])
 
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         @test output.operation.buffer == expected
     end
 
@@ -55,7 +55,7 @@ using StreamOps
             ])
         ])
 
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         @test output.operation.buffer == expected
     end
 
@@ -83,7 +83,7 @@ using StreamOps
             ])
         ])
 
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         @test output.operation.buffer == expected
     end
 

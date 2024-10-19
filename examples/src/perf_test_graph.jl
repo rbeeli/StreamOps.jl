@@ -41,7 +41,7 @@ function run()
             (x, x) for x in dts
         )
     ])
-    run_simulation!(exe, start, stop)
+    run!(exe, start, stop)
 
     nothing
 end

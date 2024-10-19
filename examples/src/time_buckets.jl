@@ -22,7 +22,7 @@ op!(g, :flush, Func{Vector{Float64}}((exe, dt, buf) -> begin
 end, Float64[]), out=Vector{Float64})
 
 # Create sink nodes
-output1 = sink!(g, :output1, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
+sink!(g, :output1, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)
 bind!(g, :values, :buffer)
@@ -36,8 +36,8 @@ exe = compile_historic_executor(DateTime, g, debug=!true)
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 6)
 set_adapters!(exe, [
-    HistoricTimer{DateTime}(exe, g[:timer], interval=Dates.Day(2), start_time=start),
-    HistoricIterable(exe, values, [
+    HistoricTimer{DateTime}(exe, g[:timer], interval=Day(2), start_time=start),
+    HistoricIterable(exe, g[:values], [
         (DateTime(2000, 1, 1, 0, 1, 1), 1.0),
         (DateTime(2000, 1, 1, 0, 1, 2), 1.5),
         (DateTime(2000, 1, 2, 0, 0, 0), 2.0),
@@ -49,7 +49,7 @@ set_adapters!(exe, [
         (DateTime(2000, 1, 6, 0, 0, 0), 6.0)
     ])
 ])
-@time run_simulation!(exe, start, stop)
+@time run!(exe, start, stop)
 
 # Visualize the computation graph
 graphviz(exe.graph)

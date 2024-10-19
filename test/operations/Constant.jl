@@ -25,7 +25,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test output.operation.buffer == [999, 999, 999, 999, 999]
     end
@@ -51,7 +51,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
 
         @test output.operation.buffer == [999, 999, 999, 999, 999]
     end
@@ -79,7 +79,7 @@ using StreamOps
     #             for (i, x) in enumerate(vals)
     #         ])
     #     ])
-    #     run_simulation!(exe, start, stop)
+    #     run!(exe, start, stop)
 
     #     println(output.operation.buffer)
     #     # @test output.operation.buffer == [999, 999, 999, 999, 999]

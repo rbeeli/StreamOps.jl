@@ -26,7 +26,7 @@ set_adapters!(exe, [
         (DateTime(2000, 1, 2), 2.0),
     ])
 ])
-@time run_simulation!(exe, start, stop)
+@time run!(exe, start, stop)
 
 # Visualize the computation graph
 graphviz(exe.graph)

@@ -25,7 +25,10 @@ mutable struct HistoricIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
     end
 end
 
-function setup!(adapter::HistoricIterable{TData}, executor::HistoricExecutor{TStates,TTime}) where {TData,TStates,TTime}
+function setup!(
+    adapter::HistoricIterable{TData},
+    executor::HistoricExecutor{TStates,TTime}
+) where {TData,TStates,TTime}
     adapter.iterate_state = iterate(adapter.data)
 
     if !isnothing(adapter.iterate_state)
@@ -48,7 +51,10 @@ function process_event!(
     nothing
 end
 
-function advance!(adapter::HistoricIterable{TData}, executor::HistoricExecutor{TStates,TTime}) where {TData,TStates,TTime}
+function advance!(
+    adapter::HistoricIterable{TData},
+    executor::HistoricExecutor{TStates,TTime}
+) where {TData,TStates,TTime}
     # Schedule next record
     adapter.iterate_state = iterate(adapter.data, (@inbounds adapter.iterate_state[2]))
     if !isnothing(adapter.iterate_state)

@@ -75,8 +75,13 @@ function set_adapters!(executor::RealtimeExecutor, adapters)
     executor.adapters = collect(adapters)
 end
 
-function run_realtime!(executor::RealtimeExecutor{TStates,TTime}; start_time::TTime, end_time::TTime) where {TStates,TTime}
+function run!(
+    executor::RealtimeExecutor{TStates,TTime},
+    start_time::TTime,
+    end_time::TTime
+) where {TStates,TTime}
     @assert start_time < end_time "Start time '$start_time' must be before end time '$end_time'"
+    @assert !isempty(executor.adapters) "No adapters have been defined for HistoricExecutor"
 
     # Set executor time bounds
     executor.start_time = start_time

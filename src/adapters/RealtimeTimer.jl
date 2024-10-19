@@ -10,7 +10,7 @@ mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     stop_flag::Threads.Atomic{Bool}
     stop_check_interval::Dates.Millisecond
 
-    function RealtimeTimer(
+    function RealtimeTimer{TTime}(
         executor,
         node::StreamNode
         ;
@@ -25,7 +25,10 @@ mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     end
 end
 
-function worker(adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function worker(
+    adapter::RealtimeTimer{TPeriod,TTime},
+    executor::RealtimeExecutor{TStates,TTime}
+) where {TPeriod,TStates,TTime}
     time_now = time(executor)
     next_time = _calc_next_time(adapter, executor)
 

@@ -15,7 +15,7 @@ using StreamOps
     set_adapters!(exe, [
         HistoricTimer{DateTime}(exe, timer; interval=Dates.Second(5), start_time=start),
     ])
-    run_simulation!(exe, start, stop)
+    run!(exe, start, stop)
     @test get_state(counter.operation) == 4 # 0, 5, 10, 15
 
     reset!(counter.operation)

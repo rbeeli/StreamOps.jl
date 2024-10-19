@@ -29,7 +29,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         
         @test length(output.operation.buffer) == length(expected)
         @test output.operation.buffer ≈ expected
@@ -62,7 +62,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         
         @test length(output.operation.buffer) == length(expected)
         @test output.operation.buffer ≈ expected
@@ -93,7 +93,7 @@ using StreamOps
                 for (i, x) in enumerate(vals)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         
         @test length(output.operation.buffer) == length(expected)
         @test output.operation.buffer ≈ expected

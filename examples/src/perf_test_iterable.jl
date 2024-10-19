@@ -10,7 +10,7 @@ StreamOps.time_zero(::Type{Timestamp64}) = Timestamp64(0)
 function run()
     g = StreamGraph()
 
-    values = source!(g, :values, out=Int, init=0)
+    source!(g, :values, out=Int, init=0)
     # buffer = sink!(g, :buffer, Buffer{Int}())
 
     # bind!(g, values, buffer)
@@ -18,7 +18,7 @@ function run()
     exe = compile_historic_executor(Timestamp64, g; debug=!true)
 
     Base.invokelatest() do
-        adapter = HistoricIterable(exe, values, 
+        adapter = HistoricIterable(exe, g[:values], 
             [(Timestamp64(x), x) for x in 1:10_000_000]
         )
         

@@ -25,7 +25,7 @@ using Suppressor
             ])
         ])
         output = @capture_out begin
-            run_simulation!(exe, start, stop)
+            run!(exe, start, stop)
         end
         @test output == "1\n2\n3\n4\n"
     end
@@ -51,7 +51,7 @@ using Suppressor
             ])
         ])
         output = @capture_out begin
-            run_simulation!(exe, start, stop)
+            run!(exe, start, stop)
         end
         @test output == "x=1\nx=2\nx=3\nx=4\n"
     end

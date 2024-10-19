@@ -38,15 +38,15 @@ bind!(g, :number, :output)
 exe = compile_realtime_executor(Timestamp64, g, debug=!true)
 
 # Run in realtime mode
-start = round_origin(now(Timestamp64), Dates.Second(1), RoundUp)
-stop = start + Dates.Second(5)
-values = [
+start = round_origin(now(Timestamp64), Second(1), RoundUp)
+stop = start + Second(5)
+vals = [
     (start + Second(1), 1.0),
     (start + Second(2), 2.0),
     (start + Second(3), 3.0),
     (start + Second(4), 4.0),
 ]
 set_adapters!(exe, [
-    RealtimeIterable(exe, g[:number], values)
+    RealtimeIterable(exe, g[:number], vals)
 ])
-@time run_realtime!(exe, start_time=start, end_time=stop)
+@time run!(exe, start, stop)

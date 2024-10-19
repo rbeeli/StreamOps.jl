@@ -26,7 +26,7 @@ using StreamOps
                 (DateTime(2000, 1, 5), 5)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         @test output.operation.buffer == [1, 2, 3, 4]
     end
 
@@ -53,7 +53,7 @@ using StreamOps
                 (DateTime(2000, 1, 5), 5)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         @test output.operation.buffer == [1, 2, 3]
     end
 
@@ -80,7 +80,7 @@ using StreamOps
                 (DateTime(2000, 1, 5), 5)
             ])
         ])
-        run_simulation!(exe, start, stop)
+        run!(exe, start, stop)
         @test output.operation.buffer == [1, 2, 3, 4, 5]
     end
 
