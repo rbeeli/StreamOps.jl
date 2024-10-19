@@ -1,5 +1,6 @@
 using Test
 using StreamOps
+using Dates
 
 @testset "Counter" begin
     g = StreamGraph()
@@ -13,7 +14,7 @@ using StreamOps
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 0, 15)
     set_adapters!(exe, [
-        HistoricTimer{DateTime}(exe, timer; interval=Dates.Second(5), start_time=start),
+        HistoricTimer{DateTime}(exe, timer; interval=Second(5), start_time=start),
     ])
     run!(exe, start, stop)
     @test get_state(counter.operation) == 4 # 0, 5, 10, 15

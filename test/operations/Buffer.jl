@@ -1,5 +1,6 @@
 using Test
 using StreamOps
+using Dates
 
 @testset verbose = true "Buffer" begin
 
@@ -118,7 +119,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 6)
         set_adapters!(exe, [
-            HistoricTimer{DateTime}(exe, g[:timer]; interval=Dates.Day(2), start_time=start),
+            HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(2), start_time=start),
             HistoricIterable(exe, g[:values], [
                 (DateTime(2000, 1, 1), 1.0),
                 (DateTime(2000, 1, 2), 2.0),

@@ -1,5 +1,6 @@
 using Test
 using StreamOps
+using Dates
 
 @testset verbose = true "TimeTupleBuffer" begin
 
@@ -101,7 +102,7 @@ using StreamOps
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 6)
         set_adapters!(exe, [
-            HistoricTimer{DateTime}(exe, timer; interval=Dates.Day(2), start_time=start),
+            HistoricTimer{DateTime}(exe, timer; interval=Day(2), start_time=start),
             HistoricIterable(exe, values, input)
         ])
         run!(exe, start, stop)

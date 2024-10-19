@@ -41,7 +41,7 @@ using Dates
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
         set_adapters!(exe, [
-            HistoricTimer{DateTime}(exe, g[:time], interval=Dates.Day(1), start_time=start)
+            HistoricTimer{DateTime}(exe, g[:time], interval=Day(1), start_time=start)
         ])
         @time run!(exe, start, stop)
 

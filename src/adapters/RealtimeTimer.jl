@@ -8,7 +8,7 @@ mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     start_time::TTime
     task::Union{Task,Nothing}
     stop_flag::Threads.Atomic{Bool}
-    stop_check_interval::Dates.Millisecond
+    stop_check_interval::Millisecond
 
     function RealtimeTimer{TTime}(
         executor,
@@ -16,7 +16,7 @@ mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
         ;
         interval::TPeriod,
         start_time::TTime,
-        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50)
+        stop_check_interval::Millisecond=Millisecond(50)
     ) where {TPeriod,TTime}
         adapter_func = executor.adapter_funcs[node.index]
         stop_flag = Threads.Atomic{Bool}(false)
@@ -39,7 +39,7 @@ function worker(
         time_now >= end_time(executor) && break
 
         # Calculate sleep duration
-        sleep_us = Dates.Microsecond(min(next_time - time_now, adapter.stop_check_interval))
+        sleep_us = Microsecond(min(next_time - time_now, adapter.stop_check_interval))
 
         # Wait until next event (or stop flag check)
         # use Libc.systemsleep(secs) instead of Base.sleep(secs) for more accurate sleep time

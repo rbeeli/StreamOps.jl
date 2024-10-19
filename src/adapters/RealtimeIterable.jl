@@ -8,7 +8,7 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
     iterate_state::Union{Nothing,Tuple{TItem,Int}}
     task::Union{Task,Nothing}
     stop_flag::Threads.Atomic{Bool}
-    stop_check_interval::Dates.Millisecond
+    stop_check_interval::Millisecond
     process_queue::Channel{TItem}
 
     function RealtimeIterable(
@@ -17,7 +17,7 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
         node::StreamNode,
         data::TData
         ;
-        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50),
+        stop_check_interval::Millisecond=Millisecond(50),
         max_queue_size=1024
     ) where {TExecutor<:GraphExecutor,TData,TItem}
         adapter_func = executor.adapter_funcs[node.index]
@@ -39,7 +39,7 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
         node::StreamNode,
         data::TData
         ;
-        stop_check_interval::Dates.Millisecond=Dates.Millisecond(50),
+        stop_check_interval::Millisecond=Millisecond(50),
         max_queue_size=1024
     ) where {TExecutor<:GraphExecutor,TData}
         eltype(data) != Any || throw(ArgumentError("Element type detected as Any. Use typed HistoricIterable constructor to avoid performance penality of Any."))
@@ -71,7 +71,7 @@ function worker(
         time_now >= end_time(executor) && break
 
         # Calculate sleep duration
-        sleep_us = Dates.Microsecond(min(next_time - time_now, adapter.stop_check_interval))
+        sleep_us = Microsecond(min(next_time - time_now, adapter.stop_check_interval))
 
         # Wait until next event (or stop flag check)
         # use Libc.systemsleep(secs) instead of Base.sleep(secs) for more accurate sleep time
