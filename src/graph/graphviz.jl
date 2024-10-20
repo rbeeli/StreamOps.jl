@@ -15,7 +15,7 @@ function graphviz(
     println(io, "  edge [fontsize=$edgefontsize fontname=\"$edgefontname\" fontcolor=\"#666666\"];")
     
     function make_label(node::StreamNode)
-        return "$(node.label)<FONT POINT-SIZE=\"5\"></FONT><SUP><FONT COLOR=\"gray\" POINT-SIZE=\"$(ceil(Int, 0.7nodefontsize))\">[$(node.index)]</FONT></SUP>"
+        return "$(node.label)<FONT POINT-SIZE=\"5\"> </FONT><SUP><FONT COLOR=\"gray\" POINT-SIZE=\"$(ceil(Int, 0.7nodefontsize))\">[$(node.index)]</FONT></SUP>"
     end
 
     # Source nodes (at the top)
