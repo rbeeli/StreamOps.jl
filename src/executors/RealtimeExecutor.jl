@@ -19,16 +19,14 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
         ;
         max_queue_size::Int=typemax(Int)
     ) where {TStates,TTime}
-        event_queue = Channel{ExecutionEvent{TTime}}(max_queue_size)
-        adapter_funcs = Vector{Function}()
         new{TStates,TTime}(
             graph,
             states,
             time_zero(TTime), # start_time
             time_zero(TTime), # end_time
-            event_queue,
-            Vector{SourceAdapter}(),
-            adapter_funcs
+            Channel{ExecutionEvent{TTime}}(max_queue_size), # event_queue
+            Vector{SourceAdapter}(), # adapters
+            Vector{Function}(), # adapter_funcs
         )
     end
 end

@@ -19,17 +19,15 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
         graph::StreamGraph,
         states::TStates
     ) where {TStates,TTime}
-        event_queue = BinaryMinHeap{ExecutionEvent{TTime}}()
-        adapter_funcs = Vector{Function}()
         new{TStates,TTime}(
             graph,
             states,
             time_zero(TTime), # start_time
             time_zero(TTime), # end_time
-            zero(TTime),
-            event_queue,
-            Vector{SourceAdapter}(),
-            adapter_funcs
+            zero(TTime), # current_time
+            BinaryMinHeap{ExecutionEvent{TTime}}(), # event_queue
+            Vector{SourceAdapter}(), # adapters
+            Vector{Function}(), # adapter_funcs
         )
     end
 end
@@ -66,12 +64,12 @@ function run!(
 ) where {TStates,TTime}
     @assert start_time <= end_time "Start time cannot be after end time"
     @assert !isempty(executor.adapters) "No adapters have been defined for HistoricExecutor"
-    
+
     # Set executor time bounds
     executor.start_time = start_time
     executor.end_time = end_time
     executor.current_time = start_time
-    
+
     # need invokelatest because states struct is dynamically compiled,
     # which may live in a newer world age than the caller.
     Base.invokelatest() do
@@ -94,7 +92,7 @@ function run!(
 
             # Events before start_time are NOT filtered currently,
             # useful for initialization purposes.
-            
+
             # Ignore records before start time
             # if timestamp >= start_time
             # Update the current time of the executor
@@ -103,7 +101,7 @@ function run!(
             # Execute the event
             process_event!(adapter, executor, event)
             # else
-                # println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
+            # println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
             # end
 
             # Schedule next event
