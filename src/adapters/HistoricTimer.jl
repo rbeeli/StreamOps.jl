@@ -52,7 +52,8 @@ function advance!(
     # Schedule next event
     adapter.current_time += adapter.interval
     if adapter.current_time <= end_time(executor)
-        push!(executor.event_queue, ExecutionEvent(adapter.current_time, adapter))
+        event = ExecutionEvent(adapter.current_time, adapter)
+        push!(executor.event_queue, event)
     end
     nothing
 end

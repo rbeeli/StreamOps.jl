@@ -26,9 +26,9 @@ mutable struct HistoricIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
 end
 
 function setup!(
-    adapter::HistoricIterable{TData},
+    adapter::HistoricIterable{TData,TItem,TAdapterFunc},
     executor::HistoricExecutor{TStates,TTime}
-) where {TData,TStates,TTime}
+) where {TData,TItem,TAdapterFunc,TStates,TTime}
     adapter.iterate_state = iterate(adapter.data)
 
     if !isnothing(adapter.iterate_state)
@@ -41,10 +41,10 @@ function setup!(
 end
 
 function process_event!(
-    adapter::HistoricIterable{TData},
+    adapter::HistoricIterable{TData,TItem,TAdapterFunc},
     executor::HistoricExecutor{TStates,TTime},
     event::ExecutionEvent{TTime}
-) where {TData,TStates,TTime}
+) where {TData,TItem,TAdapterFunc,TStates,TTime}
     # Execute subgraph based on current value
     _, input_data = @inbounds adapter.iterate_state[1]
     adapter.adapter_func(executor, input_data)
@@ -52,14 +52,17 @@ function process_event!(
 end
 
 function advance!(
-    adapter::HistoricIterable{TData},
+    adapter::HistoricIterable{TData,TItem,TAdapterFunc},
     executor::HistoricExecutor{TStates,TTime}
-) where {TData,TStates,TTime}
+) where {TData,TItem,TAdapterFunc,TStates,TTime}
     # Schedule next record
     adapter.iterate_state = iterate(adapter.data, (@inbounds adapter.iterate_state[2]))
+
     if !isnothing(adapter.iterate_state)
         timestamp, _ = @inbounds adapter.iterate_state[1]
-        push!(executor.event_queue, ExecutionEvent(timestamp, adapter))
+        event = ExecutionEvent(timestamp, adapter)
+        push!(executor.event_queue, event)
     end
+
     nothing
 end

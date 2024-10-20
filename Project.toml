@@ -11,6 +11,9 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 ShowGraphviz = "14e20f5a-e304-4f94-b7d9-bca841234ddf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
+[compat]
+julia = "1.10"
+
 [extras]
 Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
