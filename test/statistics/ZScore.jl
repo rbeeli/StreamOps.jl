@@ -91,8 +91,8 @@ using Statistics
         stop = DateTime(2000, 1, 1)
         run!(exe, start, stop)
 
-        # Z-score should be NaN for single value
-        @test isnan(output.operation.buffer[1])
+        # we define Z-score as 0 for a single value
+        @test output.operation.buffer[1] == 0
         @test length(output.operation.buffer) == 1
     end
 

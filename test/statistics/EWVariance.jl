@@ -117,7 +117,8 @@ using StreamOps
         ])
         run!(exe, start, stop)
 
-        @test isnan(output.operation.buffer[1])
+        # uninitialized value is 0
+        @test output.operation.buffer[1] == 0
         @test output.operation.buffer[2:end] ≈ expected[2:end]
     end
 
@@ -178,7 +179,8 @@ using StreamOps
         ])
         run!(exe, start, stop)
 
-        @test isnan(output.operation.buffer[1])
+        # uninitialized value is 0
+        @test output.operation.buffer[1] == 0
         @test output.operation.buffer[2:end] ≈ expected[2:end]
     end
 

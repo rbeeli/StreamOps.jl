@@ -69,20 +69,20 @@ end
 
 # biased variance
 @inline function get_state(op::Variance{In,Out,false,false})::Out where {In,Out}
-    op.M2 / op.window_size
+    op.window_size > 0 ? op.M2 / op.window_size : zero(Out)
 end
 
 # biased std. deviation
 @inline function get_state(op::Variance{In,Out,false,true})::Out where {In,Out}
-    sqrt(op.M2 / op.window_size)
+    op.window_size > 0 ? sqrt(op.M2 / op.window_size) : zero(Out)
 end
 
 # unbiased variance
 @inline function get_state(op::Variance{In,Out,true,false})::Out where {In,Out}
-    op.M2 / (op.window_size - 1)
+    op.window_size > 1 ? op.M2 / (op.window_size - 1) : zero(Out)
 end
 
 # unbiased std. deviation
 @inline function get_state(op::Variance{In,Out,true,true})::Out where {In,Out}
-    sqrt(op.M2 / (op.window_size - 1))
+    op.window_size > 1 ? sqrt(op.M2 / (op.window_size - 1)) : zero(Out)
 end

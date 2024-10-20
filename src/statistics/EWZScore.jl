@@ -39,7 +39,7 @@ end
     op.nobs += 1
     if op.nobs == 1
         op.mean = value
-        op.current_zscore = Out(NaN)
+        op.current_zscore = zero(Out)
         return nothing
     end
     
@@ -69,7 +69,7 @@ end
 
     # Calculate z-score
     std_dev = sqrt(op.var)
-    op.current_zscore = std_dev > zero(Out) ? (value - op.mean) / std_dev : Out(NaN)
+    op.current_zscore = std_dev > zero(Out) ? (value - op.mean) / std_dev : zero(Out)
 
     nothing
 end
@@ -81,7 +81,7 @@ end
         op.mean = value
         op.sum_wt = op.alpha
         op.sum_wt2 = op.alpha * op.alpha
-        op.current_zscore = Out(NaN)
+        op.current_zscore = zero(Out)
         return nothing
     end
     
@@ -110,7 +110,7 @@ end
 
     # Calculate z-score
     std_dev = sqrt(corrected_var)
-    op.current_zscore = std_dev > zero(Out) ? (value - op.mean) / std_dev : Out(NaN)
+    op.current_zscore = std_dev > zero(Out) ? (value - op.mean) / std_dev : zero(Out)
 
     nothing
 end

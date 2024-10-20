@@ -68,7 +68,7 @@ end
         std_dev = sqrt(variance)
         op.current = (value - op.M1) / std_dev
     else
-        op.current = Out(NaN)
+        op.current = zero(Out)
     end
 
     nothing
@@ -84,10 +84,10 @@ end
 
 # Corrected (unbiased) variance calculation
 @inline function calculate_variance(op::ZScore{In,Out,true}, n::Int)::Out where {In,Out}
-    op.M2 / (n - 1)
+    n > 1 ? op.M2 / (n - 1) : zero(Out)
 end
 
 # Uncorrected (biased) variance calculation
 @inline function calculate_variance(op::ZScore{In,Out,false}, n::Int)::Out where {In,Out}
-    op.M2 / n
+    n > 0 ? op.M2 / n : zero(Out)
 end

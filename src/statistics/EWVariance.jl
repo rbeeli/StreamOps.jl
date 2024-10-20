@@ -129,7 +129,7 @@ end
             return (num / denom) * op.var
         end
     end
-    Out(NaN)
+    zero(Out)
 end
 
 # bias corrected std. deviation
@@ -141,5 +141,5 @@ end
             return sqrt((num / denom) * op.var)
         end
     end
-    Out(NaN)
+    zero(Out)
 end
