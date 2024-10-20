@@ -9,11 +9,12 @@ using StreamOps
         values = source!(g, :values, out=Int, init=0)
         pct_change = op!(g, :pct_change, PctChange{Int,Float64}(), out=Float64)
         output = sink!(g, :output, Buffer{Float64}())
-
         bind!(g, values, pct_change)
         bind!(g, pct_change, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 5)

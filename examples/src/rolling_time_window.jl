@@ -18,7 +18,9 @@ bind!(g, :values, :rolling)
 bind!(g, :rolling, :output)
 
 # Compile the graph with historic executor
-exe = compile_historic_executor(DateTime, g, debug=!true)
+states = compile_graph!(DateTime, g)
+exe = HistoricExecutor{DateTime}(g, states)
+setup!(exe)
 
 # Run simulation
 start = DateTime(2000, 1, 1)

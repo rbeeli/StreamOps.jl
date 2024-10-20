@@ -121,7 +121,9 @@ using StreamOps
 
         bind!(g, (timer, values), output, call_policies=Always(), bind_as=NamedParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -153,7 +155,9 @@ using StreamOps
         bind!(g, timer, output, call_policies=Always(), bind_as=NoBind())
         bind!(g, values, output, call_policies=Always(), bind_as=PositionParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -188,7 +192,9 @@ using StreamOps
         bind!(g, (timer, values), output, call_policies=Always(), bind_as=NamedParams())
         bind!(g, (values2, values3), output, call_policies=Always(), bind_as=NamedParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -230,7 +236,9 @@ using StreamOps
 
         bind!(g, (timer, values), output, call_policies=Always(), bind_as=PositionParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -261,7 +269,9 @@ using StreamOps
 
         bind!(g, (timer, values), output, call_policies=Always(), bind_as=TupleParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -295,7 +305,9 @@ using StreamOps
         bind!(g, (timer, values), output, call_policies=Always(), bind_as=TupleParams())
         bind!(g, (values2, values3), output, call_policies=Always(), bind_as=TupleParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -341,7 +353,9 @@ using StreamOps
         bind!(g, (values2, values3), output, call_policies=Always(), bind_as=TupleParams())
         bind!(g, (timer, values), output, call_policies=Always(), bind_as=NamedParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)

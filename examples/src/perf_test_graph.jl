@@ -27,7 +27,9 @@ function run()
     bind!(g, :counts_node, :sink_counts)
 
     # Compile the graph with historic executor
-    exe = compile_historic_executor(Timestamp64, g, debug=!true)
+    states = compile_graph!(Timestamp64, g)
+    exe = HistoricExecutor{Timestamp64}(g, states)
+    setup!(exe)
 
     # Run simulation
     dts = [Timestamp64(i) for i in 1:10_000_000]

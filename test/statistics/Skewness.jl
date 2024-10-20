@@ -11,11 +11,12 @@ using StreamOps
         values = source!(g, :values, out=Float64, init=0.0)
         skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
         output = sink!(g, :output, Buffer{Float64}())
-
         bind!(g, values, skew)
         bind!(g, skew, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         # Reference values generated using Python script ./Skewness.py
         vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
@@ -43,11 +44,12 @@ using StreamOps
         values = source!(g, :values, out=Float64, init=0.0)
         skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
         output = sink!(g, :output, Buffer{Float64}())
-
         bind!(g, values, skew)
         bind!(g, skew, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         # Reference values generated using Python script ./Skewness.py
         vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
@@ -76,11 +78,12 @@ using StreamOps
         values = source!(g, :values, out=Float64, init=0.0)
         skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
         output = sink!(g, :output, Buffer{Float64}())
-
         bind!(g, values, skew)
         bind!(g, skew, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         expected = [0.0, 0.0, 0.0, 0.0, 0.0]

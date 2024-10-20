@@ -20,7 +20,9 @@ sink!(g, :output, func)
 bind!(g, (:timer, :values), :output, bind_as=NamedParams())
 
 # Compile the graph with historic executor
-exe = compile_historic_executor(DateTime, g, debug=!true)
+states = compile_graph!(DateTime, g)
+exe = HistoricExecutor{DateTime}(g, states)
+setup!(exe)
 
 # Run simulation
 start = DateTime(2000, 1, 1, 0, 0, 0)

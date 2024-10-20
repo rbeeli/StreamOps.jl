@@ -34,7 +34,9 @@ end, nothing))
 bind!(g, :timer, :output)
 
 # Compile the graph with realtime executor
-exe = compile_realtime_executor(Timestamp64, g, debug=!true)
+states = compile_graph!(Timestamp64, g; debug=false)
+exe = RealtimeExecutor{Timestamp64}(g, states)
+setup!(exe)
 
 # Run in realtime mode
 start = round_origin(now(Timestamp64), Second(1), RoundUp)

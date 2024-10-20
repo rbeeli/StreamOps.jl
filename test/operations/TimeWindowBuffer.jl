@@ -19,7 +19,9 @@ using Dates
         bind!(g, values, rolling)
         bind!(g, rolling, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
@@ -58,7 +60,9 @@ using Dates
         bind!(g, values, rolling)
         bind!(g, rolling, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)
@@ -96,7 +100,9 @@ using Dates
         bind!(g, values, rolling)
         bind!(g, rolling, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 1, 0)
@@ -131,7 +137,9 @@ using Dates
         bind!(g, (:timer, :rolling), :output,
             bind_as=TupleParams(), call_policies=IfExecuted(:timer))
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 7)

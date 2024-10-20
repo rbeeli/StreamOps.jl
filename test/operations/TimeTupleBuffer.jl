@@ -9,12 +9,13 @@ using Dates
 
         values = source!(g, :values, out=Int, init=0)
         buffer = sink!(g, :buffer, TimeTupleBuffer{DateTime,Int}())
-
         @test buffer.operation.min_count == 0
-
         bind!(g, values, buffer)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
+
         input = [
             (DateTime(2000, 1, 1), 1),
             (DateTime(2000, 1, 2), 2),
@@ -39,13 +40,14 @@ using Dates
         values = source!(g, :values, out=Int, init=0)
         buffer = op!(g, :buffer, TimeTupleBuffer{DateTime,Int}(min_count=3), out=Vector{Tuple{DateTime,Int}})
         output = sink!(g, :output, Counter())
-
         @test buffer.operation.min_count == 3
-
         bind!(g, values, buffer)
         bind!(g, buffer, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
+
         input = [
             (DateTime(2000, 1, 1), 1),
             (DateTime(2000, 1, 2), 2),
@@ -90,7 +92,10 @@ using Dates
         bind!(g, timer, flush_buffer)
         bind!(g, flush_buffer, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
+        
         input = [
             (DateTime(2000, 1, 1), 1.0),
             (DateTime(2000, 1, 2), 2.0),

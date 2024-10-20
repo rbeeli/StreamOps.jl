@@ -26,7 +26,9 @@ end, nothing))
 bind!(g, :timer, :output)
 
 # Compile the graph with realtime executor
-exe = compile_realtime_executor(DateTime, g, debug=!true)
+states = compile_graph!(DateTime, g; debug=false)
+exe = RealtimeExecutor{DateTime}(g, states)
+setup!(exe)
 
 # Run in realtime mode
 start = round_origin(now(UTC), Second(1), RoundUp)

@@ -26,7 +26,9 @@ bind!(g, (:values1, :values2, :values3, :values4), :combine)
 bind!(g, :combine, :output)
 
 # Compile the graph with historic executor
-exe = compile_historic_executor(DateTime, g, debug=!true)
+states = compile_graph!(DateTime, g)
+exe = HistoricExecutor{DateTime}(g, states)
+setup!(exe)
 
 # Run simulation
 start = DateTime(1999, 12, 31)

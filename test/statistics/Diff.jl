@@ -11,7 +11,9 @@ using StreamOps
     bind!(g, values, diff)
     bind!(g, diff, output)
 
-    exe = compile_historic_executor(DateTime, g; debug=!true)
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 5)

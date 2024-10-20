@@ -12,7 +12,9 @@ using Dates
         sink!(g, :output, Buffer{Float64}(buffer))
         bind!(g, :values, :output)
 
-        exe = compile_historic_executor(DateTime, g, debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 10)
@@ -36,7 +38,9 @@ using Dates
         sink!(g, :output, Buffer{DateTime}(buffer))
         bind!(g, :time, :output)
 
-        exe = compile_historic_executor(DateTime, g, debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -57,7 +61,9 @@ using Dates
         sink!(g, :output, Buffer{Float64}(buffer))
         bind!(g, :values, :output)
 
-        exe = compile_historic_executor(DateTime, g, debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 10)

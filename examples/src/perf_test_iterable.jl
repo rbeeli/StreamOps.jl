@@ -15,7 +15,9 @@ function run()
 
     # bind!(g, values, buffer)
 
-    exe = compile_historic_executor(Timestamp64, g; debug=!true)
+    states = compile_graph!(Timestamp64, g)
+    exe = HistoricExecutor{Timestamp64}(g, states)
+    setup!(exe)
 
     Base.invokelatest() do
         adapter = HistoricIterable(exe, g[:values], 

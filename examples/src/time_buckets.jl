@@ -30,7 +30,9 @@ bind!(g, (:timer, :buffer), :flush, call_policies=[IfExecuted(:timer)])
 bind!(g, :flush, :output1)
 
 # Compile the graph with historic executor
-exe = compile_historic_executor(DateTime, g, debug=!true)
+states = compile_graph!(DateTime, g)
+exe = HistoricExecutor{DateTime}(g, states)
+setup!(exe)
 
 # Run simulation
 start = DateTime(2000, 1, 1)

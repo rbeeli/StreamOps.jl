@@ -13,7 +13,9 @@ using StreamOps
         bind!(g, values, avg)
         bind!(g, avg, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 7)
@@ -53,7 +55,9 @@ using StreamOps
         bind!(g, values, avg)
         bind!(g, avg, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 7)
@@ -93,7 +97,9 @@ using StreamOps
         bind!(g, values, avg)
         bind!(g, avg, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = Float64[1.0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
         start = DateTime(2000, 1, 1)

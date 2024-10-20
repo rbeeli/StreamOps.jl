@@ -16,7 +16,9 @@ using Statistics
         bind!(g, values, avg)
         bind!(g, avg, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
         start = DateTime(2000, 1, 1)
@@ -45,7 +47,9 @@ using Statistics
         bind!(g, values, avg)
         bind!(g, avg, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
         start = DateTime(2000, 1, 1)
@@ -74,7 +78,9 @@ using Statistics
         bind!(g, values, avg)
         bind!(g, avg, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         expected = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -106,7 +112,9 @@ using Statistics
         bind!(g, values, avg)
         bind!(g, avg, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
         start = DateTime(2000, 1, 1)

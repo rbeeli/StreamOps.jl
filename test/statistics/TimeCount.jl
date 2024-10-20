@@ -9,16 +9,15 @@ using Dates
 
         values = source!(g, :values, out=Int, init=0)
         rolling = op!(g, :rolling, TimeCount{DateTime}(Minute(2), :closed), out=Int)
-
         @test is_valid(values.operation) # != nothing -> is_valid
         @test !is_valid(rolling.operation)
-
         output = sink!(g, :output, Buffer{Int}())
-
         bind!(g, values, rolling)
         bind!(g, rolling, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1, 0, 0, 0)
         stop = DateTime(2000, 1, 1, 0, 10, 0)

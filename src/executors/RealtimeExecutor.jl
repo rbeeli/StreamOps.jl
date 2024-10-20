@@ -12,23 +12,24 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     event_queue::Channel{ExecutionEvent{TTime}}
     adapters::Vector{SourceAdapter}
     adapter_funcs::Vector{Function}
+
     function RealtimeExecutor{TTime}(
         graph::StreamGraph,
         states::TStates
         ;
-        start_time::TTime,
-        end_time::TTime
+        max_queue_size::Int=typemax(Int)
     ) where {TStates,TTime}
-        event_queue = Channel{ExecutionEvent{TTime}}(1024)
+        event_queue = Channel{ExecutionEvent{TTime}}(max_queue_size)
         adapter_funcs = Vector{Function}()
         new{TStates,TTime}(
             graph,
             states,
-            start_time,
-            end_time,
+            time_zero(TTime), # start_time
+            time_zero(TTime), # end_time
             event_queue,
             Vector{SourceAdapter}(),
-            adapter_funcs)
+            adapter_funcs
+        )
     end
 end
 
@@ -52,22 +53,12 @@ end
     executor.end_time
 end
 
-function compile_realtime_executor(::Type{TTime}, graph::StreamGraph; debug=false) where {TTime}
-    states = compile_graph!(TTime, graph; debug=debug)
-    executor = RealtimeExecutor{TTime}(
-        graph,
-        states,
-        start_time=time_zero(TTime),
-        end_time=time_zero(TTime)
-    )
-
+function setup!(executor::RealtimeExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
     # Compile source functions
     for source in executor.graph.source_nodes
         source_fn = compile_source!(executor, executor.graph.nodes[source]; debug=debug)
         push!(executor.adapter_funcs, source_fn)
     end
-
-    executor
 end
 
 function set_adapters!(executor::RealtimeExecutor, adapters)
@@ -123,8 +114,6 @@ function run!(
         # need invokelatest because states struct is dynamically compiled,
         # which may live in a newer world age than the caller.
         Base.invokelatest() do
-            adapters = executor.adapters
-
             while true
                 # wait for next event
                 event = take!(executor.event_queue)
@@ -137,13 +126,16 @@ function run!(
                     break
                 end
 
+                # Events before start_time are NOT filtered currently,
+                # useful for initialization purposes.
+
                 # Process event if not wake-up call
                 if !isa(adapter, WakeUpAdapter)
-                    # Check if before start time
-                    if timestamp < start_time
-                        println("RealtimeExecutor: Dropping event from source [$(label(adapter.node))] at time $timestamp before start time $(start_time)")
-                        continue
-                    end
+                    # # Check if before start time
+                    # if timestamp < start_time
+                    #     println("RealtimeExecutor: Dropping event from source [$(label(adapter.node))] at time $timestamp before start time $(start_time)")
+                    #     continue
+                    # end
 
                     # Execute source function
                     process_event!(adapter, executor, event)

@@ -48,11 +48,12 @@ using LinearAlgebra
             values = source!(g, :values, out=Int, init=0)
             avg = op!(g, :avg, SavitzkyGolay{Int,Float64}(window_size, 1), out=Float64)
             output = sink!(g, :output, Buffer{Float64}())
-
             bind!(g, values, avg)
             bind!(g, avg, output)
 
-            exe = compile_historic_executor(DateTime, g; debug=!true)
+            states = compile_graph!(DateTime, g)
+            exe = HistoricExecutor{DateTime}(g, states)
+            setup!(exe)
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             set_adapters!(exe, [
@@ -69,11 +70,12 @@ using LinearAlgebra
             values = source!(g, :values, out=Int, init=0)
             avg = op!(g, :avg, SavitzkyGolay{Int,Float64}(window_size, 2), out=Float64)
             output = sink!(g, :output, Buffer{Float64}())
-
             bind!(g, values, avg)
             bind!(g, avg, output)
 
-            exe = compile_historic_executor(DateTime, g; debug=!true)
+            states = compile_graph!(DateTime, g)
+            exe = HistoricExecutor{DateTime}(g, states)
+            setup!(exe)
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             set_adapters!(exe, [
@@ -90,11 +92,12 @@ using LinearAlgebra
             values = source!(g, :values, out=Int, init=0)
             avg = op!(g, :avg, SavitzkyGolay{Int,Float64}(window_size, 3), out=Float64)
             output = sink!(g, :output, Buffer{Float64}())
-
             bind!(g, values, avg)
             bind!(g, avg, output)
 
-            exe = compile_historic_executor(DateTime, g; debug=!true)
+            states = compile_graph!(DateTime, g)
+            exe = HistoricExecutor{DateTime}(g, states)
+            setup!(exe)
 
             vals = [1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             set_adapters!(exe, [

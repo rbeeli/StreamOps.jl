@@ -13,7 +13,9 @@ using StreamOps
         bind!(g, values, ffill)
         bind!(g, ffill, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, NaN, 2.0, -1.0, NaN, NaN, 3.0, NaN, 4.0, missing]
         expected = [1.0, 1.0, 2.0, -1.0, -1.0, -1.0, 3.0, 3.0, 4.0, 4.0]
@@ -41,7 +43,9 @@ using StreamOps
         bind!(g, values, ffill)
         bind!(g, ffill, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = ["a", missing, "", "c", missing, missing, "d", missing, "e", missing]
         expected = ["a", "a", "a", "c", "c", "c", "d", "d", "e", "e"]
@@ -69,7 +73,9 @@ using StreamOps
         bind!(g, values, ffill)
         bind!(g, ffill, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [0, 1, 3, 0, -2, 4, 3]
         expected = [99, 1, 3, 3, -2, 4, 3]

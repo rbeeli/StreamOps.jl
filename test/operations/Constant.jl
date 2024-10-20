@@ -13,7 +13,9 @@ using StreamOps
         bind!(g, values, constant)
         bind!(g, constant, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [2, 3, -1, 0, 3]
         start = DateTime(2000, 1, 1)
@@ -40,7 +42,9 @@ using StreamOps
         bind!(g, constant, output)
         bind!(g, values, output, bind_as=NoBind())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [2, 3, -1, 0, 3]
         start = DateTime(2000, 1, 1)
@@ -68,7 +72,9 @@ using StreamOps
     #     bind!(g, mean, output)
     #     bind!(g, constant, output, call_policies=IfInvalid(:mean))
 
-    #     exe = compile_historic_executor(DateTime, g; debug=!true)
+    #     states = compile_graph!(DateTime, g)
+    #     exe = HistoricExecutor{DateTime}(g, states)
+    #     setup!(exe)
 
     #     vals = [2, 3, -1, 0, 3]
     #     start = DateTime(2000, 1, 1)

@@ -14,18 +14,23 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     event_queue::BinaryMinHeap{ExecutionEvent{TTime}}
     adapters::Vector{SourceAdapter}
     adapter_funcs::Vector{Function}
-    function HistoricExecutor{TTime}(graph::StreamGraph, states::TStates, start_time::TTime, end_time::TTime) where {TStates,TTime}
+
+    function HistoricExecutor{TTime}(
+        graph::StreamGraph,
+        states::TStates
+    ) where {TStates,TTime}
         event_queue = BinaryMinHeap{ExecutionEvent{TTime}}()
         adapter_funcs = Vector{Function}()
         new{TStates,TTime}(
             graph,
             states,
-            start_time,
-            end_time,
+            time_zero(TTime), # start_time
+            time_zero(TTime), # end_time
             zero(TTime),
             event_queue,
             Vector{SourceAdapter}(),
-            adapter_funcs)
+            adapter_funcs
+        )
     end
 end
 
@@ -41,22 +46,17 @@ end
     executor.end_time
 end
 
-function compile_historic_executor(::Type{TTime}, graph::StreamGraph; debug=false) where {TTime}
-    states = compile_graph!(TTime, graph; debug=debug)
-    executor = HistoricExecutor{TTime}(graph, states, time_zero(TTime), time_zero(TTime))
+function set_adapters!(executor::HistoricExecutor, adapters)
+    @assert length(adapters) >= length(executor.adapter_funcs) "Number of executor adapters must be greater than or equal to number of source nodes"
+    executor.adapters = collect(adapters)
+end
 
+function setup!(executor::HistoricExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
     # Compile source functions
     for source in executor.graph.source_nodes
         source_fn = compile_source!(executor, executor.graph.nodes[source]; debug=debug)
         push!(executor.adapter_funcs, source_fn)
     end
-
-    executor
-end
-
-function set_adapters!(executor::HistoricExecutor, adapters)
-    @assert length(adapters) >= length(executor.adapter_funcs) "Number of executor adapters must be greater than or equal to number of source nodes"
-    executor.adapters = collect(adapters)
 end
 
 function run!(
@@ -92,16 +92,19 @@ function run!(
                 break
             end
 
+            # Events before start_time are NOT filtered currently,
+            # useful for initialization purposes.
+            
             # Ignore records before start time
-            if timestamp >= start_time
-                # Update the current time of the executor
-                executor.current_time = timestamp
+            # if timestamp >= start_time
+            # Update the current time of the executor
+            executor.current_time = timestamp
 
-                # Execute the event
-                process_event!(adapter, executor, event)
+            # Execute the event
+            process_event!(adapter, executor, event)
             # else
                 # println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
-            end
+            # end
 
             # Schedule next event
             advance!(adapter, executor)

@@ -49,7 +49,9 @@ using StreamOps
         sink!(g, :output, Buffer{DateTime}())
         bind!(g, :never_valid, :output, call_policies=IfValid(:all))
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -71,7 +73,9 @@ using StreamOps
         sink!(g, :output, Buffer{NTuple{2,Int}}())
         bind!(g, (:a, :b), :output, call_policies=IfValid(:a, :b), bind_as=TupleParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
@@ -106,7 +110,9 @@ using StreamOps
         sink!(g, :output, Buffer{NTuple{2,Int}}())
         bind!(g, (:a, :b), :output, call_policies=IfValid(:all), bind_as=TupleParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
@@ -141,7 +147,9 @@ using StreamOps
         sink!(g, :output, Buffer{NTuple{2,Union{Nothing,Int}}}())
         bind!(g, (:a, :b), :output, call_policies=IfValid(:any), bind_as=TupleParams())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 4)
@@ -182,7 +190,9 @@ using StreamOps
         sink!(g, :output, Buffer{Float64}())
         bind!(g, :never_valid, :output, call_policies=IfInvalid())
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -209,7 +219,9 @@ using StreamOps
         sink!(g, :output, Buffer{NTuple{2,DateTime}}())
         bind!(g, :call_if_1, :output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -236,7 +248,9 @@ using StreamOps
         sink!(g, :output, Buffer{NTuple{2,DateTime}}())
         bind!(g, :call_if_1, :output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)
@@ -263,7 +277,9 @@ using StreamOps
         sink!(g, :output, Buffer{NTuple{2,DateTime}}())
         bind!(g, :call_if_1, :output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         start = DateTime(2000, 1, 1)
         stop = DateTime(2000, 1, 3)

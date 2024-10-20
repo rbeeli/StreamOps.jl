@@ -16,7 +16,9 @@ using Statistics
         bind!(g, values, zscore)
         bind!(g, zscore, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
 
@@ -48,7 +50,9 @@ using Statistics
         bind!(g, values, zscore)
         bind!(g, zscore, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
         start = DateTime(2000, 1, 1)
@@ -76,7 +80,9 @@ using Statistics
         bind!(g, values, zscore)
         bind!(g, zscore, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         set_adapters!(exe, [
             HistoricIterable(exe, values, [(DateTime(2000, 1, 1), 1.0)])
@@ -99,7 +105,9 @@ using Statistics
         bind!(g, values, zscore)
         bind!(g, zscore, output)
 
-        exe = compile_historic_executor(DateTime, g; debug=!true)
+        states = compile_graph!(DateTime, g)
+        exe = HistoricExecutor{DateTime}(g, states)
+        setup!(exe)
 
         constant_vals = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
         set_adapters!(exe, [

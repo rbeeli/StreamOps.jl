@@ -34,7 +34,9 @@ bind!(g, :final_multiply, :output1)
 bind!(g, :combine, :output2)
 
 # Compile the graph with historic executor
-exe = compile_historic_executor(DateTime, g, debug=!true)
+states = compile_graph!(DateTime, g)
+exe = HistoricExecutor{DateTime}(g, states)
+setup!(exe)
 
 # Run simulation
 set_adapters!(exe, [
