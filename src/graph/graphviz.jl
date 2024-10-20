@@ -6,11 +6,13 @@ function graphviz(
     nodefontsize=10,
     edgefontsize=8,
     nodefontname="Helvetica,Arial,sans-serif",
-    edgefontname="Helvetica,Arial,sans-serif"
+    edgefontname="Helvetica,Arial,sans-serif",
+    layout="dot"
 )
     io = IOBuffer()
     
     println(io, "digraph G {")
+    println(io, "  layout=$layout")
     println(io, "  node [fontsize=$nodefontsize fontname=\"$nodefontname\"];")
     println(io, "  edge [fontsize=$edgefontsize fontname=\"$edgefontname\" fontcolor=\"#666666\"];")
     
