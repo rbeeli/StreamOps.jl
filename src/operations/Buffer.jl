@@ -29,8 +29,8 @@ mutable struct Buffer{T} <: StreamOperation
     end
 end
 
-@inline function (op::Buffer{T})(executor, val::T) where {T}
-    push!(op.buffer, val)
+@inline function (op::Buffer{T})(executor, value::T) where {T}
+    push!(op.buffer, value)
     nothing
 end
 

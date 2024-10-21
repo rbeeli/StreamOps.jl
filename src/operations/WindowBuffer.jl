@@ -9,6 +9,8 @@ using an efficient circular buffer with O(1) push and pop operations.
 - `copy::Bool=false`: If `true`, the result will be a copy of the data as `Vector{In}`,
     otherwise it will be a `view` into the underlying buffer.
 
+The implementation is based on [DataStructures.jl](https://juliacollections.github.io/DataStructures.jl/latest/)'s [CircularBuffer](https://juliacollections.github.io/DataStructures.jl/latest/circ_buffer/).
+    
 Note that the returned value is a view into the buffer, so it is not a copy of the data,
 hence the result should not be modified or stored for later use.
 If temporary storage of the result or modification of the values is needed, a copy should be made.
@@ -27,7 +29,7 @@ mutable struct WindowBuffer{T,copy} <: StreamOperation
     end
 end
 
-@inline function (op::WindowBuffer)(executor, value)
+@inline function (op::WindowBuffer{T})(executor, value::T) where {T}
     # automatically handles overwriting in a circular manner
     push!(op.buffer, value)
     nothing
@@ -44,3 +46,5 @@ end
 end
 
 @inline Base.empty!(op::WindowBuffer) = empty!(op.buffer)
+
+@inline Base.length(op::WindowBuffer) = length(op.buffer)
