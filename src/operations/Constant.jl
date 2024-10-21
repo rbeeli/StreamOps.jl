@@ -7,7 +7,8 @@ mutable struct Constant{T} <: StreamOperation
     Constant(value::T) where{T} = new{T}(value)
 end
 
-@inline function(op::Constant)(executor, value)
+# add default nothing to value since we don't need to bind an input value
+@inline function(op::Constant)(executor, value=nothing)
     nothing
 end
 
