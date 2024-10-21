@@ -200,7 +200,7 @@ function bind!(
     bind_as=PositionParams()
 )
     call_policies isa CallPolicy && (call_policies = [call_policies])
-    val_policies isa CallPolicy && (val_policies = [call_policies])
+    val_policies isa CallPolicy && (val_policies = [val_policies])
 
     if input_nodes isa StreamNode
         input_nodes = [input_nodes]
@@ -463,8 +463,8 @@ function _gen_execute_call!(
                     println("Executing node [$($("$(label(node))"))] at time $(time(executor))...")
                     $call_expr
                 catch e
-                    println("Error in node [$($("$(label(node))"))] with input nodes [$(join(input_names, ","))] at time $(time(executor)): $e")
-                    throw(e)
+                    msg = "Execution of node [$($("$(label(node))"))] with inputs [$(join($(input_names), ","))] at time $(time(executor)) failed."
+                    throw(StreamOpsError(Symbol($("$(label(node))")), msg, e))
                 end
             end
         )

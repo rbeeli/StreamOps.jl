@@ -25,17 +25,24 @@ function run()
         )
         
         setup!(adapter, exe)
-        display(@code_native advance!(adapter, exe))
-        # for _ in 1:10_000_000
-        #     advance!(adapter, exe)
-        # end
+        
+        # display(@code_native advance!(adapter, exe))
+
+        for _ in 1:10_000_000
+            advance!(adapter, exe)
+        end
     end
 
     nothing
 end
 
-@time run()
+# @time run()
 
 # using ProfileView
 # ProfileView.@profview run()
+
 # VSCodeServer.@profview run()
+
+using Profile, PProf
+@profile run();
+pprof(webport=58699)

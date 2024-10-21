@@ -1,7 +1,6 @@
-using Test
-using StreamOps
-
-@testset "Diff" begin
+@testitem "Diff" begin
+    using Dates
+    
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)

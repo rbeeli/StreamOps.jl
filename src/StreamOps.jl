@@ -2,6 +2,7 @@ module StreamOps
 
 include("utils.jl")
 include("types.jl")
+include("errors.jl")
 
 include("graph/call_policies.jl")
 include("graph/params_bindings.jl")

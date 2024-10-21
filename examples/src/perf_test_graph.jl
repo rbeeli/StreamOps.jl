@@ -32,7 +32,7 @@ function run()
     setup!(exe)
 
     # Run simulation
-    dts = [Timestamp64(i) for i in 1:10_000_000]
+    dts = [Timestamp64(i) for i in 1:20_000_000]
     start = first(dts)
     stop = last(dts)
     set_adapters!(exe, [
@@ -48,8 +48,8 @@ function run()
     nothing
 end
 
-@time run()
+# @time run()
 
-# using ProfileView
-# ProfileView.@profview run()
+using ProfileView
+ProfileView.@profview run()
 # VSCodeServer.@profview run()

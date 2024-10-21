@@ -47,6 +47,8 @@ function graphviz(
         for input_binding in node.input_bindings
             for input_node in input_binding.input_nodes
                 headlabel = length(input_binding.input_nodes) > 1 ? "headlabel=<<FONT POINT-SIZE=\"$(ceil(Int, 0.6nodefontsize))\">$(edge_counter).</FONT>>" : ""
+
+                # call_policies
                 if first(input_binding.call_policies) isa Never
                     # input has no call policies, i.e. it does never trigger the node
                     println(io, "  node$(input_node.index) -> node$(node.index) [label=<Never> $headlabel color=gray style=dotted arrowhead=open penwidth=1 arrowsize=0.75 labeldistance=1.5];")
@@ -57,6 +59,7 @@ function graphviz(
                             <TR><TD ALIGN=\"LEFT\">$label</TD></TR>
                         </TABLE>> arrowhead=open penwidth=0.5 arrowsize=0.75 labeldistance=1.5 $headlabel];")
                 end
+
                 edge_counter += 1
             end
         end

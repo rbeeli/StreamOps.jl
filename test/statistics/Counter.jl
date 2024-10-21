@@ -1,8 +1,6 @@
-using Test
-using StreamOps
-using Dates
-
-@testset "Counter" begin
+@testitem "Counter" begin
+    using Dates
+    
     g = StreamGraph()
 
     timer = source!(g, :timer, out=DateTime, init=DateTime(0))

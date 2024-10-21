@@ -1,10 +1,6 @@
-# using Test
-# using StreamOps
-# using Dates
-
-# @testset verbose = true "RealtimeExecutor" begin
-
-#     @testset "w/ RealtimeIterable" begin
+#     @testitem "w/ RealtimeIterable" begin
+    # using Dates
+    
 #         g = StreamGraph()
 
 #         buffer = Float64[]
@@ -28,7 +24,9 @@
 #         @test all(buffer .== [1.0, 2.0])
 #     end
 
-#     # @testset "w/ RealtimeTimer" begin
+#     # @testitem "w/ RealtimeTimer" begin
+    # using Dates
+
 #     #     g = StreamGraph()
 
 #     #     buffer = DateTime[]
@@ -49,5 +47,3 @@
 #     #     @test all(buffer .>= start)
 #     #     @test all(buffer .<= stop)
 #     # end
-
-# end
