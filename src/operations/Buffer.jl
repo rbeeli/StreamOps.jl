@@ -15,7 +15,7 @@ this operation as valid only when the buffer has at least
 mutable struct Buffer{T} <: StreamOperation
     const buffer::Vector{T}
     const min_count::Int
-    
+
     function Buffer{T}(; min_count=0) where {T}
         new{T}(T[], min_count)
     end
@@ -29,7 +29,7 @@ mutable struct Buffer{T} <: StreamOperation
     end
 end
 
-@inline function (op::Buffer)(executor, val)
+@inline function (op::Buffer{T})(executor, val::T) where {T}
     push!(op.buffer, val)
     nothing
 end

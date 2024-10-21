@@ -9,6 +9,7 @@ using Dates
 # import Pkg;Pkg.test("StreamOps", test_args=["adapters/HistoricIterable.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["executors/RealtimeExecutor.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["operations/Buffer.jl"])
+# import Pkg;Pkg.test("StreamOps", test_args=["operations/RingBuffer.jl"])
 # import Pkg;Pkg.test("StreamOps", test_args=["statistics/Skewness.jl"])
 
 requested_tests = ARGS
@@ -24,6 +25,7 @@ if isempty(requested_tests)
     include("operations/Constant.jl")
     include("operations/Print.jl")
     include("operations/Buffer.jl")
+    include("operations/RingBuffer.jl")
     include("operations/TimeTupleBuffer.jl")
     include("operations/Lag.jl")
     include("operations/Copy.jl")
