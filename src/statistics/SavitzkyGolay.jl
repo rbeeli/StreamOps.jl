@@ -5,7 +5,7 @@ using LinearAlgebra
 Calculates the moving Savitzky-Golay filter with fixed window size.
 
 The Savitzky-Golay filter fits a polynomial of order `order` to the data in the window
-and uses the polynomial to predict the smoothed value.
+and uses the polynomial to predict the smoothed value at the end of the window.
 """
 mutable struct SavitzkyGolay{In<:Number,Out<:Number} <: StreamOperation
     const buffer::CircularBuffer{In}
