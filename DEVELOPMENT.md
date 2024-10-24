@@ -8,3 +8,5 @@
 - Should there be validation policies to check before executing a node,
   independent of the inputs? (e.g. check if all inputs are valid)
 - implement or remove val_policies
+
+- Feature to collect stats about nodes: number of calls, time spent, average time, max time, etc.

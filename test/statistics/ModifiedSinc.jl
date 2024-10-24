@@ -33,7 +33,7 @@ end
         ])
         run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
 
-        @test output.operation.buffer[end] ≈ StreamOps._ModifiedSinc.smoothMS(vals[end-window_size+1:end], deg, window_size)[end]
+        @test output.operation.buffer[end] ≈ StreamOps._ModifiedSincOrig.smoothMS(vals[end-window_size+1:end], deg, window_size)[end]
     end
 end
 
@@ -60,6 +60,6 @@ end
         ])
         run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
 
-        @test output.operation.buffer[end] ≈ StreamOps._ModifiedSinc.smoothMS(vals[end-window_size+1:end], deg, window_size)[end]
+        @test output.operation.buffer[end] ≈ StreamOps._ModifiedSincOrig.smoothMS(vals[end-window_size+1:end], deg, window_size)[end]
     end
 end
