@@ -2,7 +2,7 @@
 Represents a constant value that is passed through the stream.
 """
 mutable struct Constant{T} <: StreamOperation
-    value::T
+    const value::T
     
     Constant(value::T) where{T} = new{T}(value)
 end
