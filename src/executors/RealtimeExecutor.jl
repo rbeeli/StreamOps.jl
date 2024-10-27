@@ -11,7 +11,7 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     end_time::TTime
     event_queue::Channel{ExecutionEvent{TTime}}
     adapters::Vector{SourceAdapter}
-    adapter_funcs::Vector{Function}
+    adapter_funcs::Dict{Int,Function}
 
     function RealtimeExecutor{TTime}(
         graph::StreamGraph,
@@ -26,7 +26,7 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
             time_zero(TTime), # end_time
             Channel{ExecutionEvent{TTime}}(max_queue_size), # event_queue
             Vector{SourceAdapter}(), # adapters
-            Vector{Function}(), # adapter_funcs
+            Dict{Int,Function}(), # adapter_funcs
         )
     end
 end
@@ -53,9 +53,9 @@ end
 
 function setup!(executor::RealtimeExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
     # Compile source functions
-    for source in executor.graph.source_nodes
-        source_fn = compile_source!(executor, executor.graph.nodes[source]; debug=debug)
-        push!(executor.adapter_funcs, source_fn)
+    for source_ix in executor.graph.source_nodes
+        source_fn = compile_source!(executor, executor.graph.nodes[source_ix]; debug=debug)
+        executor.adapter_funcs[source_ix] = source_fn
     end
 end
 
@@ -144,6 +144,8 @@ function run!(
         @error "RealtimeExecutor: Unhandled error, aborting: $e"
         rethrow()
     finally
+        println("RealtimeExecutor: Destroying adapters...")
+
         # Stop wake-up thread
         wake_up_stop[] = true
         try
@@ -152,8 +154,6 @@ function run!(
             println("RealtimeExecutor: Error stopping wake-up thread: $e")
         end
 
-        # Destroy adapters
-        println("RealtimeExecutor: Destroying adapters...")
         destroy!.(executor.adapters)
         println("RealtimeExecutor: Adapters destroyed")
     end

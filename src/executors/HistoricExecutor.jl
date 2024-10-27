@@ -13,7 +13,7 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     current_time::TTime
     event_queue::BinaryMinHeap{ExecutionEvent{TTime}}
     adapters::Vector{SourceAdapter}
-    adapter_funcs::Vector{Function}
+    adapter_funcs::Dict{Int,Function}
 
     function HistoricExecutor{TTime}(
         graph::StreamGraph,
@@ -27,7 +27,7 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
             zero(TTime), # current_time
             BinaryMinHeap{ExecutionEvent{TTime}}(), # event_queue
             Vector{SourceAdapter}(), # adapters
-            Vector{Function}(), # adapter_funcs
+            Dict{Int,Function}(), # adapter_funcs
         )
     end
 end
@@ -51,9 +51,9 @@ end
 
 function setup!(executor::HistoricExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
     # Compile source functions
-    for source in executor.graph.source_nodes
-        source_fn = compile_source!(executor, executor.graph.nodes[source]; debug=debug)
-        push!(executor.adapter_funcs, source_fn)
+    for source_ix in executor.graph.source_nodes
+        source_fn = compile_source!(executor, executor.graph.nodes[source_ix]; debug=debug)
+        executor.adapter_funcs[source_ix] = source_fn
     end
 end
 
