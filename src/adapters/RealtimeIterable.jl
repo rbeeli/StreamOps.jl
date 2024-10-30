@@ -71,11 +71,11 @@ function worker(
         time_now >= end_time(executor) && break
 
         # Calculate sleep duration
-        sleep_us = Microsecond(min(next_time - time_now, adapter.stop_check_interval))
+        sleep_ns = Nanosecond(min(next_time - time_now, adapter.stop_check_interval))
 
         # Wait until next event (or stop flag check)
         # use Libc.systemsleep(secs) instead of Base.sleep(secs) for more accurate sleep time
-        Dates.value(sleep_us) > 0 && systemsleep(Dates.value(sleep_us) / 1_000_000.0)
+        Dates.value(sleep_ns) > 0 && systemsleep(Dates.value(sleep_ns) / 1e9)
 
         # If we've reached or passed next_time, schedule the event and calculate the next time
         if time_now >= next_time
