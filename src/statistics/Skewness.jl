@@ -6,6 +6,14 @@ Calculates the moving sample skewness with fixed window size in O(1) time.
 # Arguments
 - `window_size`: The number of observations to consider in the moving window.
 
+# Notes
+- Uses Kahan summation for numerical stability
+- Handles edge cases:
+  - Returns 0 when n < 3 observations
+  - Returns 0 when all values in window are identical
+  - Returns 0 when variance is effectively 0 (≤ 1e-14)
+- Implements the same method as pandas' rolling skewness calculation
+
 # References
 Python pandas implementation of rolling skewness:
 * https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.window.rolling.Rolling.skew.html
