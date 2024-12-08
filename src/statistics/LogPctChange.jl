@@ -6,20 +6,24 @@ Calculates the logarithmic percentage change of consecutive values.
 """
 mutable struct LogPctChange{In<:Number,Out<:Number} <: StreamOperation
     current::In
-    prev::In
+    pct_change::Out
     counter::Int
     const min_count::Int
 
-    LogPctChange{In,Out}(
+    function LogPctChange{In,Out}(
         ;
-        init=zero(In),
+        current=zero(In),
+        pct_change=zero(Out),
         min_count::Int=2
-    ) where {In<:Number,Out<:Number} =
-        new{In,Out}(init, init, 0, min_count)
+    ) where {In<:Number,Out<:Number}
+        new{In,Out}(current, pct_change, 0, min_count)
+    end
 end
 
-@inline function (op::LogPctChange)(executor, value)
-    op.prev = op.current
+@inline function (op::LogPctChange{In,Out})(executor, value::In) where {In,Out}
+    if op.counter > 0
+        op.pct_change = log(value / op.current)
+    end
     op.current = value
     op.counter += 1
     nothing
@@ -27,6 +31,4 @@ end
 
 @inline is_valid(op::LogPctChange) = op.counter >= op.min_count
 
-@inline function get_state(op::LogPctChange{In,Out})::Out where {In,Out}
-    log(op.current / op.prev)
-end
+@inline get_state(op::LogPctChange) = op.pct_change

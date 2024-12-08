@@ -6,20 +6,24 @@ Calculates the percentage change of consecutive values.
 """
 mutable struct PctChange{In<:Number,Out<:Number} <: StreamOperation
     current::In
-    prev::In
+    pct_change::Out
     counter::Int
     const min_count::Int
 
-    PctChange{In,Out}(
+    function PctChange{In,Out}(
         ;
-        init=zero(In),
+        current=zero(In),
+        pct_change=zero(Out),
         min_count::Int=2
-    ) where {In<:Number,Out<:Number} =
-        new{In,Out}(init, init, 0, min_count)
+    ) where {In<:Number,Out<:Number}
+        new{In,Out}(current, pct_change, 0, min_count)
+    end
 end
 
-@inline function (op::PctChange)(executor, value)
-    op.prev = op.current
+@inline function (op::PctChange{In,Out})(executor, value::In) where {In,Out}
+    if op.counter > 0
+        op.pct_change = value / op.current - one(Out)
+    end
     op.current = value
     op.counter += 1
     nothing
@@ -27,6 +31,4 @@ end
 
 @inline is_valid(op::PctChange) = op.counter >= op.min_count
 
-@inline function get_state(op::PctChange{In,Out})::Out where {In,Out}
-    op.current / op.prev - one(Out)
-end
+@inline get_state(op::PctChange) = op.pct_change
