@@ -1,7 +1,7 @@
 name = "StreamOps"
 uuid = "a9627898-32a8-4203-afdc-bd07b9d6797f"
 authors = ["Rino Beeli <40661605+rbeeli@users.noreply.github.com>"]
-version = "0.6.4"
+version = "0.6.5"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
