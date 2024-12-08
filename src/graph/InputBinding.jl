@@ -4,10 +4,10 @@ mutable struct InputBinding{TNode}
     bind_as::ParamsBinding
 
     function InputBinding(
-        nodes::Vector{TNode},
+        nodes::Union{<:AbstractArray{TNode},<:Tuple{Vararg{TNode}}},
         call_policies::Vector{CallPolicy},
         bind_as::ParamsBinding
     ) where {TNode}
-        new{TNode}(nodes, call_policies, bind_as)
+        new{TNode}(collect(nodes), call_policies, bind_as)
     end
 end

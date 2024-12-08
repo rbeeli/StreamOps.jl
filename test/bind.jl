@@ -1,3 +1,43 @@
+@testitem "default using symbols" begin
+    using Dates
+
+    g = StreamGraph()
+
+    source!(g, :values, out=Float64, init=0.0)
+    sink!(g, :output, Print())
+
+    bind!(g, :values, :output)
+
+    @test length(g[:output].input_bindings) == 1
+    @test g[:output].input_bindings[1].bind_as isa PositionParams
+end
+
+@testitem "default using strings and mixed" begin
+    using Dates
+
+    g = StreamGraph()
+
+    source!(g, :values1, out=Float64, init=0.0)
+    source!(g, "values2", out=Float64, init=0.0)
+    source!(g, "values3", out=Float64, init=0.0)
+    sink!(g, :output1, Print())
+    sink!(g, "output2", Print())
+    sink!(g, "output3", Print())
+
+    bind!(g, :values1, "output1")
+    bind!(g, "values2", :output2)
+    bind!(g, "values3", "output3")
+
+    display(g[:output1].input_bindings)
+
+    @test length(g[:output1].input_bindings) == 1
+    @test length(g["output2"].input_bindings) == 1
+    @test length(g[:output3].input_bindings) == 1
+    @test g[:output1].input_bindings[1].bind_as isa PositionParams
+    @test g[:output2].input_bindings[1].bind_as isa PositionParams
+    @test g[:output3].input_bindings[1].bind_as isa PositionParams
+end
+
 @testitem "default bind_as=PositionParams" begin
     using Dates
 

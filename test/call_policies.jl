@@ -246,6 +246,37 @@ end
     @test length(buffer) == 3
 end
 
+@testitem "IfSource('timer1')" begin
+    using Dates
+
+    g = StreamGraph()
+
+    source!(g, :timer1, out=DateTime, init=DateTime(0))
+    source!(g, :timer2, out=DateTime, init=DateTime(0))
+
+    op!(g, :call_if_1, Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0))), out=NTuple{2,DateTime})
+    bind!(g, (:timer1, :timer2), :call_if_1, call_policies=IfSource("timer1"))
+
+    sink!(g, :output, Buffer{NTuple{2,DateTime}}())
+    bind!(g, :call_if_1, :output)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 3)
+    set_adapters!(exe, [
+        HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
+        HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
+    ])
+    run!(exe, start, stop)
+
+    buffer = g[:output].operation.buffer
+    
+    @test length(buffer) == 3
+end
+
 @testitem "IfExecuted(:any)" begin
     using Dates
 
@@ -277,6 +308,45 @@ end
     @test length(buffer) == 12
 end
 
+# @testitem "IfNotExecuted()" begin
+#     using Dates
+
+#     g = StreamGraph()
+
+#     source!(g, :a, out=Int, init=0)
+#     source!(g, :b, out=Int, init=0)
+
+#     op!(g, :call_if_1, Func((exe, _) -> time(exe), DateTime(0)), out=DateTime)
+#     bind!(g, :a, :call_if_1, call_policies=IfNotExecuted())
+
+#     sink!(g, :output, Buffer{DateTime}())
+#     bind!(g, :call_if_1, :output)
+
+#     states = compile_graph!(DateTime, g)
+#     exe = HistoricExecutor{DateTime}(g, states)
+#     setup!(exe)
+
+#     start = DateTime(2000, 1, 1)
+#     stop = DateTime(2000, 1, 4)
+#     set_adapters!(exe, [
+#         HistoricIterable(exe, g[:a], [
+#             (DateTime(2000, 1, 4), 4)
+#         ])
+#         HistoricIterable(exe, g[:b], [
+#             (DateTime(2000, 1, 1), 1),
+#             (DateTime(2000, 1, 2), 2),
+#             (DateTime(2000, 1, 3), 3),
+#             (DateTime(2000, 1, 4), 4)
+#         ])
+#     ])
+#     run!(exe, start, stop)
+
+#     buffer = g[:output].operation.buffer
+#     display(buffer)
+
+#     # @test length(buffer) == 12
+# end
+
 @testitem "IfExecuted(:timer1)" begin
     using Dates
     
@@ -287,6 +357,37 @@ end
 
     op!(g, :call_if_1, Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0))), out=NTuple{2,DateTime})
     bind!(g, (:timer1, :timer2), :call_if_1, call_policies=IfExecuted(:timer1))
+
+    sink!(g, :output, Buffer{NTuple{2,DateTime}}())
+    bind!(g, :call_if_1, :output)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 3)
+    set_adapters!(exe, [
+        HistoricTimer{DateTime}(exe, g[:timer1]; interval=Day(1), start_time=start),
+        HistoricTimer{DateTime}(exe, g[:timer2]; interval=Hour(6), start_time=start)
+    ])
+    run!(exe, start, stop)
+
+    buffer = g[:output].operation.buffer
+    
+    @test length(buffer) == 3
+end
+
+@testitem "IfExecuted('timer1')" begin
+    using Dates
+    
+    g = StreamGraph()
+
+    source!(g, :timer1, out=DateTime, init=DateTime(0))
+    source!(g, :timer2, out=DateTime, init=DateTime(0))
+
+    op!(g, :call_if_1, Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0))), out=NTuple{2,DateTime})
+    bind!(g, (:timer1, :timer2), :call_if_1, call_policies=IfExecuted("timer1"))
 
     sink!(g, :output, Buffer{NTuple{2,DateTime}}())
     bind!(g, :call_if_1, :output)
