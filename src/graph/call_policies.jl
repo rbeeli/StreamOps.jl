@@ -23,11 +23,12 @@ struct IfExecuted <: CallPolicy
         new([mode])
     end
     IfExecuted(nodes::Symbol...) = new(collect(nodes))
-
-    # String support
-    IfExecuted(mode::String="all") = IfExecuted(Symbol(mode))
-    IfExecuted(nodes::String...) = IfExecuted((Symbol(node) for node in nodes)...)
 end
+
+# constructor String support
+IfExecuted(mode::String="all") = IfExecuted(Symbol(mode))
+IfExecuted(nodes::String...) = IfExecuted((Symbol(node) for node in nodes)...)
+
 
 # # If connected node was NOT executed, REGARDLESS of valid output or not, trigger the node
 # struct IfNotExecuted <: CallPolicy
@@ -39,6 +40,7 @@ end
 #     IfNotExecuted(nodes::Symbol...) = new(collect(nodes))
 # end
 
+
 # If connected node(s) have valid output(s), trigger the node
 struct IfValid <: CallPolicy
     nodes::Union{Symbol,Vector{Symbol}} # :any, :all or node label symbols
@@ -48,11 +50,12 @@ struct IfValid <: CallPolicy
         new([mode])
     end
     IfValid(nodes::Symbol...) = new(collect(nodes))
-
-    # String support
-    IfValid(mode::String="all") = IfValid(Symbol(mode))
-    IfValid(nodes::String...) = IfValid((Symbol(node) for node in nodes)...)
 end
+
+# constructor String support
+IfValid(mode::String="all") = IfValid(Symbol(mode))
+IfValid(nodes::String...) = IfValid((Symbol(node) for node in nodes)...)
+
 
 # If connected node(s) have invalid output(s), trigger the node
 struct IfInvalid <: CallPolicy
@@ -63,11 +66,12 @@ struct IfInvalid <: CallPolicy
         new([mode])
     end
     IfInvalid(nodes::Symbol...) = new(collect(nodes))
-
-    # String support
-    IfInvalid(mode::String="any") = IfInvalid(Symbol(mode))
-    IfInvalid(nodes::String...) = IfInvalid((Symbol(node) for node in nodes)...)
 end
+
+# constructor String support
+IfInvalid(mode::String="any") = IfInvalid(Symbol(mode))
+IfInvalid(nodes::String...) = IfInvalid((Symbol(node) for node in nodes)...)
+
 
 function _make_label(nodes::Union{Symbol,Vector{Symbol}})
     return if nodes isa Symbol
