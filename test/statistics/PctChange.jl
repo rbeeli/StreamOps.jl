@@ -27,3 +27,25 @@
     run!(exe, start, stop)
     @test output.operation.buffer ≈ [1.0, 0.5, 0.3333333333333333, -0.75]
 end
+
+@testitem "min_count" begin
+    using Dates
+
+    # min_count=0
+    op = PctChange{Int,Float64}(min_count=0)
+    @test is_valid(op)
+
+    # min_count=1
+    op = PctChange{Int,Float64}(min_count=1)
+    @test !is_valid(op)
+    op(nothing, 1.0)
+    @test is_valid(op)
+
+    # min_count=2 (default)
+    op = PctChange{Int,Float64}()
+    @test !is_valid(op)
+    op(nothing, 1.0)
+    @test !is_valid(op)
+    op(nothing, 2.0)
+    @test is_valid(op)
+end
