@@ -74,7 +74,10 @@ end
 
 # biased std. deviation
 @inline function get_state(op::Variance{In,Out,false,true})::Out where {In,Out}
-    op.window_size > 0 ? sqrt(op.M2 / op.window_size) : zero(Out)
+    # due to floating-point rounding errors in Welford’s online update formula,
+    # M2 can become slightly negative, potentially leading to negative values under the sqrt,
+    # therefore, need to ensure >= 0
+    op.window_size > 0 ? sqrt(max(zero(Out), op.M2 / op.window_size)) : zero(Out)
 end
 
 # unbiased variance
@@ -84,5 +87,8 @@ end
 
 # unbiased std. deviation
 @inline function get_state(op::Variance{In,Out,true,true})::Out where {In,Out}
-    op.window_size > 1 ? sqrt(op.M2 / (op.window_size - 1)) : zero(Out)
+    # due to floating-point rounding errors in Welford’s online update formula,
+    # M2 can become slightly negative, potentially leading to negative values under the sqrt,
+    # therefore, need to ensure >= 0
+    op.window_size > 1 ? sqrt(max(zero(Out), op.M2 / (op.window_size - 1))) : zero(Out)
 end
