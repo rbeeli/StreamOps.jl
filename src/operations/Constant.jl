@@ -17,7 +17,3 @@ end
 @inline function get_state(op::Constant{T})::T where {T}
     op.value
 end
-
-@inline function reset!(op::Constant{T}) where {T}
-    nothing
-end
