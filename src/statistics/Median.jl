@@ -48,9 +48,7 @@ end
 
 @inline Base.length(med::Median) = length(med.heap_pos)
 
-@inline window_length(med::Median) = DataStructures.capacity(med.heap_pos)
-
-@inline isfull(med::Median) = DataStructures.isfull(med.heap_pos)
+@inline DataStructures.isfull(med::Median) = DataStructures.isfull(med.heap_pos)
 
 function _grow!(med::Median, val)
     if isnan(val)
