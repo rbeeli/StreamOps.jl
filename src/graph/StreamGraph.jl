@@ -16,90 +16,6 @@ mutable struct StreamGraph
     end
 end
 
-"""
-Sort the nodes in the graph in topological order using a depth-first search (DFS).
-"""
-function topological_sort!(graph::StreamGraph)
-    empty!(graph.topo_order)
-    visited = falses(length(graph.nodes))
-    temp_stack = Int[]
-
-    for node_index in 1:length(graph.nodes)
-        if !visited[node_index]
-            push!(temp_stack, node_index)
-
-            while !isempty(temp_stack)
-                current_node = temp_stack[end]
-
-                if !visited[current_node]
-                    visited[current_node] = true
-                    push!(graph.topo_order, current_node)
-                end
-
-                all_visited = true
-
-                for dependent_index in graph.deps[current_node]
-                    if !visited[dependent_index]
-                        push!(temp_stack, dependent_index)
-                        all_visited = false
-                    end
-                end
-
-                if all_visited
-                    pop!(temp_stack)
-                end
-            end
-        end
-    end
-
-    if length(graph.topo_order) != length(graph.nodes)
-        error("Graph has a cycle")
-    end
-
-    nothing
-end
-
-"""
-Check if the graph is weakly connected, i.e., there is a path between every pair of nodes.
-If not, the graph is not fully connected and some nodes will never be reached.
-
-Also check that there is at least one source node in the graph.
-"""
-function verify_graph(graph::StreamGraph)
-    isempty(graph.nodes) && error("Empty graph.")
-    isempty(graph.source_nodes) && error("No source nodes in the graph.")
-
-    visited = falses(length(graph.nodes))
-    stack = copy(graph.source_nodes)
-
-    # Mark all source nodes as visited
-    for source in stack
-        visited[source] = true
-    end
-
-    # Perform DFS from all source nodes
-    while !isempty(stack)
-        node_index = pop!(stack)
-
-        for ix in graph.reverse_deps[node_index]
-            if !visited[ix]
-                visited[ix] = true
-                push!(stack, ix)
-            end
-        end
-    end
-
-    # only nodes of type Constant{T} are allowed to have no input bindings
-    unvisited = findall(i -> !visited[i] & !(graph.nodes[i].operation isa Constant), eachindex(visited))
-    if any(unvisited)
-        msg = "Following nodes are not reachable from the source nodes, i.e. computation graph is not weakly connected: "
-        for ix in unvisited
-            msg *= "\n [$ix] $(graph.nodes[ix].label)"
-        end
-        error(msg)
-    end
-end
-
 function _make_node!(
     graph::StreamGraph,
     is_source::Bool,
@@ -289,15 +205,136 @@ end
 
 @inline Base.getindex(graph::StreamGraph, label::Union{String,Symbol}) = get_node(graph, label)
 
-function compile_graph!(::Type{TTime}, g::StreamGraph; debug::Bool=false) where {TTime}
+"""
+Sort the nodes in the graph in topological order using a depth-first search (DFS).
+"""
+function topological_sort!(graph::StreamGraph)
+    empty!(graph.topo_order)
+    visited = falses(length(graph.nodes))
+    temp_stack = Int[]
+
+    for node_index in 1:length(graph.nodes)
+        if !visited[node_index]
+            push!(temp_stack, node_index)
+
+            while !isempty(temp_stack)
+                current_node = temp_stack[end]
+
+                if !visited[current_node]
+                    visited[current_node] = true
+                    push!(graph.topo_order, current_node)
+                end
+
+                all_visited = true
+
+                for dependent_index in graph.deps[current_node]
+                    if !visited[dependent_index]
+                        push!(temp_stack, dependent_index)
+                        all_visited = false
+                    end
+                end
+
+                if all_visited
+                    pop!(temp_stack)
+                end
+            end
+        end
+    end
+
+    if length(graph.topo_order) != length(graph.nodes)
+        error("Graph has a cycle")
+    end
+
+    nothing
+end
+
+"""
+Check if the graph is weakly connected, i.e., there is a path between every pair of nodes.
+If not, the graph is not fully connected and some nodes will never be reached.
+
+Also check that there is at least one source node in the graph.
+"""
+function verify_graph_connectedness(graph::StreamGraph)
+    isempty(graph.nodes) && error("Empty graph.")
+    isempty(graph.source_nodes) && error("No source nodes in the graph.")
+
+    visited = falses(length(graph.nodes))
+    stack = copy(graph.source_nodes)
+
+    # Mark all source nodes as visited
+    for source in stack
+        visited[source] = true
+    end
+
+    # Perform DFS from all source nodes
+    while !isempty(stack)
+        node_index = pop!(stack)
+
+        for ix in graph.reverse_deps[node_index]
+            if !visited[ix]
+                visited[ix] = true
+                push!(stack, ix)
+            end
+        end
+    end
+
+    # only nodes of type Constant{T} are allowed to have no input bindings
+    unvisited = findall(i -> !visited[i] & !(graph.nodes[i].operation isa Constant), eachindex(visited))
+    if any(unvisited)
+        msg = "Following nodes are not reachable from the source nodes, i.e. computation graph is not weakly connected: "
+        for ix in unvisited
+            msg *= "\n [$ix] $(graph.nodes[ix].label)"
+        end
+        error(msg)
+    end
+end
+
+"""
+Verify that no binding of a StreamNode with IfExecuted(:NODE) has :NODE coming after
+the StreamNode it is bound to in topological order, as this would never trigger.
+"""
+function verify_bindings_topo_order(graph::StreamGraph)
+    node_positions = Dict(node_idx => pos for (pos, node_idx) in enumerate(graph.topo_order))
+    
+    for node in graph.nodes
+        for binding in node.input_bindings
+            for policy in binding.call_policies
+                if policy isa IfExecuted
+                    # Get nodes to check based on policy type
+                    nodes_to_check = if policy.nodes in (:any, :all)
+                        # For :any/:all, check the actual bound nodes
+                        binding.input_nodes
+                    else
+                        # For specific nodes, get them by label
+                        [get_node(graph, node_label) for node_label in policy.nodes]
+                    end
+                    
+                    # Verify all referenced nodes come before current node
+                    for policy_node in nodes_to_check
+                        if node_positions[policy_node.index] >= node_positions[node.index]
+                            error("Invalid IfExecuted policy in node [$(node.label)]: " *
+                                  "referenced node [$(policy_node.label)] comes after the node in topological order")
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+function compile_graph!(::Type{TTime}, graph::StreamGraph; debug::Bool=false) where {TTime}
     # verify that the graph is weakly connected and has at least one source node
-    verify_graph(g)
+    verify_graph_connectedness(graph)
 
     # sort computation graph nodes in topological order
-    topological_sort!(g)
+    topological_sort!(graph)
 
+    # Verify that no binding of a StreamNode with IfExecuted(:NODE) has :NODE coming after
+    # the StreamNode it is bound to in topological order, as this would never trigger
+    verify_bindings_topo_order(graph)
+    
     # compile states struct
-    states_type = compile_states_struct(TTime, g; debug=debug)
+    states_type = compile_states_struct(TTime, graph; debug=debug)
 
     # use invokelatest to call the generated states type constructor,
     # otherwise a world age error will occur because the constructor
