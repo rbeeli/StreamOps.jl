@@ -53,6 +53,7 @@ include("statistics/TimeSum.jl")
 include("statistics/TimeMean.jl")
 include("statistics/SavitzkyGolay.jl")
 include("statistics/ModifiedSinc.jl")
+include("statistics/CumSum.jl")
 
 # export all
 for n in names(@__MODULE__; all=true)
