@@ -28,6 +28,65 @@
     @test get_state(g[:buffer].operation) == [1, 2, 3, 4]
 end
 
+@testitem "Buffer{Float32}() w/ Float64 input and NO automatic casting (error)" begin
+    using Dates
+
+    g = StreamGraph()
+
+    source!(g, :values, out=Float64, init=0.0)
+    sink!(g, :buffer, Buffer{Float32}(; auto_cast=false))
+
+    @test g[:buffer].operation.min_count == 0
+
+    bind!(g, :values, :buffer)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 4)
+    set_adapters!(exe, [
+        HistoricIterable(exe, g[:values], [
+            (DateTime(2000, 1, 1), 1.0),
+            (DateTime(2000, 1, 2), 2.0),
+            (DateTime(2000, 1, 3), 3.0),
+            (DateTime(2000, 1, 4), 4.0)
+        ])
+    ])
+    @test_throws "MethodError: no method matching" run!(exe, start, stop)
+end
+
+@testitem "Buffer{Float32}() w/ Float64 input and automatic casting" begin
+    using Dates
+
+    g = StreamGraph()
+
+    source!(g, :values, out=Float64, init=0.0)
+    sink!(g, :buffer, Buffer{Float32}(; auto_cast=true))
+
+    @test g[:buffer].operation.min_count == 0
+
+    bind!(g, :values, :buffer)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 4)
+    set_adapters!(exe, [
+        HistoricIterable(exe, g[:values], [
+            (DateTime(2000, 1, 1), 1.0),
+            (DateTime(2000, 1, 2), 2.0),
+            (DateTime(2000, 1, 3), 3.0),
+            (DateTime(2000, 1, 4), 4.0)
+        ])
+    ])
+    run!(exe, start, stop)
+    @test get_state(g[:buffer].operation) == [1f0, 2f0, 3f0, 4f0]
+end
+
 @testitem "Buffer{Int}(storage)" begin
     using Dates
     

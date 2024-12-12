@@ -11,26 +11,33 @@ this operation as valid only when the buffer has at least
 # Arguments
 - `min_count=0`: The minimum number of values required in the buffer to be considered valid.
 - `storage=T[]`: Use provided vector for storage instead of creating a new one.
+- `auto_cast=false`: Enable auto-casting to target type of any input type.
 """
-mutable struct Buffer{T} <: StreamOperation
+mutable struct Buffer{T,auto_cast} <: StreamOperation
     const buffer::Vector{T}
     const min_count::Int
+    const auto_cast::Bool
 
-    function Buffer{T}(; min_count=0) where {T}
-        new{T}(T[], min_count)
+    function Buffer{T}(; min_count=0, auto_cast::Bool=false) where {T}
+        new{T,auto_cast}(T[], min_count, auto_cast)
     end
 
-    function Buffer(storage::Vector{T}; min_count=0) where {T}
-        new{T}(storage, min_count)
+    function Buffer(storage::Vector{T}; min_count=0, auto_cast::Bool=false) where {T}
+        new{T,auto_cast}(storage, min_count, auto_cast)
     end
 
-    function Buffer{T}(storage::Vector{T}; min_count=0) where {T}
-        new{T}(storage, min_count)
+    function Buffer{T}(storage::Vector{T}; min_count=0, auto_cast::Bool=false) where {T}
+        new{T,auto_cast}(storage, min_count, auto_cast)
     end
 end
 
 @inline function (op::Buffer{T})(executor, value::T) where {T}
     push!(op.buffer, value)
+    nothing
+end
+
+@inline function (op::Buffer{T,true})(executor, value) where {T}
+    push!(op.buffer, T(value)) # try to cast
     nothing
 end
 
