@@ -6,18 +6,21 @@ Historic means that the executor processes timestamped events that occurred in t
 at full speed, i.e., the current time of the executor is updated to the timestamp of the event.
 """
 mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
-    graph::StreamGraph
-    states::TStates
+    const graph::StreamGraph
+    const states::TStates
     start_time::TTime
     end_time::TTime
     current_time::TTime
-    event_queue::BinaryMinHeap{ExecutionEvent{TTime}}
-    adapters::Vector{SourceAdapter}
-    adapter_funcs::Dict{Int,Function}
+    const event_queue::BinaryMinHeap{ExecutionEvent{TTime}}
+    const adapters::Vector{SourceAdapter}
+    const adapter_funcs::Dict{Int,Function}
+    const drop_events_before_start::Bool
 
     function HistoricExecutor{TTime}(
         graph::StreamGraph,
         states::TStates
+        ;
+        drop_events_before_start::Bool=false
     ) where {TStates,TTime}
         new{TStates,TTime}(
             graph,
@@ -28,6 +31,7 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
             BinaryMinHeap{ExecutionEvent{TTime}}(), # event_queue
             Vector{SourceAdapter}(), # adapters
             Dict{Int,Function}(), # adapter_funcs
+            drop_events_before_start,
         )
     end
 end
@@ -46,7 +50,8 @@ end
 
 function set_adapters!(executor::HistoricExecutor, adapters)
     @assert length(adapters) >= length(executor.adapter_funcs) "Number of executor adapters must be greater than or equal to number of source nodes"
-    executor.adapters = collect(adapters)
+    empty!(executor.adapters)
+    append!(executor.adapters, adapters)
 end
 
 function setup!(executor::HistoricExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
@@ -90,19 +95,16 @@ function run!(
                 break
             end
 
-            # Events before start_time are NOT filtered currently,
-            # useful for initialization purposes.
-
             # Ignore records before start time
-            # if timestamp >= start_time
-            # Update the current time of the executor
-            executor.current_time = timestamp
+            if !executor.drop_events_before_start || timestamp >= start_time
+                # Update the current time of the executor
+                executor.current_time = timestamp
 
-            # Execute the event
-            process_event!(adapter, executor, event)
+                # Execute the event
+                process_event!(adapter, executor, event)
             # else
-            # println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
-            # end
+            #   println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
+            end
 
             # Schedule next event
             advance!(adapter, executor)

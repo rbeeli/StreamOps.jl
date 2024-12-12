@@ -1,4 +1,4 @@
-@testitem "w/ HistoricIterable" begin
+@testitem "HistoricIterable" begin
     using Dates
 
     g = StreamGraph()
@@ -26,7 +26,36 @@
     @test all(buffer .== [1.0, 2.0])
 end
 
-@testitem "w/ HistoricTimer" begin
+@testitem "HistoricIterable w/ drop_events_before_start" begin
+    using Dates
+
+    g = StreamGraph()
+
+    buffer = Float64[]
+    source!(g, :values, out=Float64, init=0.0)
+    sink!(g, :output, Buffer{Float64}(buffer))
+    bind!(g, :values, :output)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states, drop_events_before_start=true)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 10)
+    set_adapters!(exe, [
+        HistoricIterable(exe, g[:values], [
+            (DateTime(1999, 12, 31), 0.0),
+            (DateTime(2000, 1, 1), 1.0),
+            (DateTime(2000, 1, 2), 2.0),
+        ])
+    ])
+    @time run!(exe, start, stop)
+
+    @test length(buffer) == 2
+    @test all(buffer .== [1.0, 2.0])
+end
+
+@testitem "HistoricTimer" begin
     using Dates
     
     g = StreamGraph()
@@ -51,7 +80,7 @@ end
     @test all(buffer .== start:Day(1):stop)
 end
 
-@testitem "w/ HistoricIterable 2x for 1 source" begin
+@testitem "HistoricIterable 2x for 1 source" begin
     using Dates
     
     g = StreamGraph()
