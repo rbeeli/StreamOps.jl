@@ -53,6 +53,13 @@ julia> round_origin(1.0, 1.0, RoundDown, origin=origin)
     origin + round((value - origin) / bucket_width, mode) * bucket_width
 end
 
+"""
+Returns the number of nanoseconds since UNIX epoch of arbitrary AbstractTime type.
+"""
+@inline function nanos_since_epoch_zero(x::T) where {T<:Dates.AbstractTime}
+    Dates.value(Nanosecond(x - T(1970, 1, 1)))
+end
+
 # Function to recursively remove line number nodes
 function _remove_line_nodes!(ex)
     ex isa Expr || return ex
