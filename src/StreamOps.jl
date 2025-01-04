@@ -55,8 +55,8 @@ include("statistics/SavitzkyGolay.jl")
 include("statistics/ModifiedSinc.jl")
 include("statistics/CumSum.jl")
 
-include("encoders/PeriodicSinEncoder.jl")
-include("encoders/PeriodicCosEncoder.jl")
+include("encoders/PeriodicTimeEncoder.jl")
+include("encoders/PeriodicWeekdayEncoder.jl")
 
 # export all
 for n in names(@__MODULE__; all=true)
