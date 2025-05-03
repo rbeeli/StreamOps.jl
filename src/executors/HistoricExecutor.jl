@@ -1,7 +1,7 @@
 using DataStructures
 
 """
-An executor that runs a stream computation graph in historic mode.
+An executor that runs a stream computation graph in historical mode.
 Historic means that the executor processes timestamped events that occurred in the past
 at full speed, i.e., the current time of the executor is updated to the timestamp of the event.
 """

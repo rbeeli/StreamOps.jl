@@ -29,7 +29,7 @@ bind!(g, :values, :buffer)
 bind!(g, (:timer, :buffer), :flush, call_policies=[IfExecuted(:timer)])
 bind!(g, :flush, :output1)
 
-# Compile the graph with historic executor
+# Compile the graph with historical executor
 states = compile_graph!(DateTime, g)
 exe = HistoricExecutor{DateTime}(g, states)
 setup!(exe)

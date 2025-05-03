@@ -31,7 +31,7 @@ mutable struct Buffer{T,auto_cast} <: StreamOperation
     end
 end
 
-@inline function (op::Buffer{T})(executor, value::T) where {T}
+@inline function (op::Buffer{T,false})(executor, value::T) where {T}
     push!(op.buffer, value)
     nothing
 end

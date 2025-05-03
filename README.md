@@ -1,6 +1,6 @@
 # StreamOps.jl
 
-Composable operations for efficient online processing of realtime and historic data streams using directed graphs.
+Composable operations for efficient online processing of realtime and historical data streams using directed graphs.
 
 ## Background
 

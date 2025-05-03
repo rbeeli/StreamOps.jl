@@ -20,7 +20,7 @@ function run()
     # Create edges between nodes (define the computation graph)
     bind!(g, :values, :output)
 
-    # Compile the graph with historic executor
+    # Compile the graph with historical executor
     states = compile_graph!(Timestamp64, g)
     exe = HistoricExecutor{Timestamp64}(g, states)
     setup!(exe)

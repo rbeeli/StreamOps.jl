@@ -34,7 +34,7 @@ bind!(g, (:combine, :source2, :source3), :final_multiply)
 bind!(g, :final_multiply, :output1)
 bind!(g, :combine, :output2)
 
-# Compile the graph with historic executor
+# Compile the graph with historical executor
 states = compile_graph!(DateTime, g)
 exe = HistoricExecutor{DateTime}(g, states)
 setup!(exe)

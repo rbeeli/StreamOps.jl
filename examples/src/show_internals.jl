@@ -22,7 +22,7 @@ sink!(g, :counter, Counter())
 bind!(g, :source_timer, :output)
 bind!(g, :source_timer, :counter)
 
-# Compile the graph with historic executor
+# Compile the graph with historical executor
 states = compile_graph!(DateTime, g, debug=true)
 exe = HistoricExecutor{DateTime}(g, states)
 setup!(exe, debug=true)

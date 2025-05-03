@@ -25,7 +25,7 @@ sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), n
 bind!(g, (:values1, :values2, :values3, :values4), :combine)
 bind!(g, :combine, :output)
 
-# Compile the graph with historic executor
+# Compile the graph with historical executor
 states = compile_graph!(DateTime, g)
 exe = HistoricExecutor{DateTime}(g, states)
 setup!(exe)

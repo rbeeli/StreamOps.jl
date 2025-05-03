@@ -14,7 +14,7 @@ sink!(g, :output, Print())
 # Create edges between nodes (define the computation graph)
 bind!(g, :values, :output)
 
-# Compile the graph with historic executor
+# Compile the graph with historical executor
 states = compile_graph!(DateTime, g)
 exe = HistoricExecutor{DateTime}(g, states)
 setup!(exe)

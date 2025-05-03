@@ -26,7 +26,7 @@ function run()
     bind!(g, :dts_node, :sink_dts)
     bind!(g, :counts_node, :sink_counts)
 
-    # Compile the graph with historic executor
+    # Compile the graph with historical executor
     states = compile_graph!(Timestamp64, g)
     exe = HistoricExecutor{Timestamp64}(g, states)
     setup!(exe)
