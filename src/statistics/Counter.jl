@@ -8,25 +8,26 @@ operations can start processing, so this operation can be used to signal when
 these operations are deemed ready and further processing can begin.
 """
 mutable struct Counter{T} <: StreamOperation
-    counter::T
-    const min_count::T
-    
-    Counter(start::T=0; min_count::T=0) where{T} = new{T}(start, min_count)
-    Counter{T}(; min_count::T=0) where{T} = new{T}(zero(T), min_count)
+	const min_count::T
+	const start::T
+	counter::T
+
+	Counter(start::T = 0; min_count::T = 0) where {T} = new{T}(min_count, start, start)
+	Counter{T}(; min_count::T = 0) where {T} = new{T}(min_count, zero(T), zero(T))
 end
 
-@inline function(op::Counter{T})(args...) where {T}
-    op.counter += one(T)
-    nothing
+function reset!(op::Counter{T}) where {T}
+	op.counter = op.start
+	nothing
+end
+
+@inline function (op::Counter{T})(args...) where {T}
+	op.counter += one(T)
+	nothing
 end
 
 @inline is_valid(op::Counter) = op.counter >= op.min_count
 
 @inline function get_state(op::Counter{T})::T where {T}
-    op.counter
-end
-
-@inline function reset!(op::Counter{T}) where {T}
-    op.counter = zero(T)
-    nothing
+	op.counter
 end

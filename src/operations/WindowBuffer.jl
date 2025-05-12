@@ -29,6 +29,11 @@ mutable struct WindowBuffer{T,copy} <: StreamOperation
     end
 end
 
+function reset!(op::WindowBuffer)
+    empty!(op.buffer)
+    nothing
+end
+
 @inline function (op::WindowBuffer{T})(executor, value::T) where {T}
     # automatically handles overwriting in a circular manner
     push!(op.buffer, value)
@@ -44,7 +49,5 @@ end
 @inline function get_state(op::WindowBuffer{T,true}) where {T}
     collect(op.buffer)
 end
-
-@inline Base.empty!(op::WindowBuffer) = empty!(op.buffer)
 
 @inline Base.length(op::WindowBuffer) = length(op.buffer)

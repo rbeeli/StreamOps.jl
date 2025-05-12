@@ -22,6 +22,11 @@ mutable struct Lag{In} <: StreamOperation
     end
 end
 
+function reset!(op::Lag)
+	empty!(op.buffer)
+    nothing
+end
+
 @inline function (op::Lag)(executor, value)
     push!(op.buffer, value)
     nothing

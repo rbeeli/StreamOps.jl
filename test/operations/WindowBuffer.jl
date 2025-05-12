@@ -35,6 +35,10 @@
     @test output.operation.buffer[1] == [2, 3, 4]
     @test output.operation.buffer[2] == [2, 3, 4]
     @test length(output.operation.buffer) == 2
+
+	@test is_valid(rolling.operation)
+	reset!(rolling.operation)
+	@test !is_valid(rolling.operation)
 end
 
 @testitem "copy=true" begin

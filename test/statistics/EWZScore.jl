@@ -1,3 +1,15 @@
+@testitem "reset!" begin
+    op = EWZScore{Float64,Float64}(alpha=0.1)
+
+    op(nothing, 1.0)
+    op(nothing, 2.0)
+    op(nothing, 3.0)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "corrected=true(default)" begin
     using Dates
     

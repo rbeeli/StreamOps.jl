@@ -1,3 +1,17 @@
+@testitem "reset!" begin
+    op = Median{Float64,Float64}(3)
+
+    @test !is_valid(op)
+
+    op(nothing, 1.0)
+    op(nothing, 2.0)
+    op(nothing, 3.0)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "full_only=false(default)" begin
     using Dates
     

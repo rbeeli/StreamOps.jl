@@ -8,15 +8,21 @@ Note that `nothing` marks this operation as invalid.
 - `init`: The initial value to use as the last value.
 """
 mutable struct Copy{Out} <: StreamOperation
+    const init::Out
     last_value::Out
     
     function Copy(init::Out) where {Out}
-        new{Out}(init)
+        new{Out}(init, init)
     end
 
     function Copy{Out}() where {Out}
-        new{Union{Out,Nothing}}(nothing)
+        new{Union{Out,Nothing}}(nothing, nothing)
     end
+end
+
+function reset!(op::Copy)
+    op.last_value = op.init
+    nothing
 end
 
 @inline function (op::Copy{Out})(executor, value::V) where {Out, V}

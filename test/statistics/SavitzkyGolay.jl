@@ -47,6 +47,20 @@ end
     @test_throws "Window size must be greater than 0" SavitzkyGolay{Float64,Float64}(0, 2)
 end
 
+@testitem "reset!" begin
+    op = SavitzkyGolay{Float64,Float64}(3, 1)
+
+    @test !is_valid(op)
+
+    op(nothing, 1.0)
+    op(nothing, 2.0)
+    op(nothing, 3.0)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "order=1" setup=[SGSnippet] begin
     using Dates
 

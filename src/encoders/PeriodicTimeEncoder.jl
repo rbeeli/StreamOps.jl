@@ -25,6 +25,12 @@ mutable struct PeriodicTimeEncoder{T} <: StreamOperation
     end
 end
 
+function reset!(op::PeriodicTimeEncoder)
+    op.current = (0.0, 0.0)
+    op.counter = 0
+    nothing
+end
+
 @inline function (op::PeriodicTimeEncoder{T})(executor, timestamp::T) where {T<:Dates.AbstractTime}
     # Get position within period in nanoseconds
     position = mod(nanos_since_epoch_zero(timestamp), op.period_nanos)

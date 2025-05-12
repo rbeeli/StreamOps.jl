@@ -1,5 +1,7 @@
 mutable struct TimeSampler{TTime,TValue,TPeriod} <: StreamOperation
     const sample_interval::TPeriod
+    const init::TValue
+    const origin::TTime
     next_time::TTime
     last_value::TValue
     new_sample::Bool
@@ -11,8 +13,15 @@ mutable struct TimeSampler{TTime,TValue,TPeriod} <: StreamOperation
         origin::TTime=time_zero(TTime)
     ) where {TTime,TValue,TPeriod}
         @assert sample_interval > zero(TPeriod) "Sample interval must be positive"
-        new{TTime,TValue,TPeriod}(sample_interval, origin, init, false)
+        new{TTime,TValue,TPeriod}(sample_interval, init, origin, origin, init, false)
     end
+end
+
+function reset!(op::TimeSampler)
+    op.last_value = op.init
+    op.next_time = op.origin
+    op.new_sample = false
+    nothing
 end
 
 # tell executor to always sync time with this operation (update_time!)

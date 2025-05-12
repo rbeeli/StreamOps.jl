@@ -1,98 +1,109 @@
+@testitem "reset!" begin
+	op = Constant(999)
+	@test is_valid(op)
+
+	op(nothing, 1.0)
+
+	@test is_valid(op)
+	reset!(op)
+	@test is_valid(op)
+end
+
 @testitem "integer with input binding" begin
-    using Dates
+	using Dates
 
-    g = StreamGraph()
+	g = StreamGraph()
 
-    source!(g, :values, out=Int, init=0)
-    op!(g, :constant, Constant(999), out=Int)
-    sink!(g, :output, Buffer{Int}())
+	source!(g, :values, out = Int, init = 0)
+	op!(g, :constant, Constant(999), out = Int)
+	sink!(g, :output, Buffer{Int}())
 
-    bind!(g, :values, :constant)
-    bind!(g, :constant, :output)
+	bind!(g, :values, :constant)
+	bind!(g, :constant, :output)
 
-    states = compile_graph!(DateTime, g)
-    exe = HistoricExecutor{DateTime}(g, states)
-    setup!(exe)
+	states = compile_graph!(DateTime, g)
+	exe = HistoricExecutor{DateTime}(g, states)
+	setup!(exe)
 
-    vals = [2, 3, -1, 0, 3]
-    start = DateTime(2000, 1, 1)
-    stop = DateTime(2000, 1, length(vals))
+	vals = [2, 3, -1, 0, 3]
+	start = DateTime(2000, 1, 1)
+	stop = DateTime(2000, 1, length(vals))
 
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
-    run!(exe, start, stop)
+	set_adapters!(exe, [
+		HistoricIterable(exe, g[:values], [
+			(DateTime(2000, 1, i), x)
+			for (i, x) in enumerate(vals)
+		]),
+	])
+	run!(exe, start, stop)
 
-    @test g[:output].operation.buffer == [999, 999, 999, 999, 999]
+	@test g[:output].operation.buffer == [999, 999, 999, 999, 999]
 end
 
 @testitem "integer w/o input binding (source node)" begin
-    using Dates
-    
-    g = StreamGraph()
+	using Dates
 
-    source!(g, :values, out=Int, init=0)
-    op!(g, :constant, Constant(999), out=Int)
-    sink!(g, :output, Buffer{Int}())
+	g = StreamGraph()
 
-    bind!(g, :constant, :output)
-    bind!(g, :values, :output, bind_as=NoBind())
+	source!(g, :values, out = Int, init = 0)
+	op!(g, :constant, Constant(999), out = Int)
+	sink!(g, :output, Buffer{Int}())
 
-    states = compile_graph!(DateTime, g)
-    exe = HistoricExecutor{DateTime}(g, states)
-    setup!(exe)
+	bind!(g, :constant, :output)
+	bind!(g, :values, :output, bind_as = NoBind())
 
-    vals = [2, 3, -1, 0, 3]
-    start = DateTime(2000, 1, 1)
-    stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
-    run!(exe, start, stop)
+	states = compile_graph!(DateTime, g)
+	exe = HistoricExecutor{DateTime}(g, states)
+	setup!(exe)
 
-    @test g[:output].operation.buffer == [999, 999, 999, 999, 999]
+	vals = [2, 3, -1, 0, 3]
+	start = DateTime(2000, 1, 1)
+	stop = DateTime(2000, 1, length(vals))
+	set_adapters!(exe, [
+		HistoricIterable(exe, g[:values], [
+			(DateTime(2000, 1, i), x)
+			for (i, x) in enumerate(vals)
+		]),
+	])
+	run!(exe, start, stop)
+
+	@test g[:output].operation.buffer == [999, 999, 999, 999, 999]
 end
 
 @testitem "integer with input trigger but no binding" begin
-    using Dates
-    
-    g = StreamGraph()
+	using Dates
 
-    source!(g, :values, out=Int, init=0)
-    op!(g, :constant, Constant(999), out=Int)
-    sink!(g, :output, Buffer{Int}())
+	g = StreamGraph()
 
-    bind!(g, :values, :constant, bind_as=NoBind())
-    bind!(g, :constant, :output)
+	source!(g, :values, out = Int, init = 0)
+	op!(g, :constant, Constant(999), out = Int)
+	sink!(g, :output, Buffer{Int}())
 
-    states = compile_graph!(DateTime, g)
-    exe = HistoricExecutor{DateTime}(g, states)
-    setup!(exe)
+	bind!(g, :values, :constant, bind_as = NoBind())
+	bind!(g, :constant, :output)
 
-    vals = [2, 3, -1, 0, 3]
-    start = DateTime(2000, 1, 1)
-    stop = DateTime(2000, 1, length(vals))
+	states = compile_graph!(DateTime, g)
+	exe = HistoricExecutor{DateTime}(g, states)
+	setup!(exe)
 
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
-    run!(exe, start, stop)
+	vals = [2, 3, -1, 0, 3]
+	start = DateTime(2000, 1, 1)
+	stop = DateTime(2000, 1, length(vals))
 
-    @test g[:output].operation.buffer == [999, 999, 999, 999, 999]
+	set_adapters!(exe, [
+		HistoricIterable(exe, g[:values], [
+			(DateTime(2000, 1, i), x)
+			for (i, x) in enumerate(vals)
+		]),
+	])
+	run!(exe, start, stop)
+
+	@test g[:output].operation.buffer == [999, 999, 999, 999, 999]
 end
 
 # @testitem "constant as invalid fallback value" begin
-    # using Dates
-    
+# using Dates
+
 #     g = StreamGraph()
 
 #     values = source!(g, :values, out=Int, init=0)

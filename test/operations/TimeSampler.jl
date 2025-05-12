@@ -46,6 +46,10 @@
     @test buffer[5] == (DateTime("2000-01-01T00:04:00"), 400)
     @test buffer[6] == (DateTime("2000-01-01T00:08:00"), 800)
     @test length(buffer) == 6
+
+    @test is_valid(g[:sampler].operation)
+    reset!(g[:sampler].operation)
+    @test !is_valid(g[:sampler].operation)
 end
 
 @testitem "sample every minute, custom origin (00:00:30)" begin

@@ -1,4 +1,4 @@
-@testitem "Diff" begin
+@testitem "Diff (incl. reset!)" begin
     using Dates
     
     g = StreamGraph()
@@ -27,4 +27,7 @@
     ])
     run!(exe, start, stop)
     @test output.operation.buffer ≈ [-3, 8, -6, 10]
+
+    reset!(g[:diff].operation)
+    @test get_state(g[:diff].operation) == 0
 end

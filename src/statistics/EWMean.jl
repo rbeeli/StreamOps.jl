@@ -25,60 +25,67 @@ hence the model is more reactive to recent changes.
 Incremental calculation of weighted mean and variance, Tony Finch, Feb 2009
 https://blog.fugue88.ws/archives/2017-01/The-correct-way-to-start-an-Exponential-Moving-Average-EMA
 """
-mutable struct EWMean{In<:Number,Out<:Number,corrected} <: StreamOperation
-    const alpha::Out
-    const c::Out # 1 - alpha
-    const corrected::Bool # bias correction
-    M::Out
-    ci::Out
-    n::Int
+mutable struct EWMean{In <: Number, Out <: Number, corrected} <: StreamOperation
+	const alpha::Out
+	const c::Out # 1 - alpha
+	const corrected::Bool # bias correction
+	M::Out
+	ci::Out
+	n::Int
 
-    EWMean{In,Out}(
-        ;
-        alpha::Out,
-        corrected=true
-    ) where {In<:Number,Out<:Number} =
-        new{In,Out,corrected}(
-            alpha,
-            one(Out) - alpha, # c
-            corrected,
-            zero(Out), # M
-            corrected ? one(Out) : zero(Out), # ci
-            0 # n
-        )
+	EWMean{In, Out}(
+		;
+		alpha::Out,
+		corrected = true,
+	) where {In <: Number, Out <: Number} =
+		new{In, Out, corrected}(
+			alpha,
+			one(Out) - alpha, # c
+			corrected,
+			zero(Out), # M
+			corrected ? one(Out) : zero(Out), # ci
+			0, # n
+		)
+end
+
+function reset!(op::EWMean{In, Out, corrected}) where {In, Out, corrected}
+	op.M = zero(Out)
+	op.ci = corrected ? one(Out) : zero(Out)
+	op.n = 0
+	nothing
 end
 
 # uncorrected mean
-@inline function (op::EWMean{In,Out,false})(executor, value::In) where {In,Out}
-    if op.n == 0
-        op.M = value
-    else
-        op.M = op.c * op.M + op.alpha * value
-    end
+@inline function (op::EWMean{In, Out, false})(executor, value::In) where {In, Out}
+	if op.n == 0
+		op.M = value
+	else
+		op.M = op.c * op.M + op.alpha * value
+	end
 
-    op.n += 1
+	op.n += 1
 
-    nothing
+	nothing
 end
 
 # bias corrected mean
-@inline function (op::EWMean{In,Out,true})(executor, value::In) where {In,Out}
-    op.M = op.c * op.M + op.alpha * value
-    op.n += 1
-    op.ci *= op.c
-    nothing
+@inline function (op::EWMean{In, Out, true})(executor, value::In) where {In, Out}
+	op.M = op.c * op.M + op.alpha * value
+	op.n += 1
+	op.ci *= op.c
+	nothing
 end
 
 @inline function is_valid(op::EWMean)
-    op.n > 0
+	op.n > 0
 end
 
 # uncorrected mean
-@inline function get_state(op::EWMean{In,Out,false})::Out where {In,Out}
-    op.M
+@inline function get_state(op::EWMean{In, Out, false})::Out where {In, Out}
+	op.M
 end
 
 # bias corrected mean
-@inline function get_state(op::EWMean{In,Out,true})::Out where {In,Out}
-    op.M / (one(Out) - op.ci)
+@inline function get_state(op::EWMean{In, Out, true})::Out where {In, Out}
+	op.M / (one(Out) - op.ci)
 end

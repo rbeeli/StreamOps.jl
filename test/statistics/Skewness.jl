@@ -1,3 +1,19 @@
+@testitem "reset!" begin
+    op = Skewness{Float64,Float64}(5)
+
+    @test !is_valid(op)
+
+    op(nothing, 1.0)
+    op(nothing, 2.0)
+    op(nothing, 3.0)
+    op(nothing, 4.0)
+    op(nothing, 5.0)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "window_size=5" begin
     using Dates
 

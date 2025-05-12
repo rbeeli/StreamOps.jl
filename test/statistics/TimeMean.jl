@@ -1,17 +1,25 @@
-@testitem "defaults" begin
+@testitem "defaults (empty_valid=false) (incl. reset!)" begin
     using Dates
     
     g = StreamGraph()
-
     values = source!(g, :values, out=Int, init=0)
     rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed), out=Float64)
 
-    # empty by default valid with value "empty_value=NaN"
-    @test is_valid(rolling.operation)
+    # empty by default invalid with value "empty_value=NaN"
+    @test !is_valid(rolling.operation)
     @test isnan(get_state(rolling.operation))
+    reset!(rolling.operation)
+    @test !is_valid(rolling.operation)
+
+    g = StreamGraph()
+    values = source!(g, :values, out=Int, init=0)
+    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed, empty_valid=true), out=Float64)
+    @test is_valid(rolling.operation)
+    reset!(rolling.operation)
+    @test is_valid(rolling.operation)
 end
 
-@testitem "empty_valid=false" begin
+@testitem "empty_valid=true (incl. reset!)" begin
     using Dates
     
     g = StreamGraph()
@@ -19,6 +27,8 @@ end
     values = source!(g, :values, out=Int, init=0)
     rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed, empty_valid=false), out=Float64)
 
+    @test !is_valid(rolling.operation)
+    reset!(rolling.operation)
     @test !is_valid(rolling.operation)
 end
 
@@ -31,9 +41,7 @@ end
     rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed), out=Float64)
 
     @test is_valid(values.operation)
-
-    # empty by default valid with value "empty_value=NaN"
-    @test is_valid(rolling.operation)
+    @test !is_valid(rolling.operation)
     @test isnan(get_state(rolling.operation))
 
     output = sink!(g, :output, Buffer{Float64}())
@@ -78,9 +86,7 @@ end
     bind!(g, :values, :rolling)
 
     @test is_valid(g[:values].operation)
-
-    # empty by default valid with value "empty_value=NaN"
-    @test is_valid(g[:rolling].operation)
+    @test !is_valid(g[:rolling].operation)
     @test isnan(get_state(g[:rolling].operation))
 
     output = sink!(g, :output, Buffer{Tuple{DateTime,Float64}}())

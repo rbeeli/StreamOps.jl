@@ -1,3 +1,15 @@
+@testitem "reset!" begin
+    op = EWVariance{Float64,Float64}(alpha=0.9, corrected=false)
+
+    op(nothing, 1.0)
+    op(nothing, 2.0)
+    op(nothing, 3.0)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "alpha=0.9 corrected=false" begin
     using Dates
     

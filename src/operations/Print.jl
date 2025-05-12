@@ -10,6 +10,10 @@ struct Print{F<:Function} <: StreamOperation
     end
 end
 
+function reset!(op::Print)
+    nothing
+end
+
 @inline function (op::Print)(executor, value)
     op.print_fn(executor, value)
     nothing

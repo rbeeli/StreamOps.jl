@@ -31,6 +31,11 @@ mutable struct Buffer{T,auto_cast} <: StreamOperation
     end
 end
 
+function reset!(op::Buffer)
+    empty!(op.buffer)
+    nothing
+end
+
 @inline function (op::Buffer{T,false})(executor, value::T) where {T}
     push!(op.buffer, value)
     nothing
@@ -44,5 +49,3 @@ end
 @inline is_valid(op::Buffer) = length(op.buffer) >= op.min_count
 
 @inline get_state(op::Buffer) = op.buffer
-
-@inline Base.empty!(op::Buffer) = empty!(op.buffer)

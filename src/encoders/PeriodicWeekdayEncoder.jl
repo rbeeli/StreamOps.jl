@@ -26,6 +26,12 @@ mutable struct PeriodicWeekdayEncoder{T} <: StreamOperation
     end
 end
 
+function reset!(op::PeriodicWeekdayEncoder)
+    op.current = (0.0, 1.0)
+    op.counter = 0
+    nothing
+end
+
 @inline function (op::PeriodicWeekdayEncoder{T})(executor, timestamp::T) where {T<:Dates.AbstractTime}
     # Get the day of week (1-7, where 1 is Monday by default)
     weekday = Dates.dayofweek(timestamp)

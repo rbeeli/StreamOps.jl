@@ -18,3 +18,14 @@
     @test get_node_label(g, 1) == :values
     @test get_node_label(g, 2) == :output
 end
+
+# @testitem "reset!" begin
+#     using Dates
+
+#     g = StreamGraph()
+
+#     values = source!(g, :values, out=Float64, init=0.0)
+#     output = sink!(g, :output, Buffer{Int}(min_count=1))
+
+#     reset!(g)
+# end

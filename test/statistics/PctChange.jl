@@ -1,3 +1,16 @@
+@testitem "reset!" begin
+    op = PctChange{Float64,Float64}()
+
+    @test !is_valid(op)
+
+    op(nothing, 1.0)
+    op(nothing, 2.0)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "default" begin
     using Dates
     

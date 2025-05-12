@@ -24,6 +24,11 @@ mutable struct RingBuffer{T} <: StreamOperation
     end
 end
 
+function reset!(op::RingBuffer)
+    empty!(op.buffer)
+    nothing
+end
+
 @inline function (op::RingBuffer{T})(executor, value::T) where {T}
     push!(op.buffer, value)
     nothing
@@ -32,7 +37,5 @@ end
 @inline is_valid(op::RingBuffer) = length(op.buffer) >= op.min_count
 
 @inline get_state(op::RingBuffer) = op.buffer
-
-@inline Base.empty!(op::RingBuffer) = empty!(op.buffer)
 
 @inline Base.length(op::RingBuffer) = length(op.buffer)

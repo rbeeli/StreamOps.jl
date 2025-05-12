@@ -5,19 +5,25 @@ and stores the result as the last value.
 mutable struct Func{T,TFunc,TIsValid} <: StreamOperation
     const func::TFunc
     const is_valid::TIsValid
+    const init::T
     last_value::T
 
     function Func(func::TFunc, init::T; is_valid::TIsValid=!isnothing) where {T,TFunc,TIsValid}
-        new{T,TFunc,TIsValid}(func, is_valid, init)
+        new{T,TFunc,TIsValid}(func, is_valid, init, init)
     end
 
     function Func{T}(func::TFunc, init::T; is_valid::TIsValid=!isnothing) where {T,TFunc,TIsValid}
-        new{T,TFunc,TIsValid}(func, is_valid, init)
+        new{T,TFunc,TIsValid}(func, is_valid, init, init)
     end
 
     # function Func(func::TFunc) where {TFunc}
     #     new{Nothing,TFunc}(func, nothing)
     # end
+end
+
+function reset!(op::Func)
+	op.last_value = op.init
+    nothing
 end
 
 @inline has_output(op::Func{Nothing}) = false

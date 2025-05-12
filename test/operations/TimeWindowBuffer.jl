@@ -8,7 +8,7 @@
 
     @test rolling.operation.copy
     @test is_valid(values.operation) # != nothing -> is_valid
-    @test is_valid(rolling.operation) # valid_if_empty=true is default
+    @test !is_valid(rolling.operation) # valid_if_empty=false is default
 
     output = sink!(g, :output, Buffer{Vector{Int}}())
 
@@ -39,19 +39,23 @@
     @test output.operation.buffer[4] == [2, 3, 4]
     @test output.operation.buffer[5] == [10]
     @test length(output.operation.buffer) == 5
+
+	@test is_valid(rolling.operation)
+	reset!(rolling.operation)
+	@test !is_valid(rolling.operation) # valid_if_empty=false
 end
 
-@testitem "copy=true :open (excluded) valid_if_empty=false" begin
+@testitem "copy=true :open (excluded) valid_if_empty=true" begin
     using Dates
     
     g = StreamGraph()
 
     values = source!(g, :values, out=Int, init=0)
-    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=false), out=Vector{Int})
+    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=true), out=Vector{Int})
 
     @test rolling.operation.copy
     @test is_valid(values.operation) # != nothing -> is_valid
-    @test !is_valid(rolling.operation) # valid_if_empty=false
+    @test is_valid(rolling.operation) # valid_if_empty=true
 
     output = sink!(g, :output, Buffer{Vector{Int}}())
 
@@ -83,6 +87,10 @@ end
     @test output.operation.buffer[4] == [3, 4]
     @test output.operation.buffer[5] == [10]
     @test length(output.operation.buffer) == 5
+
+	@test is_valid(rolling.operation)
+	reset!(rolling.operation)
+	@test is_valid(rolling.operation) # valid_if_empty=true
 end
 
 @testitem "copy=false" begin

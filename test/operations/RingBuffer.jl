@@ -1,3 +1,13 @@
+@testitem "reset!" begin
+    op = RingBuffer{Int}(1, min_count=1)
+
+    op(nothing, 1)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "RingBuffer{Int}(1) (discard 3)" begin
     using Dates
 

@@ -48,6 +48,19 @@ mutable struct Skewness{In<:Number,Out<:Number} <: StreamOperation
     end
 end
 
+function reset!(op::Skewness{In, Out}) where {In, Out}
+	empty!(op.buffer)
+    op.x = zero(Out)
+    op.xx = zero(Out)
+    op.xxx = zero(Out)
+    op.compensation_x = zero(Out)
+    op.compensation_xx = zero(Out)
+    op.compensation_xxx = zero(Out)
+    op.num_consecutive_same_value = 0
+    op.prev_value = zero(In)
+	nothing
+end
+
 function _add_skew!(op::Skewness{In,Out}, val::In) where {In<:Number,Out<:Number}
     y = val - op.compensation_x
     t = op.x + y

@@ -8,35 +8,46 @@ with the last valid value.
 - `should_fill_fn` A function that returns `true` if a value should be filled.
 - `init=zero(T)`: The initial value to use as the last valid value.
 """
-mutable struct ForwardFill{T,F<:Function} <: StreamOperation
-    const should_fill_fn::F
-    called::Bool
-    last_valid::T
+mutable struct ForwardFill{T, F <: Function} <: StreamOperation
+	const should_fill_fn::F
+    const init::T
+	called::Bool
+	last_valid::T
 
-    # constructor for String type with default fill function
-    ForwardFill{T}(
-        should_fill_fn::F=(x) -> (ismissing(x) || x == "")
-        ;
-        init=""
-    ) where {T<:String,F<:Function} = new{T,F}(should_fill_fn, false, init)
+	# constructor for String type with default fill function
+	function ForwardFill{T}(
+		should_fill_fn::F = (x) -> (ismissing(x) || x == "")
+		;
+		init = "",
+	) where {T <: String, F <: Function}
+		new{T, F}(should_fill_fn, init, false, init)
+	end
 
-    # default constructor
-    ForwardFill{T}(
-        should_fill_fn::F=(x) -> (ismissing(x) || isnan(x))
-        ;
-        init=zero(T)
-    ) where {T,F<:Function} = new{T,F}(should_fill_fn, false, init)
+	# default constructor
+	function ForwardFill{T}(
+		should_fill_fn::F = (x) -> (ismissing(x) || isnan(x))
+		;
+		init = zero(T),
+	) where {T, F <: Function}
+		new{T, F}(should_fill_fn, init, false, init)
+	end
 end
 
-@inline function (op::ForwardFill{T,F})(executor, value) where {T,F}
-    if !op.should_fill_fn(value)
-        # don't fill, just update last_valid
-        op.last_valid = value
-    end
-
-    op.called = true
-
+function reset!(op::ForwardFill)
+	op.called = false
+    op.last_valid = op.init
     nothing
+end
+
+@inline function (op::ForwardFill{T, F})(executor, value) where {T, F}
+	if !op.should_fill_fn(value)
+		# don't fill, just update last_valid
+		op.last_valid = value
+	end
+
+	op.called = true
+
+	nothing
 end
 
 @inline is_valid(op::ForwardFill) = op.called

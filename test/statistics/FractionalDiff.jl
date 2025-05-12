@@ -1,3 +1,15 @@
+@testitem "reset!" begin
+    op = FractionalDiff{Float64,Float64}(0.99999)
+
+    op(nothing, 1.0)
+    op(nothing, 2.0)
+    op(nothing, 3.0)
+
+    @test is_valid(op)
+    reset!(op)
+    @test !is_valid(op)
+end
+
 @testitem "order=0.99" begin
     using Dates
     

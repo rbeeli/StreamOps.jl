@@ -1,4 +1,4 @@
-@testitem "default ctor" begin
+@testitem "default ctor (incl. reset!)" begin
     using Dates
     
     g = StreamGraph()
@@ -27,6 +27,9 @@
     ])
     run!(exe, start, stop)
     @test output.operation.buffer ≈ expected
+
+    reset!(g[:cumsum].operation)
+    @test get_state(g[:cumsum].operation) == 0
 end
 
 @testitem "custom init value" begin
@@ -95,7 +98,7 @@ end
     @test output.operation.buffer ≈ expected
 end
 
-@testitem "empty!" begin
+@testitem "reset!" begin
     using Dates
     
     g = StreamGraph()
@@ -126,7 +129,7 @@ end
     @test output.operation.buffer ≈ expected
 
     # Test reset
-    empty!(cumsum.operation)
+    reset!(cumsum.operation)
     @test !is_valid(cumsum.operation)
     @test get_state(cumsum.operation) == 100.0
 end

@@ -30,7 +30,7 @@ mutable struct TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,copy} <: Stre
         interval_mode::Symbol,
         ;
         copy::Bool=false,
-        valid_if_empty::Bool=true
+        valid_if_empty::Bool=false,
     ) where {TTime,TValue,TPeriod}
         new{TTime,TValue,TPeriod,interval_mode,copy}(
             Vector{TTime}(),
@@ -40,6 +40,12 @@ mutable struct TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,copy} <: Stre
             copy,
             valid_if_empty)
     end
+end
+
+function reset!(op::TimeWindowBuffer)
+    empty!(op.time_buffer)
+    empty!(op.value_buffer)
+    nothing
 end
 
 # tell executor to always sync time with this operation (update_time!)
@@ -90,10 +96,4 @@ end
 
 @inline function get_state(op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,true}) where {TTime,TValue,TPeriod,interval_mode}
     collect(op.value_buffer)
-end
-
-@inline function Base.empty!(op::TimeWindowBuffer)
-    empty!(op.time_buffer)
-    empty!(op.value_buffer)
-    nothing
 end

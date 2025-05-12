@@ -25,6 +25,11 @@ mutable struct TimeTupleBuffer{TTime,TValue} <: StreamOperation
     end
 end
 
+function reset!(op::TimeTupleBuffer)
+    empty!(op.buffer)
+    nothing
+end
+
 @inline function (op::TimeTupleBuffer{TTime,TValue})(executor, val::TValue) where {TTime,TValue}
     push!(op.buffer, (time(executor), val))
     nothing
@@ -33,5 +38,3 @@ end
 @inline is_valid(op::TimeTupleBuffer) = length(op.buffer) >= op.min_count
 
 @inline get_state(op::TimeTupleBuffer) = op.buffer
-
-@inline Base.empty!(op::TimeTupleBuffer) = empty!(op.buffer)

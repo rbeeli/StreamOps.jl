@@ -1,4 +1,4 @@
-@testitem "default" begin
+@testitem "default (incl. reset!)" begin
     using Dates
 
     g = StreamGraph()
@@ -38,4 +38,8 @@
     @test output.operation.buffer[4] == sum([2, 3, 4])
     @test output.operation.buffer[5] == sum([10])
     @test length(output.operation.buffer) == 5
+
+    @test is_valid(rolling.operation)
+    reset!(rolling.operation)
+    @test !is_valid(rolling.operation)
 end
