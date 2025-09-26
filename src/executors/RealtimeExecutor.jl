@@ -155,4 +155,4 @@ function run!(
     nothing
 end
 
-export RealtimeExecutor, WakeUpAdapter, run!, set_adapters!, setup!, start_time, end_time
+export RealtimeExecutor, WakeUpAdapter, set_adapters!, start_time, end_time

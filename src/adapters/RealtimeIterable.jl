@@ -131,4 +131,4 @@ function destroy!(adapter::RealtimeIterable{TData,TItem}) where {TData,TItem}
     nothing
 end
 
-export RealtimeIterable, run!, process_event!, destroy!
+export RealtimeIterable

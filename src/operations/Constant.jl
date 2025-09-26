@@ -22,4 +22,4 @@ end
     op.value
 end
 
-export Constant, is_valid, get_state, reset!
+export Constant

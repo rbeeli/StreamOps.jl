@@ -47,4 +47,4 @@ end
 
 @inline get_state(op::Func{T}) where {T} = op.last_value
 
-export Func, has_output, is_valid, get_state, reset!
+export Func, has_output

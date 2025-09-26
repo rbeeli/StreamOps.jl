@@ -18,4 +18,4 @@ end
     storage.data
 end
 
-export AdapterStorage, is_valid, get_state
+export AdapterStorage

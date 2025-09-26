@@ -34,4 +34,4 @@ end
 
 @inline get_state(op::Lag) = @inbounds first(op.buffer)
 
-export Lag, is_valid, get_state, reset!
+export Lag

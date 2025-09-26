@@ -50,4 +50,4 @@ end
 
 @inline get_state(op::ForwardFill{T}) where {T} = op.last_valid
 
-export ForwardFill, is_valid, get_state, reset!
+export ForwardFill

@@ -100,4 +100,4 @@ end
     collect(op.value_buffer)
 end
 
-export TimeWindowBuffer, is_valid, get_state, reset!, update_time!
+export TimeWindowBuffer

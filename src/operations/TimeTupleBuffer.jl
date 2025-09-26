@@ -39,4 +39,4 @@ end
 
 @inline get_state(op::TimeTupleBuffer) = op.buffer
 
-export TimeTupleBuffer, is_valid, get_state, reset!
+export TimeTupleBuffer

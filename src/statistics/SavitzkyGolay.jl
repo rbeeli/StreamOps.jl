@@ -71,4 +71,4 @@ function _precompute_h(window_size, order)
     h_table
 end
 
-export SavitzkyGolay, is_valid, get_state, reset!
+export SavitzkyGolay

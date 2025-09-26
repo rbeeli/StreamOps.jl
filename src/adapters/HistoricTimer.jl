@@ -52,4 +52,4 @@ function advance!(
     nothing
 end
 
-export HistoricTimer, setup!, process_event!, advance!
+export HistoricTimer

@@ -50,4 +50,4 @@ end
 
 @inline get_state(op::Buffer) = op.buffer
 
-export Buffer, is_valid, get_state, reset!
+export Buffer

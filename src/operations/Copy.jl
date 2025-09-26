@@ -34,4 +34,4 @@ end
 
 @inline get_state(op::Copy{Out}) where {Out} = op.last_value
 
-export Copy, is_valid, get_state, reset!
+export Copy

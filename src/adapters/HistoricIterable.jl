@@ -64,4 +64,4 @@ function advance!(
     nothing
 end
 
-export HistoricIterable, setup!, process_event!, advance!
+export HistoricIterable

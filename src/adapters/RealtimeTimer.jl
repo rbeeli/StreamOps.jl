@@ -92,4 +92,4 @@ function destroy!(adapter::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime}
     nothing
 end
 
-export RealtimeTimer, run!, process_event!, destroy!
+export RealtimeTimer

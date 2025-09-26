@@ -1,5 +1,6 @@
 module StreamOps
 
+include("interface.jl")
 include("utils.jl")
 include("types.jl")
 include("errors.jl")
@@ -54,7 +55,6 @@ include("statistics/TimeMean.jl")
 include("statistics/SavitzkyGolay.jl")
 include("statistics/ModifiedSinc.jl")
 include("statistics/CumSum.jl")
-
 include("encoders/PeriodicTimeEncoder.jl")
 include("encoders/PeriodicWeekdayEncoder.jl")
 

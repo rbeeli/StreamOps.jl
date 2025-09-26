@@ -23,4 +23,4 @@ end
 
 @inline get_state(op::Print) = nothing
 
-export Print, is_valid, get_state, reset!
+export Print

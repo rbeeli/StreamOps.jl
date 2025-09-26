@@ -48,4 +48,4 @@ end
 
 @inline Base.length(op::WindowBuffer) = length(op.buffer)
 
-export WindowBuffer, is_valid, get_state, reset!
+export WindowBuffer

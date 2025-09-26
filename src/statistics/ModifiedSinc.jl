@@ -346,7 +346,11 @@ mutable struct ModifiedSinc{In<:Number,Out<:Number} <: StreamOperation
     end
 end
 
-# TODO: reset!(op::ModifiedSinc)
+function reset!(op::ModifiedSinc{In,Out}) where {In<:Number,Out<:Number}
+    empty!(op.buffer)
+    op.filtered = zero(Out)
+    nothing
+end
 
 @inline function (op::ModifiedSinc{In,Out})(executor, value::In) where {In<:Number,Out<:Number}
     push!(op.buffer, Out(value))
@@ -366,4 +370,4 @@ end
     op.filtered
 end
 
-export ModifiedSinc, is_valid, get_state
+export ModifiedSinc

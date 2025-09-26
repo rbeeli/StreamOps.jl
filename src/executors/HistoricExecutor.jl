@@ -113,4 +113,4 @@ function run!(
     nothing
 end
 
-export HistoricExecutor, run!, set_adapters!, setup!, start_time, end_time
+export HistoricExecutor, set_adapters!, start_time, end_time
