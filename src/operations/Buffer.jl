@@ -49,3 +49,5 @@ end
 @inline is_valid(op::Buffer) = length(op.buffer) >= op.min_count
 
 @inline get_state(op::Buffer) = op.buffer
+
+export Buffer, is_valid, get_state, reset!

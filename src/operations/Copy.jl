@@ -10,7 +10,7 @@ Note that `nothing` marks this operation as invalid.
 mutable struct Copy{Out} <: StreamOperation
     const init::Out
     last_value::Out
-    
+
     function Copy(init::Out) where {Out}
         new{Out}(init, init)
     end
@@ -25,7 +25,7 @@ function reset!(op::Copy)
     nothing
 end
 
-@inline function (op::Copy{Out})(executor, value::V) where {Out, V}
+@inline function (op::Copy{Out})(executor, value::V) where {Out,V}
     op.last_value = copy(value)
     nothing
 end
@@ -33,3 +33,5 @@ end
 @inline is_valid(op::Copy{Out}) where {Out} = !isnothing(op.last_value)
 
 @inline get_state(op::Copy{Out}) where {Out} = op.last_value
+
+export Copy, is_valid, get_state, reset!

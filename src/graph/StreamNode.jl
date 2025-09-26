@@ -18,17 +18,11 @@ mutable struct StreamNode
     label::Symbol
     field_name::Symbol
     function StreamNode(
-        index,
-        is_source,
-        is_sink,
-        operation::StreamOperation,
-        output_type,
-        label::Symbol
+        index, is_source, is_sink, operation::StreamOperation, output_type, label::Symbol
     )
         input_bindings = InputBinding{StreamNode}[]
         field_name = label
-        new(index, is_source, is_sink, operation, input_bindings,
-            output_type, label, field_name)
+        new(index, is_source, is_sink, operation, input_bindings, output_type, label, field_name)
     end
 end
 
@@ -37,3 +31,5 @@ end
 @inline is_sink(node::StreamNode) = node.is_sink
 
 @inline label(node::StreamNode) = node.label
+
+export StreamNode, is_source, is_sink, label

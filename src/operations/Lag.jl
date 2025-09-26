@@ -12,18 +12,16 @@ The internal storage is a circular buffer with efficient O(1) push and pop opera
 mutable struct Lag{In} <: StreamOperation
     const buffer::CircularBuffer{In}
     const lag::Int
-    
-    function Lag{In}(
-        lag::Int=1
-    ) where {In}
+
+    function Lag{In}(lag::Int=1) where {In}
         @assert lag >= 0 "Lag must be non-negative"
-        buf = CircularBuffer{In}(lag+1)
+        buf = CircularBuffer{In}(lag + 1)
         new{In}(buf, lag)
     end
 end
 
 function reset!(op::Lag)
-	empty!(op.buffer)
+    empty!(op.buffer)
     nothing
 end
 
@@ -35,3 +33,5 @@ end
 @inline is_valid(op::Lag) = isfull(op.buffer)
 
 @inline get_state(op::Lag) = @inbounds first(op.buffer)
+
+export Lag, is_valid, get_state, reset!

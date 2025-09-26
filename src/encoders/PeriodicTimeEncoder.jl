@@ -50,3 +50,5 @@ end
 @inline function get_state(op::PeriodicTimeEncoder)::Tuple{Float64,Float64}
     op.current
 end
+
+export PeriodicTimeEncoder, is_valid, get_state, reset!

@@ -39,3 +39,5 @@ end
 @inline get_state(op::RingBuffer) = op.buffer
 
 @inline Base.length(op::RingBuffer) = length(op.buffer)
+
+export RingBuffer, is_valid, get_state, reset!

@@ -17,10 +17,7 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     const drop_events_before_start::Bool
 
     function HistoricExecutor{TTime}(
-        graph::StreamGraph,
-        states::TStates
-        ;
-        drop_events_before_start::Bool=false
+        graph::StreamGraph, states::TStates; drop_events_before_start::Bool=false
     ) where {TStates,TTime}
         new{TStates,TTime}(
             graph,
@@ -63,9 +60,7 @@ function setup!(executor::HistoricExecutor{TStates,TTime}; debug=false) where {T
 end
 
 function run!(
-    executor::HistoricExecutor{TStates,TTime},
-    start_time::TTime,
-    end_time::TTime
+    executor::HistoricExecutor{TStates,TTime}, start_time::TTime, end_time::TTime
 ) where {TStates,TTime}
     @assert start_time <= end_time "Start time cannot be after end time"
     @assert !isempty(executor.adapters) "No adapters have been defined for HistoricExecutor"
@@ -102,8 +97,8 @@ function run!(
 
                 # Execute the event
                 process_event!(adapter, executor, event)
-            # else
-            #   println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
+                # else
+                #   println("HistoricExecutor: Event from source [$(get_node_label(executor.graph, index))] at time $timestamp is before start time $start_time")
             end
 
             # Schedule next event
@@ -117,3 +112,5 @@ function run!(
 
     nothing
 end
+
+export HistoricExecutor, run!, set_adapters!, setup!, start_time, end_time

@@ -15,10 +15,9 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
         ::Type{TItem},
         executor::TExecutor,
         node::StreamNode,
-        data::TData
-        ;
+        data::TData;
         stop_check_interval::Millisecond=Millisecond(50),
-        max_queue_size=1024
+        max_queue_size=1024,
     ) where {TExecutor<:GraphExecutor,TData,TItem}
         adapter_func = executor.adapter_funcs[node.index]
         stop_flag = Threads.Atomic{Bool}(false)
@@ -37,12 +36,15 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
     function RealtimeIterable(
         executor::TExecutor,
         node::StreamNode,
-        data::TData
-        ;
+        data::TData;
         stop_check_interval::Millisecond=Millisecond(50),
-        max_queue_size=1024
+        max_queue_size=1024,
     ) where {TExecutor<:GraphExecutor,TData}
-        eltype(data) != Any || throw(ArgumentError("Element type detected as Any. Use typed HistoricIterable constructor to avoid performance penality of Any."))
+        eltype(data) != Any || throw(
+            ArgumentError(
+                "Element type detected as Any. Use typed HistoricIterable constructor to avoid performance penality of Any.",
+            ),
+        )
         adapter_func = executor.adapter_funcs[node.index]
         stop_flag = Threads.Atomic{Bool}(false)
         new{TData,eltype(data),typeof(adapter_func)}(
@@ -59,8 +61,7 @@ mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
 end
 
 function worker(
-    adapter::RealtimeIterable{TData,TItem},
-    executor::RealtimeExecutor{TStates,TTime}
+    adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecutor{TStates,TTime}
 ) where {TData,TItem,TStates,TTime}
     while !isnothing(adapter.iterate_state)
         next_item = @inbounds adapter.iterate_state[1]
@@ -92,7 +93,9 @@ function worker(
     println("RealtimeIterable: Thread [$(adapter.node.label)] ended")
 end
 
-function run!(adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecutor{TStates,TTime}) where {TData,TItem,TStates,TTime}
+function run!(
+    adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecutor{TStates,TTime}
+) where {TData,TItem,TStates,TTime}
     adapter.iterate_state = iterate(adapter.data)
 
     if !isnothing(adapter.iterate_state)
@@ -108,7 +111,7 @@ end
 function process_event!(
     adapter::RealtimeIterable{TData,TItem},
     executor::RealtimeExecutor{TStates,TTime},
-    event::ExecutionEvent{TTime}
+    event::ExecutionEvent{TTime},
 ) where {TData,TItem,TStates,TTime}
     # Execute subgraph based on current value
     if !isready(adapter.process_queue)
@@ -127,3 +130,5 @@ function destroy!(adapter::RealtimeIterable{TData,TItem}) where {TData,TItem}
     end
     nothing
 end
+
+export RealtimeIterable, run!, process_event!, destroy!

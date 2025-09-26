@@ -12,22 +12,21 @@ mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
 
     function RealtimeTimer{TTime}(
         executor,
-        node::StreamNode
-        ;
+        node::StreamNode;
         interval::TPeriod,
         start_time::TTime,
-        stop_check_interval::Millisecond=Millisecond(50)
+        stop_check_interval::Millisecond=Millisecond(50),
     ) where {TPeriod,TTime}
         adapter_func = executor.adapter_funcs[node.index]
         stop_flag = Threads.Atomic{Bool}(false)
         new{TPeriod,TTime,typeof(adapter_func)}(
-            node, adapter_func, interval, start_time, nothing, stop_flag, stop_check_interval)
+            node, adapter_func, interval, start_time, nothing, stop_flag, stop_check_interval
+        )
     end
 end
 
 function worker(
-    adapter::RealtimeTimer{TPeriod,TTime},
-    executor::RealtimeExecutor{TStates,TTime}
+    adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}
 ) where {TPeriod,TStates,TTime}
     time_now = time(executor)
     next_time = _calc_next_time(adapter, executor)
@@ -58,15 +57,17 @@ function worker(
     println("RealtimeTimer: Timer [$(adapter.node.label)] thread ended")
 end
 
-function _calc_next_time(adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function _calc_next_time(
+    adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}
+) where {TPeriod,TStates,TTime}
     round_origin(
-        time(executor) + adapter.interval,
-        adapter.interval,
-        RoundDown,
-        origin=adapter.start_time)
+        time(executor) + adapter.interval, adapter.interval, RoundDown; origin=adapter.start_time
+    )
 end
 
-function run!(adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}) where {TPeriod,TStates,TTime}
+function run!(
+    adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}
+) where {TPeriod,TStates,TTime}
     adapter.task = Threads.@spawn worker(adapter, executor)
     println("RealtimeTimer: Timer [$(adapter.node.label)] thread started")
     nothing
@@ -75,7 +76,7 @@ end
 function process_event!(
     adapter::RealtimeTimer{TPeriod,TTime},
     executor::RealtimeExecutor{TStates,TTime},
-    event::ExecutionEvent{TTime}
+    event::ExecutionEvent{TTime},
 ) where {TPeriod,TStates,TTime}
     # Execute subgraph based on current value
     adapter.adapter_func(executor, event.timestamp)
@@ -90,3 +91,5 @@ function destroy!(adapter::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime}
     end
     nothing
 end
+
+export RealtimeTimer, run!, process_event!, destroy!

@@ -7,10 +7,7 @@ mutable struct TimeSampler{TTime,TValue,TPeriod} <: StreamOperation
     new_sample::Bool
 
     function TimeSampler{TTime,TValue}(
-        sample_interval::TPeriod
-        ;
-        init::TValue=zero(TValue),
-        origin::TTime=time_zero(TTime)
+        sample_interval::TPeriod; init::TValue=zero(TValue), origin::TTime=time_zero(TTime)
     ) where {TTime,TValue,TPeriod}
         @assert sample_interval > zero(TPeriod) "Sample interval must be positive"
         new{TTime,TValue,TPeriod}(sample_interval, init, origin, origin, init, false)
@@ -32,13 +29,15 @@ OperationTimeSync(::TimeSampler) = true
     nothing
 end
 
-@inline function (op::TimeSampler{TTime,TValue,TPeriod})(executor, value) where {TTime,TValue,TPeriod}
+@inline function (op::TimeSampler{TTime,TValue,TPeriod})(
+    executor, value
+) where {TTime,TValue,TPeriod}
     current_time = time(executor)
 
     if current_time >= op.next_time
         op.last_value = value
         op.new_sample = true
-        op.next_time = round_origin(current_time, op.sample_interval, RoundUp, origin=op.next_time)
+        op.next_time = round_origin(current_time, op.sample_interval, RoundUp; origin=op.next_time)
         if op.next_time == current_time
             op.next_time += op.sample_interval
         end
@@ -54,3 +53,5 @@ end
 @inline function get_state(op::TimeSampler{TTime,TValue,TPeriod}) where {TTime,TValue,TPeriod}
     op.last_value
 end
+
+export TimeSampler, is_valid, get_state, reset!, update_time!

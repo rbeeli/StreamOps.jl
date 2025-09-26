@@ -15,3 +15,5 @@ function Base.showerror(io::IO, e::StreamOpsError)
         showerror(io, e.inner_exception)
     end
 end
+
+export StreamOpsError

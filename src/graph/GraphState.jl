@@ -42,7 +42,9 @@ function compile_states_struct(::Type{TTime}, graph::StreamGraph; debug::Bool=fa
         push!(ctor_args, :(zero($TTime)))
     end
 
-    struct_def = Expr(:struct, true, :($(struct_name) <: StreamOps.GraphState), Expr(:block, field_defs...))
+    struct_def = Expr(
+        :struct, true, :($(struct_name) <: StreamOps.GraphState), Expr(:block, field_defs...)
+    )
     eval(struct_def)
 
     ctor_def = :($struct_name() = $struct_name($(ctor_args...)))
@@ -53,3 +55,5 @@ function compile_states_struct(::Type{TTime}, graph::StreamGraph; debug::Bool=fa
 
     eval(struct_name)
 end
+
+export did_execute, info, compile_states_struct

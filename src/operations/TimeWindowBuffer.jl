@@ -26,19 +26,11 @@ mutable struct TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,copy} <: Stre
     const valid_if_empty::Bool
 
     function TimeWindowBuffer{TTime,TValue}(
-        time_period::TPeriod,
-        interval_mode::Symbol,
-        ;
-        copy::Bool=false,
-        valid_if_empty::Bool=false,
+        time_period::TPeriod, interval_mode::Symbol, ; copy::Bool=false, valid_if_empty::Bool=false
     ) where {TTime,TValue,TPeriod}
         new{TTime,TValue,TPeriod,interval_mode,copy}(
-            Vector{TTime}(),
-            Vector{TValue}(),
-            time_period,
-            interval_mode,
-            copy,
-            valid_if_empty)
+            Vector{TTime}(), Vector{TValue}(), time_period, interval_mode, copy, valid_if_empty
+        )
     end
 end
 
@@ -53,7 +45,9 @@ OperationTimeSync(::TimeWindowBuffer) = true
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is excluded.
-@inline function update_time!(op::TimeWindowBuffer{TTime,TValue,TPeriod,:open}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(
+    op::TimeWindowBuffer{TTime,TValue,TPeriod,:open}, current_time::TTime
+) where {TTime,TValue,TPeriod}
     cutoff_time = current_time - op.time_period
     while !isempty(op.time_buffer) && first(op.time_buffer) <= cutoff_time
         popfirst!(op.time_buffer)
@@ -64,7 +58,9 @@ end
 
 # Internal function to remove old entries from the buffer,
 # where the oldest value right on the cutoff time is included.
-@inline function update_time!(op::TimeWindowBuffer{TTime,TValue,TPeriod,:closed}, current_time::TTime) where {TTime,TValue,TPeriod}
+@inline function update_time!(
+    op::TimeWindowBuffer{TTime,TValue,TPeriod,:closed}, current_time::TTime
+) where {TTime,TValue,TPeriod}
     cutoff_time = current_time - op.time_period
     while !isempty(op.time_buffer) && first(op.time_buffer) < cutoff_time
         popfirst!(op.time_buffer)
@@ -73,7 +69,9 @@ end
     nothing
 end
 
-@inline function (op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode})(executor, value) where {TTime,TValue,TPeriod,interval_mode}
+@inline function (op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode})(
+    executor, value
+) where {TTime,TValue,TPeriod,interval_mode}
     current_time = time(executor)
 
     # Add new entry
@@ -90,10 +88,16 @@ end
     op.valid_if_empty || !isempty(op.value_buffer)
 end
 
-@inline function get_state(op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,false}) where {TTime,TValue,TPeriod,interval_mode}
+@inline function get_state(
+    op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,false}
+) where {TTime,TValue,TPeriod,interval_mode}
     view(op.value_buffer, :)
 end
 
-@inline function get_state(op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,true}) where {TTime,TValue,TPeriod,interval_mode}
+@inline function get_state(
+    op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,true}
+) where {TTime,TValue,TPeriod,interval_mode}
     collect(op.value_buffer)
 end
+
+export TimeWindowBuffer, is_valid, get_state, reset!, update_time!

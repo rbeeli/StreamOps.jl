@@ -8,48 +8,46 @@ with the last valid value.
 - `should_fill_fn` A function that returns `true` if a value should be filled.
 - `init=zero(T)`: The initial value to use as the last valid value.
 """
-mutable struct ForwardFill{T, F <: Function} <: StreamOperation
-	const should_fill_fn::F
+mutable struct ForwardFill{T,F<:Function} <: StreamOperation
+    const should_fill_fn::F
     const init::T
-	called::Bool
-	last_valid::T
+    called::Bool
+    last_valid::T
 
-	# constructor for String type with default fill function
-	function ForwardFill{T}(
-		should_fill_fn::F = (x) -> (ismissing(x) || x == "")
-		;
-		init = "",
-	) where {T <: String, F <: Function}
-		new{T, F}(should_fill_fn, init, false, init)
-	end
+    # constructor for String type with default fill function
+    function ForwardFill{T}(
+        should_fill_fn::F=(x) -> (ismissing(x) || x == ""); init=""
+    ) where {T<:String,F<:Function}
+        new{T,F}(should_fill_fn, init, false, init)
+    end
 
-	# default constructor
-	function ForwardFill{T}(
-		should_fill_fn::F = (x) -> (ismissing(x) || isnan(x))
-		;
-		init = zero(T),
-	) where {T, F <: Function}
-		new{T, F}(should_fill_fn, init, false, init)
-	end
+    # default constructor
+    function ForwardFill{T}(
+        should_fill_fn::F=(x) -> (ismissing(x) || isnan(x)); init=zero(T)
+    ) where {T,F<:Function}
+        new{T,F}(should_fill_fn, init, false, init)
+    end
 end
 
 function reset!(op::ForwardFill)
-	op.called = false
+    op.called = false
     op.last_valid = op.init
     nothing
 end
 
-@inline function (op::ForwardFill{T, F})(executor, value) where {T, F}
-	if !op.should_fill_fn(value)
-		# don't fill, just update last_valid
-		op.last_valid = value
-	end
+@inline function (op::ForwardFill{T,F})(executor, value) where {T,F}
+    if !op.should_fill_fn(value)
+        # don't fill, just update last_valid
+        op.last_valid = value
+    end
 
-	op.called = true
+    op.called = true
 
-	nothing
+    nothing
 end
 
 @inline is_valid(op::ForwardFill) = op.called
 
 @inline get_state(op::ForwardFill{T}) where {T} = op.last_valid
+
+export ForwardFill, is_valid, get_state, reset!

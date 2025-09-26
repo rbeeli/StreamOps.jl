@@ -3,13 +3,9 @@ mutable struct HistoricTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
     adapter_func::TAdapterFunc
     interval::TPeriod
     current_time::TTime
-    
+
     function HistoricTimer{TTime}(
-        executor,
-        node::StreamNode
-        ;
-        interval::TPeriod,
-        start_time::TTime
+        executor, node::StreamNode; interval::TPeriod, start_time::TTime
     ) where {TPeriod,TTime}
         adapter_func = executor.adapter_funcs[node.index]
         new{TPeriod,TTime,typeof(adapter_func)}(node, adapter_func, interval, start_time)
@@ -17,8 +13,7 @@ mutable struct HistoricTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
 end
 
 function setup!(
-    adapter::HistoricTimer{TPeriod,TTime},
-    executor::HistoricExecutor{TStates,TTime}
+    adapter::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}
 ) where {TPeriod,TStates,TTime}
     # Initialize current time of the timer
     if adapter.current_time < start_time(executor)
@@ -26,7 +21,7 @@ function setup!(
     end
 
     if adapter.current_time > end_time(executor)
-        return
+        return nothing
     end
 
     # Schedule first event
@@ -38,7 +33,7 @@ end
 function process_event!(
     adapter::HistoricTimer{TPeriod,TTime},
     executor::HistoricExecutor{TStates,TTime},
-    event::ExecutionEvent{TTime}
+    event::ExecutionEvent{TTime},
 ) where {TPeriod,TStates,TTime}
     # Execute subgraph based on current value
     adapter.adapter_func(executor, adapter.current_time)
@@ -46,8 +41,7 @@ function process_event!(
 end
 
 function advance!(
-    adapter::HistoricTimer{TPeriod,TTime},
-    executor::HistoricExecutor{TStates,TTime}
+    adapter::HistoricTimer{TPeriod,TTime}, executor::HistoricExecutor{TStates,TTime}
 ) where {TPeriod,TStates,TTime}
     # Schedule next event
     adapter.current_time += adapter.interval
@@ -57,3 +51,5 @@ function advance!(
     end
     nothing
 end
+
+export HistoricTimer, setup!, process_event!, advance!

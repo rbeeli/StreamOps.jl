@@ -15,7 +15,7 @@ this operation as valid only when the buffer has at least
 mutable struct TimeTupleBuffer{TTime,TValue} <: StreamOperation
     const buffer::Vector{Tuple{TTime,TValue}}
     const min_count::Int
-    
+
     function TimeTupleBuffer{TTime,TValue}(; min_count=0) where {TTime,TValue}
         new{TTime,TValue}(Tuple{TTime,TValue}[], min_count)
     end
@@ -38,3 +38,5 @@ end
 @inline is_valid(op::TimeTupleBuffer) = length(op.buffer) >= op.min_count
 
 @inline get_state(op::TimeTupleBuffer) = op.buffer
+
+export TimeTupleBuffer, is_valid, get_state, reset!

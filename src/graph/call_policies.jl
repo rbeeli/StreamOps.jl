@@ -1,10 +1,8 @@
 # If connected node is executed, always trigger the node
-struct Always <: CallPolicy
-end
+struct Always <: CallPolicy end
 
 # Never trigger the node (passive, input only)
-struct Never <: CallPolicy
-end
+struct Never <: CallPolicy end
 
 # Only trigger node if execution was initiated by a given source node
 struct IfSource <: CallPolicy
@@ -35,7 +33,6 @@ end
 # Outer constructors
 IfExecuted(nodes::Union{Symbol,String}...) = IfExecuted(nodes)
 
-
 # # If connected node was NOT executed, REGARDLESS of valid output or not, trigger the node
 # struct IfNotExecuted <: CallPolicy
 #     nodes::Union{Symbol,Vector{Symbol}} # :any, :all or node label symbols
@@ -45,7 +42,6 @@ IfExecuted(nodes::Union{Symbol,String}...) = IfExecuted(nodes)
 #     end
 #     IfNotExecuted(nodes::Symbol...) = new(collect(nodes))
 # end
-
 
 # If connected node(s) have valid output(s), trigger the node
 struct IfValid <: CallPolicy
@@ -68,7 +64,6 @@ end
 # Outer constructors
 IfValid(nodes::Union{Symbol,String}...) = IfValid(nodes)
 
-
 # If connected node(s) have invalid output(s), trigger the node
 struct IfInvalid <: CallPolicy
     nodes::Union{Symbol,Vector{Symbol}} # :any, :all or node label symbols
@@ -90,7 +85,6 @@ end
 # Outer constructors
 IfInvalid(nodes::Union{Symbol,String}...) = IfInvalid(nodes)
 
-
 function _make_label(nodes::Union{Symbol,Vector{Symbol}})
     return if nodes isa Symbol
         ":$nodes"
@@ -106,3 +100,5 @@ graphviz_label(policy::IfExecuted) = "IfExecuted($(_make_label(policy.nodes)))"
 # graphviz_label(policy::IfNotExecuted) = "IfNotExecuted($(_make_label(policy.nodes)))"
 graphviz_label(policy::IfValid) = "IfValid($(_make_label(policy.nodes)))"
 graphviz_label(policy::IfInvalid) = "IfInvalid($(_make_label(policy.nodes)))"
+
+export Always, Never, IfSource, IfExecuted, IfValid, IfInvalid, graphviz_label

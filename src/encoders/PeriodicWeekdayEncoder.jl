@@ -13,7 +13,7 @@ where d is the weekday number (0-6)
 """
 mutable struct PeriodicWeekdayEncoder{T} <: StreamOperation
     const start_of_week::Int
-    current::Tuple{Float64, Float64}
+    current::Tuple{Float64,Float64}
     counter::Int
 
     function PeriodicWeekdayEncoder{T}(; start_of_week::Int=Dates.Mon) where {T<:Dates.AbstractTime}
@@ -22,7 +22,7 @@ mutable struct PeriodicWeekdayEncoder{T} <: StreamOperation
     end
 
     function PeriodicWeekdayEncoder(; start_of_week::Int=Dates.Mon)
-        PeriodicWeekdayEncoder{DateTime}(start_of_week=start_of_week)
+        PeriodicWeekdayEncoder{DateTime}(; start_of_week=start_of_week)
     end
 end
 
@@ -32,16 +32,18 @@ function reset!(op::PeriodicWeekdayEncoder)
     nothing
 end
 
-@inline function (op::PeriodicWeekdayEncoder{T})(executor, timestamp::T) where {T<:Dates.AbstractTime}
+@inline function (op::PeriodicWeekdayEncoder{T})(
+    executor, timestamp::T
+) where {T<:Dates.AbstractTime}
     # Get the day of week (1-7, where 1 is Monday by default)
     weekday = Dates.dayofweek(timestamp)
-    
+
     # Convert to 0-6 range relative to start_of_week
     day_num = mod(weekday - op.start_of_week, 7)
-    
+
     # Calculate angle
     angle = 2π * day_num / 7
-    
+
     # Calculate sine and cosine transformations
     op.current = (sin(angle), cos(angle))
     op.counter += 1
@@ -50,6 +52,8 @@ end
 
 @inline is_valid(op::PeriodicWeekdayEncoder) = op.counter > 0
 
-@inline function get_state(op::PeriodicWeekdayEncoder)::Tuple{Float64, Float64}
+@inline function get_state(op::PeriodicWeekdayEncoder)::Tuple{Float64,Float64}
     op.current
 end
+
+export PeriodicWeekdayEncoder, is_valid, get_state, reset!

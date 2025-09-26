@@ -3,31 +3,29 @@ mutable struct HistoricIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
     adapter_func::TAdapterFunc
     data::TData
     iterate_state::Union{Nothing,Tuple{TItem,Int}}
-    
+
     function HistoricIterable(
-        ::Type{TItem},
-        executor::TExecutor,
-        node::StreamNode, 
-        data::TData
+        ::Type{TItem}, executor::TExecutor, node::StreamNode, data::TData
     ) where {TExecutor<:GraphExecutor,TItem,TData}
         adapter_func = executor.adapter_funcs[node.index]
         new{TData,TItem,typeof(adapter_func)}(node, adapter_func, data, nothing)
     end
 
     function HistoricIterable(
-        executor::TExecutor,
-        node::StreamNode,
-        data::TData
+        executor::TExecutor, node::StreamNode, data::TData
     ) where {TExecutor<:GraphExecutor,TData}
-        eltype(data) != Any || throw(ArgumentError("Element type detected as Any. Use typed HistoricIterable constructor to avoid performance penality of Any."))
+        eltype(data) != Any || throw(
+            ArgumentError(
+                "Element type detected as Any. Use typed HistoricIterable constructor to avoid performance penality of Any.",
+            ),
+        )
         adapter_func = executor.adapter_funcs[node.index]
         new{TData,eltype(data),typeof(adapter_func)}(node, adapter_func, data, nothing)
     end
 end
 
 function setup!(
-    adapter::HistoricIterable{TData,TItem,TAdapterFunc},
-    executor::HistoricExecutor{TStates,TTime}
+    adapter::HistoricIterable{TData,TItem,TAdapterFunc}, executor::HistoricExecutor{TStates,TTime}
 ) where {TData,TItem,TAdapterFunc,TStates,TTime}
     adapter.iterate_state = iterate(adapter.data)
 
@@ -43,7 +41,7 @@ end
 function process_event!(
     adapter::HistoricIterable{TData,TItem,TAdapterFunc},
     executor::HistoricExecutor{TStates,TTime},
-    event::ExecutionEvent{TTime}
+    event::ExecutionEvent{TTime},
 ) where {TData,TItem,TAdapterFunc,TStates,TTime}
     # Execute subgraph based on current value
     _, input_data = @inbounds adapter.iterate_state[1]
@@ -52,8 +50,7 @@ function process_event!(
 end
 
 function advance!(
-    adapter::HistoricIterable{TData,TItem,TAdapterFunc},
-    executor::HistoricExecutor{TStates,TTime}
+    adapter::HistoricIterable{TData,TItem,TAdapterFunc}, executor::HistoricExecutor{TStates,TTime}
 ) where {TData,TItem,TAdapterFunc,TStates,TTime}
     # Schedule next record
     adapter.iterate_state = iterate(adapter.data, (@inbounds adapter.iterate_state[2]))
@@ -66,3 +63,5 @@ function advance!(
 
     nothing
 end
+
+export HistoricIterable, setup!, process_event!, advance!

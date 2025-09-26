@@ -8,21 +8,12 @@ mutable struct StreamGraph
     reverse_deps::Vector{Vector{Int}}
     topo_order::Vector{Int}
     function StreamGraph()
-        new(Vector{StreamNode}(),
-            Int[],
-            Vector{Int}[],
-            Vector{Int}[],
-            Int[])
+        new(Vector{StreamNode}(), Int[], Vector{Int}[], Vector{Int}[], Int[])
     end
 end
 
 function _make_node!(
-    graph::StreamGraph,
-    is_source::Bool,
-    is_sink::Bool,
-    operation,
-    output_type::Type,
-    label::Symbol
+    graph::StreamGraph, is_source::Bool, is_sink::Bool, operation, output_type::Type, label::Symbol
 )
     label ∈ [:all, :any] && error("Invalid node label '$label'")
 
@@ -46,14 +37,18 @@ function _make_node!(
     node
 end
 
-function source!(graph::StreamGraph, label::Union{Symbol,String}; out::Type{TOutput}, init::TOutput) where {TOutput}
+function source!(
+    graph::StreamGraph, label::Union{Symbol,String}; out::Type{TOutput}, init::TOutput
+) where {TOutput}
     if label isa String
         label = Symbol(label)
     end
     _make_node!(graph, true, false, AdapterStorage{TOutput}(init), TOutput, label)
 end
 
-function op!(graph::StreamGraph, label::Union{Symbol,String}, operation::StreamOperation; out::Type{TOutput}) where {TOutput}
+function op!(
+    graph::StreamGraph, label::Union{Symbol,String}, operation::StreamOperation; out::Type{TOutput}
+) where {TOutput}
     if label isa String
         label = Symbol(label)
     end
@@ -68,9 +63,7 @@ function sink!(graph::StreamGraph, label::Union{Symbol,String}, operation::Strea
 end
 
 function _get_call_policies(
-    graph::StreamGraph,
-    input_nodes::Union{<:AbstractArray{T},<:Tuple{Vararg{T}}},
-    call_policies,
+    graph::StreamGraph, input_nodes::Union{<:AbstractArray{T},<:Tuple{Vararg{T}}}, call_policies
 ) where {T<:StreamNode}
     policies = Vector{CallPolicy}()
     if isnothing(call_policies) || isempty(call_policies)
@@ -80,8 +73,11 @@ function _get_call_policies(
     else
         append!(policies, call_policies)
     end
-    all(p -> p isa CallPolicy, policies) || error("Invalid call policy passed in parameter 'call_policies'")
-    any(p -> p isa Never, policies) && length(policies) > 1 && error("Never policy cannot be combined with other policies")
+    all(p -> p isa CallPolicy, policies) ||
+        error("Invalid call policy passed in parameter 'call_policies'")
+    any(p -> p isa Never, policies) &&
+        length(policies) > 1 &&
+        error("Never policy cannot be combined with other policies")
     policies
 end
 
@@ -101,11 +97,10 @@ end
 function bind!(
     graph::StreamGraph,
     input_nodes::Union{T,<:AbstractArray{T},<:Tuple{Vararg{T}}},
-    to::Union{Symbol,String}
-    ;
+    to::Union{Symbol,String};
     call_policies=nothing,
     val_policies=nothing,
-    bind_as=PositionParams()
+    bind_as=PositionParams(),
 ) where {T<:Union{String,Symbol,StreamNode}}
     # ensure 'to' is a Symbol
     if to isa String
@@ -123,20 +118,20 @@ function bind!(
     bind!(
         graph,
         get_node.(Ref(graph), input_nodes),
-        get_node(graph, to),
+        get_node(graph, to);
         call_policies=call_policies,
         val_policies=val_policies,
-        bind_as=bind_as)
+        bind_as=bind_as,
+    )
 end
 
 function bind!(
     graph::StreamGraph,
     input_nodes::Union{StreamNode,<:AbstractArray{StreamNode},<:Tuple{Vararg{StreamNode}}},
-    to::StreamNode
-    ;
+    to::StreamNode;
     call_policies=nothing,
     val_policies=nothing,
-    bind_as=PositionParams()
+    bind_as=PositionParams(),
 )
     call_policies isa CallPolicy && (call_policies = [call_policies])
     val_policies isa CallPolicy && (val_policies = [val_policies])
@@ -152,7 +147,8 @@ function bind!(
         is_sink(input) && error("Cannot bind sink node [$(input.label)] as input")
         input in graph.nodes || error("Input node [$(input.label)] not found in graph")
         input.index != to.index || error("Cannot bind node [$(input.label)] to itself")
-        input.index in graph.deps[to.index] && error("Node [$(input.label)] is already bound to node [$(to.label)]")
+        input.index in graph.deps[to.index] &&
+            error("Node [$(input.label)] is already bound to node [$(to.label)]")
     end
 
     # Call policies
@@ -184,7 +180,7 @@ function get_source_subgraph(graph::StreamGraph, source_node::StreamNode)
     end
 
     # Sort the subgraph indices according to the topological order
-    sort!(subgraph_indices, by=i -> graph.topo_order[i])
+    sort!(subgraph_indices; by=i -> graph.topo_order[i])
 
     subgraph_indices
 end
@@ -279,7 +275,9 @@ function verify_graph_connectedness(graph::StreamGraph)
     end
 
     # only nodes of type Constant{T} are allowed to have no input bindings
-    unvisited = findall(i -> !visited[i] & !(graph.nodes[i].operation isa Constant), eachindex(visited))
+    unvisited = findall(
+        i -> !visited[i] & !(graph.nodes[i].operation isa Constant), eachindex(visited)
+    )
     if any(unvisited)
         msg = "Following nodes are not reachable from the source nodes, i.e. computation graph is not weakly connected: "
         for ix in unvisited
@@ -295,7 +293,7 @@ the StreamNode it is bound to in topological order, as this would never trigger.
 """
 function verify_bindings_topo_order(graph::StreamGraph)
     node_positions = Dict(node_idx => pos for (pos, node_idx) in enumerate(graph.topo_order))
-    
+
     for node in graph.nodes
         for binding in node.input_bindings
             for policy in binding.call_policies
@@ -308,12 +306,14 @@ function verify_bindings_topo_order(graph::StreamGraph)
                         # For specific nodes, get them by label
                         [get_node(graph, node_label) for node_label in policy.nodes]
                     end
-                    
+
                     # Verify all referenced nodes come before current node
                     for policy_node in nodes_to_check
                         if node_positions[policy_node.index] >= node_positions[node.index]
-                            error("Invalid IfExecuted policy in node [$(node.label)]: " *
-                                  "referenced node [$(policy_node.label)] comes after the node in topological order")
+                            error(
+                                "Invalid IfExecuted policy in node [$(node.label)]: " *
+                                "referenced node [$(policy_node.label)] comes after the node in topological order",
+                            )
                         end
                     end
                 end
@@ -332,7 +332,7 @@ function compile_graph!(::Type{TTime}, graph::StreamGraph; debug::Bool=false) wh
     # Verify that no binding of a StreamNode with IfExecuted(:NODE) has :NODE coming after
     # the StreamNode it is bound to in topological order, as this would never trigger
     verify_bindings_topo_order(graph)
-    
+
     # compile states struct
     states_type = compile_states_struct(TTime, graph; debug=debug)
 
@@ -358,7 +358,10 @@ function _gen_params_exprs(node)
         elseif input_binding.bind_as isa NamedParams
             # keyword parameters - generates tuples of (input_name, input_value)
             for input in input_binding.input_nodes
-                push!(input_exprs, Expr(:kw, input.field_name, :(get_state(states.$(input.field_name)))))
+                push!(
+                    input_exprs,
+                    Expr(:kw, input.field_name, :(get_state(states.$(input.field_name)))),
+                )
                 push!(input_names, String(input.field_name))
             end
         elseif input_binding.bind_as isa TupleParams
@@ -373,7 +376,9 @@ function _gen_params_exprs(node)
             # no input binding
             nothing
         else
-            error("Unsupported parameter binding for node [$(label(node))]: $(typeof(input_binding.bind_as))")
+            error(
+                "Unsupported parameter binding for node [$(label(node))]: $(typeof(input_binding.bind_as))",
+            )
         end
     end
 
@@ -385,7 +390,7 @@ function _gen_execute_call!(
     node_expressions::Vector{Expr},
     source_node::StreamNode,
     node::StreamNode,
-    debug::Bool
+    debug::Bool,
 ) where {TExecutor<:GraphExecutor}
     g = executor.graph
     tmp_exprs = Expr[]
@@ -409,7 +414,8 @@ function _gen_execute_call!(
                 break
             elseif call_policy isa IfSource
                 policy_node = g[call_policy.source_node]
-                is_source(policy_node) || error("Node [$(call_policy.source_node)] not a source node")
+                is_source(policy_node) ||
+                    error("Node [$(call_policy.source_node)] not a source node")
 
                 # Only trigger the node if execution was initiated by a given source node
                 if policy_node != source_node
@@ -420,26 +426,41 @@ function _gen_execute_call!(
                 # Only trigger the node if the connected node(s) have been executed in current pass
                 if call_policy.nodes == :any
                     # Any of the connected nodes must have been executed
-                    executed_exprs = [:(@inbounds states.__executed[$(node.index)]) for node in binding_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    executed_exprs = [
+                        :(@inbounds states.__executed[$(node.index)]) for node in binding_nodes
+                    ]
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, executed_exprs, init=Expr(:||)))
+                        end, executed_exprs; init=Expr(:||)),
+                    )
                 elseif call_policy.nodes == :all
                     # All of the connected nodes must have been executed
-                    executed_exprs = [:(@inbounds states.__executed[$(node.index)]) for node in binding_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    executed_exprs = [
+                        :(@inbounds states.__executed[$(node.index)]) for node in binding_nodes
+                    ]
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, executed_exprs, init=Expr(:&&)))
+                        end, executed_exprs; init=Expr(:&&)),
+                    )
                 else
                     # Specific nodes must have been executed
                     policy_nodes = [get_node(g, node) for node in call_policy.nodes]
-                    executed_exprs = [:(@inbounds states.__executed[$(node.index)]) for node in policy_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    executed_exprs = [
+                        :(@inbounds states.__executed[$(node.index)]) for node in policy_nodes
+                    ]
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, executed_exprs, init=Expr(:&&)))
+                        end, executed_exprs; init=Expr(:&&)),
+                    )
                 end
                 has_active_bindings = true
                 # elseif call_policy isa IfNotExecuted
@@ -464,51 +485,75 @@ function _gen_execute_call!(
                 if call_policy.nodes == :any
                     # Any of the connected nodes must have a valid output
                     valid_exprs = [:(is_valid(states.$(node.field_name))) for node in binding_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, valid_exprs, init=Expr(:||)))
+                        end, valid_exprs; init=Expr(:||)),
+                    )
                 elseif call_policy.nodes == :all
                     # All of the connected nodes must have a valid output
                     valid_exprs = [:(is_valid(states.$(node.field_name))) for node in binding_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, valid_exprs, init=Expr(:&&)))
+                        end, valid_exprs; init=Expr(:&&)),
+                    )
                 else
                     # Specific nodes must have a valid output
                     policy_nodes = [get_node(g, node) for node in call_policy.nodes]
                     valid_exprs = [:(is_valid(states.$(node.field_name))) for node in policy_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, valid_exprs, init=Expr(:&&)))
+                        end, valid_exprs; init=Expr(:&&)),
+                    )
                 end
                 has_active_bindings = true
             elseif call_policy isa IfInvalid
                 # Only trigger the node if the connected node has an invalid output
                 if call_policy.nodes == :any
                     # Any of the connected nodes must have an invalid output
-                    invalid_exprs = [:(!is_valid(states.$(node.field_name))) for node in binding_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    invalid_exprs = [
+                        :(!is_valid(states.$(node.field_name))) for node in binding_nodes
+                    ]
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, invalid_exprs, init=Expr(:||)))
+                        end, invalid_exprs; init=Expr(:||)),
+                    )
                 elseif call_policy.nodes == :all
                     # All of the connected nodes must have an invalid output
-                    invalid_exprs = [:(!is_valid(states.$(node.field_name))) for node in binding_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    invalid_exprs = [
+                        :(!is_valid(states.$(node.field_name))) for node in binding_nodes
+                    ]
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, invalid_exprs, init=Expr(:&&)))
+                        end, invalid_exprs; init=Expr(:&&)),
+                    )
                 else
                     # Specific nodes must have an invalid output
                     policy_nodes = [get_node(g, node) for node in call_policy.nodes]
-                    invalid_exprs = [:(!is_valid(states.$(node.field_name))) for node in policy_nodes]
-                    push!(call_policy_exprs, foldl((e, b) -> begin
+                    invalid_exprs = [
+                        :(!is_valid(states.$(node.field_name))) for node in policy_nodes
+                    ]
+                    push!(
+                        call_policy_exprs,
+                        foldl((e, b) -> begin
                             push!(e.args, b)
                             e
-                        end, invalid_exprs, init=Expr(:&&)))
+                        end, invalid_exprs; init=Expr(:&&)),
+                    )
                 end
                 has_active_bindings = true
             else
@@ -522,9 +567,9 @@ function _gen_execute_call!(
             # For a single binding to trigger the next node, all its call policies must be fulfilled,
             # i.e. combine them using AND.
             exprs = foldl((e, b) -> begin
-                    push!(e.args, b)
-                    e
-                end, call_policy_exprs, init=Expr(:&&))
+                push!(e.args, b)
+                e
+            end, call_policy_exprs; init=Expr(:&&))
             push!(binding_exe_exprs, :($exprs))
         end
     end
@@ -543,9 +588,9 @@ function _gen_execute_call!(
         # For multiple bindings to trigger the next node, any of them may be fulfilled,
         # i.e. use OR condition.
         exprs = foldl((e, b) -> begin
-                push!(e.args, b)
-                e
-            end, binding_exe_exprs, init=Expr(:||))
+            push!(e.args, b)
+            e
+        end, binding_exe_exprs; init=Expr(:||))
         push!(tmp_exprs, :(do_execute = $exprs))
     end
 
@@ -555,7 +600,11 @@ function _gen_execute_call!(
     if node.operation isa Func
         # Directly call func for Func operation (skip functor indirection)
         if has_output(node.operation)
-            call_expr = :(states.$(node.field_name).last_value = states.$(node.field_name).func(executor, $(input_exprs...)))
+            call_expr = :(
+                states.$(node.field_name).last_value = states.$(node.field_name).func(
+                    executor, $(input_exprs...)
+                )
+            )
         else
             call_expr = :(states.$(node.field_name).func(executor, $(input_exprs...)))
         end
@@ -596,7 +645,9 @@ function _gen_execute_call!(
     nothing
 end
 
-function compile_source!(executor::TExecutor, source_node::StreamNode; debug=false) where {TExecutor<:GraphExecutor}
+function compile_source!(
+    executor::TExecutor, source_node::StreamNode; debug=false
+) where {TExecutor<:GraphExecutor}
     graph = executor.graph
     nodes = graph.nodes
 
@@ -624,7 +675,8 @@ function compile_source!(executor::TExecutor, source_node::StreamNode; debug=fal
     for (i, node_index) in enumerate(subgraph_indices[2:end])
         node = nodes[node_index]
 
-        debug && println("\nNode [$(node.label)] index=$(node.index) output_type=$(node.output_type)")
+        debug &&
+            println("\nNode [$(node.label)] index=$(node.index) output_type=$(node.output_type)")
 
         # Generate code to execute the node
         _gen_execute_call!(executor, exec_exprs, source_node, node, debug)
@@ -638,9 +690,9 @@ function compile_source!(executor::TExecutor, source_node::StreamNode; debug=fal
     for node in time_sync_nodes
         push!(time_sync_exprs, :(
         # if !(@inbounds states.__executed[$(node.index)])
-            update_time!(states.$(node.field_name), time(executor))
+        update_time!(states.$(node.field_name), time(executor))
         # end
-        ))
+))
     end
     debug && println("\nTime sync nodes: $(join([label(node) for node in time_sync_nodes], ","))")
 
@@ -668,3 +720,17 @@ function compile_source!(executor::TExecutor, source_node::StreamNode; debug=fal
 
     compiled_func
 end
+
+export StreamGraph,
+    source!,
+    op!,
+    sink!,
+    bind!,
+    get_node,
+    get_node_label,
+    get_source_subgraph,
+    topological_sort!,
+    verify_graph_connectedness,
+    verify_bindings_topo_order,
+    compile_graph!,
+    compile_source!

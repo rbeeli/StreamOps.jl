@@ -43,13 +43,13 @@ mutable struct Skewness{In<:Number,Out<:Number} <: StreamOperation
             zero(Out), # compensation_xx
             zero(Out), # compensation_xxx
             0, # num_consecutive_same_value
-            zero(In) # prev_value
+            zero(In), # prev_value
         )
     end
 end
 
-function reset!(op::Skewness{In, Out}) where {In, Out}
-	empty!(op.buffer)
+function reset!(op::Skewness{In,Out}) where {In,Out}
+    empty!(op.buffer)
     op.x = zero(Out)
     op.xx = zero(Out)
     op.xxx = zero(Out)
@@ -58,7 +58,7 @@ function reset!(op::Skewness{In, Out}) where {In, Out}
     op.compensation_xxx = zero(Out)
     op.num_consecutive_same_value = 0
     op.prev_value = zero(In)
-	nothing
+    nothing
 end
 
 function _add_skew!(op::Skewness{In,Out}, val::In) where {In<:Number,Out<:Number}
@@ -121,7 +121,7 @@ end
 @inline function get_state(op::Skewness{In,Out})::Out where {In<:Number,Out<:Number}
     minp = 3  # Minimum number of observations for valid skewness
     nobs = length(op.buffer)
-    
+
     if nobs < minp
         return zero(Out)
     elseif op.num_consecutive_same_value >= nobs
@@ -140,3 +140,5 @@ end
         ((sqrt(dnobs * (dnobs - 1)) * C) / ((dnobs - 2) * R * R * R))
     end
 end
+
+export Skewness, is_valid, get_state, reset!

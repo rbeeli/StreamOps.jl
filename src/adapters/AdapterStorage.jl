@@ -1,6 +1,6 @@
 mutable struct AdapterStorage{TData} <: StreamOperation
     data::TData
-    
+
     function AdapterStorage{TData}(data) where {TData}
         new{TData}(data)
     end
@@ -17,3 +17,5 @@ end
 @inline function get_state(storage::AdapterStorage{TData}) where {TData}
     storage.data
 end
+
+export AdapterStorage, is_valid, get_state

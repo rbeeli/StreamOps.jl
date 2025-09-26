@@ -19,11 +19,7 @@ mutable struct WindowBuffer{T,copy} <: StreamOperation
     const buffer::CircularBuffer{T}
     const copy::Bool
 
-    WindowBuffer{T}(
-        window_size::Int
-        ;
-        copy::Bool=false
-    ) where {T} = begin
+    function WindowBuffer{T}(window_size::Int; copy::Bool=false) where {T}
         buffer = CircularBuffer{T}(window_size)
         new{T,copy}(buffer, copy)
     end
@@ -51,3 +47,5 @@ end
 end
 
 @inline Base.length(op::WindowBuffer) = length(op.buffer)
+
+export WindowBuffer, is_valid, get_state, reset!

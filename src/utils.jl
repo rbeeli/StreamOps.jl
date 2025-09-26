@@ -1,6 +1,5 @@
 using Dates
 
-
 @inline time_now(::Type{DateTime}) = Dates.now(Dates.UTC)
 @inline time_zero(::Type{DateTime}) = DateTime(0)
 
@@ -19,11 +18,7 @@ julia> round_origin(DateTime(2019, 1, 1, 12, 30, 0), Hour(1), RoundUp, origin=or
 ```
 """
 @inline function round_origin(
-    value::V,
-    period::P,
-    mode::Base.RoundingMode
-    ;
-    origin=nothing
+    value::V, period::P, mode::Base.RoundingMode; origin=nothing
 ) where {V<:Union{Dates.AbstractDateTime,Dates.AbstractTime},P<:Dates.Period}
     isnothing(origin) && return round(value, period, mode)
     origin + round(value - origin, period, mode)
@@ -43,11 +38,7 @@ julia> round_origin(1.0, 1.0, RoundDown, origin=origin)
 ```
 """
 @inline function round_origin(
-    value::V,
-    bucket_width::P,
-    mode::Base.RoundingMode
-    ;
-    origin=nothing
+    value::V, bucket_width::P, mode::Base.RoundingMode; origin=nothing
 ) where {V<:Real,P<:Real}
     isnothing(origin) && return round(value / bucket_width, mode) * bucket_width
     origin + round((value - origin) / bucket_width, mode) * bucket_width
@@ -70,3 +61,5 @@ end
 
 # Function to print an expression without line number nodes
 _print_expression(expr) = println(_remove_line_nodes!(deepcopy(expr)))
+
+export time_now, time_zero, round_origin, nanos_since_epoch_zero

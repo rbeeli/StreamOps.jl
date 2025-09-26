@@ -14,10 +14,7 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     adapter_funcs::Dict{Int,Function}
 
     function RealtimeExecutor{TTime}(
-        graph::StreamGraph,
-        states::TStates
-        ;
-        max_queue_size::Int=typemax(Int)
+        graph::StreamGraph, states::TStates; max_queue_size::Int=typemax(Int)
     ) where {TStates,TTime}
         new{TStates,TTime}(
             graph,
@@ -32,8 +29,7 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
 end
 
 # Fake adapter to indicate a wake-up call for executor
-struct WakeUpAdapter <: SourceAdapter
-end
+struct WakeUpAdapter <: SourceAdapter end
 const WAKE_UP_ADAPTER = WakeUpAdapter();
 
 """
@@ -65,9 +61,7 @@ function set_adapters!(executor::RealtimeExecutor, adapters)
 end
 
 function run!(
-    executor::RealtimeExecutor{TStates,TTime},
-    start_time::TTime,
-    end_time::TTime
+    executor::RealtimeExecutor{TStates,TTime}, start_time::TTime, end_time::TTime
 ) where {TStates,TTime}
     @assert start_time < end_time "Start time '$start_time' must be before end time '$end_time'"
     @assert !isempty(executor.adapters) "No adapters have been defined for HistoricExecutor"
@@ -160,3 +154,5 @@ function run!(
 
     nothing
 end
+
+export RealtimeExecutor, WakeUpAdapter, run!, set_adapters!, setup!, start_time, end_time
