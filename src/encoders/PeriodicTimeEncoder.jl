@@ -51,4 +51,4 @@ end
     op.current
 end
 
-export PeriodicTimeEncoder, is_valid, get_state, reset!
+export PeriodicTimeEncoder

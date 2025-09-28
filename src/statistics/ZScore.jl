@@ -96,4 +96,4 @@ end
     n > 0 ? op.M2 / n : zero(Out)
 end
 
-export ZScore, is_valid, get_state, calculate_variance, reset!
+export ZScore, calculate_variance

@@ -35,4 +35,4 @@ end
     op.current - op.prev
 end
 
-export Diff, is_valid, get_state, reset!
+export Diff

@@ -87,4 +87,4 @@ end
     op.M / (one(Out) - op.ci)
 end
 
-export EWMean, is_valid, get_state, reset!
+export EWMean

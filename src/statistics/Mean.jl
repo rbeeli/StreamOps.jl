@@ -50,4 +50,4 @@ end
     op.M1 / length(op.buffer)
 end
 
-export Mean, is_valid, get_state, reset!
+export Mean

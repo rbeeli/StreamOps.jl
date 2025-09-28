@@ -103,4 +103,4 @@ end
     n == 0 ? op.empty_value : op.current_sum / n
 end
 
-export TimeMean, is_valid, get_state, reset!, update_time!
+export TimeMean, update_time!

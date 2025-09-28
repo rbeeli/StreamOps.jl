@@ -90,4 +90,4 @@ end
     op.current_sum
 end
 
-export TimeSum, is_valid, get_state, reset!, update_time!
+export TimeSum, update_time!

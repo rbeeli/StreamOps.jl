@@ -141,4 +141,4 @@ end
     end
 end
 
-export Skewness, is_valid, get_state, reset!
+export Skewness

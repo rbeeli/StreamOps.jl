@@ -66,4 +66,4 @@ function fractional_diff_weights(::Type{T}, order, weight_threshold=1e-4) where 
     T.(reverse(memory_weights))
 end
 
-export FractionalDiff, fractional_diff_weights, is_valid, get_state, reset!
+export FractionalDiff, fractional_diff_weights

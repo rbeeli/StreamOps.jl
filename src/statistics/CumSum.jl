@@ -42,4 +42,4 @@ end
     op.sum
 end
 
-export CumSum, is_valid, get_state, reset!
+export CumSum

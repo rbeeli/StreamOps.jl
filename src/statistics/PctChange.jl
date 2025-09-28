@@ -46,4 +46,4 @@ end
 
 @inline get_state(op::PctChange) = op.pct_change
 
-export PctChange, is_valid, get_state, reset!
+export PctChange

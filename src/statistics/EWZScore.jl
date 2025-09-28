@@ -137,4 +137,4 @@ end
     op.current_zscore
 end
 
-export EWZScore, is_valid, get_state, reset!
+export EWZScore

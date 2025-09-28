@@ -158,4 +158,4 @@ end
     zero(Out)
 end
 
-export EWVariance, is_valid, get_state, reset!
+export EWVariance

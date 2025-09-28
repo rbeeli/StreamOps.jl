@@ -32,4 +32,4 @@ end
     op.counter
 end
 
-export Counter, is_valid, get_state, reset!
+export Counter

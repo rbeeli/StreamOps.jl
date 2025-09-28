@@ -84,4 +84,4 @@ end
     op.current_count
 end
 
-export TimeCount, is_valid, get_state, reset!, update_time!
+export TimeCount, update_time!

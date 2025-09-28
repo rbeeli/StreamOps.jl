@@ -56,4 +56,4 @@ end
     op.current
 end
 
-export PeriodicWeekdayEncoder, is_valid, get_state, reset!
+export PeriodicWeekdayEncoder

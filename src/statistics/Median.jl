@@ -237,4 +237,4 @@ end
     end
 end
 
-export Median, TupleForward, TupleReverse, ValueLocation, is_valid, get_state, reset!
+export Median, TupleForward, TupleReverse, ValueLocation

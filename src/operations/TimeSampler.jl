@@ -54,4 +54,4 @@ end
     op.last_value
 end
 
-export TimeSampler, is_valid, get_state, reset!, update_time!
+export TimeSampler, update_time!

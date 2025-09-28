@@ -97,4 +97,4 @@ end
     op.window_size > 1 ? sqrt(max(zero(Out), op.M2 / (op.window_size - 1))) : zero(Out)
 end
 
-export Variance, is_valid, get_state, reset!
+export Variance
