@@ -39,7 +39,7 @@ function compile_states_struct(::Type{TTime}, graph::StreamGraph; debug::Bool=fa
 
         # state time field
         push!(field_defs, Expr(:(::), Symbol("$(node.field_name)__time"), TTime))
-        push!(ctor_args, :(zero($TTime)))
+        push!(ctor_args, :(StreamOps.time_zero($TTime)))
     end
 
     struct_def = Expr(
@@ -54,6 +54,36 @@ function compile_states_struct(::Type{TTime}, graph::StreamGraph; debug::Bool=fa
     debug && println(struct_def)
 
     eval(struct_name)
+end
+
+function compile_reset_method!(
+    ::Type{TTime}, states_type::Type{<:GraphState}, graph::StreamGraph; debug::Bool=false
+) where {TTime}
+    body_exprs = Expr[]
+    push!(body_exprs, :(fill!(states.__executed, false)))
+
+    for node in graph.nodes
+        field_name = node.field_name
+        time_field = Symbol("$(field_name)__time")
+        push!(body_exprs, :(states.$time_field = StreamOps.time_zero($TTime)))
+        push!(body_exprs, :(reset!(states.$field_name)))
+    end
+
+    func_expr = quote
+        function StreamOps.reset!(states::$states_type)
+            $(body_exprs...)
+            nothing
+        end
+    end
+
+    eval(func_expr)
+
+    if debug
+        println("Generated reset! method:")
+        StreamOps._print_expression(func_expr)
+    end
+
+    nothing
 end
 
 export did_execute, info, compile_states_struct

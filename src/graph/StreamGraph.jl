@@ -336,10 +336,16 @@ function compile_graph!(::Type{TTime}, graph::StreamGraph; debug::Bool=false) wh
     # compile states struct
     states_type = compile_states_struct(TTime, graph; debug=debug)
 
+    # compile reset! method specialized for this graph state
+    compile_reset_method!(TTime, states_type, graph; debug=debug)
+
     # use invokelatest to call the generated states type constructor,
     # otherwise a world age error will occur because the constructor
     # is defined after the call
     states = Base.invokelatest(states_type)
+
+    # ensure states start from a clean slate
+    Base.invokelatest(reset!, states)
 
     states
 end
