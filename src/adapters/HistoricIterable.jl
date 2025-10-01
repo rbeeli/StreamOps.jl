@@ -64,4 +64,9 @@ function advance!(
     nothing
 end
 
+function reset!(adapter::HistoricIterable)
+    adapter.iterate_state = nothing
+    nothing
+end
+
 export HistoricIterable

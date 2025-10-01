@@ -151,3 +151,67 @@ end
     @test length(buffer2) == 2
     @test all(buffer2 .== [2.0, 4.0])
 end
+
+@testitem "HistoricIterable reset!" begin
+    using Dates
+
+    g = StreamGraph()
+
+    buffer = Float64[]
+    source!(g, :values, out=Float64, init=0.0)
+    sink!(g, :output, Buffer{Float64}(buffer))
+    bind!(g, :values, :output)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 5)
+    adapter = HistoricIterable(exe, g[:values], [
+        (DateTime(2000, 1, 1), 1.0),
+        (DateTime(2000, 1, 2), 2.0),
+        (DateTime(2000, 1, 3), 3.0),
+    ])
+    set_adapters!(exe, [adapter])
+
+    run!(exe, start, stop)
+    @test buffer == [1.0, 2.0, 3.0]
+
+    reset!(adapter)
+    empty!(buffer)
+
+    run!(exe, start, stop)
+    @test buffer == [1.0, 2.0, 3.0]
+end
+
+@testitem "HistoricTimer reset!" begin
+    using Dates
+
+    g = StreamGraph()
+
+    buffer = DateTime[]
+    source!(g, :time, out=DateTime, init=DateTime(0))
+    sink!(g, :output, Buffer{DateTime}(buffer))
+    bind!(g, :time, :output)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 3)
+    adapter = HistoricTimer{DateTime}(exe, g[:time]; interval=Day(1), start_time=start)
+    set_adapters!(exe, [adapter])
+
+    run!(exe, start, stop)
+    @test buffer == collect(start:Day(1):stop)
+    @test adapter.current_time == stop + Day(1)
+
+    reset!(adapter)
+    empty!(buffer)
+    @test adapter.current_time == adapter.start_time == start
+
+    run!(exe, start, stop)
+    @test buffer == collect(start:Day(1):stop)
+end
