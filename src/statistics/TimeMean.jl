@@ -38,6 +38,12 @@ mutable struct TimeMean{TTime,TIn,TOut,TPeriod,interval_mode} <: StreamOperation
     end
 end
 
+function operation_output_type(
+    ::TimeMean{TTime,TIn,TOut,TPeriod,interval_mode}
+) where {TTime,TIn,TOut,TPeriod,interval_mode}
+    TOut
+end
+
 function reset!(
     op::TimeMean{TTime,TIn,TOut,TPeriod,interval_mode}
 ) where {TTime,TIn,TOut,TPeriod,interval_mode}
@@ -102,8 +108,5 @@ end
     n = length(op.value_buffer)
     n == 0 ? op.empty_value : op.current_sum / n
 end
-
-operation_output_type(::TimeMean{TTime,TIn,TOut,TPeriod,interval_mode}) where {TTime,TIn,TOut,TPeriod,interval_mode} =
-    TOut
 
 export TimeMean, update_time!

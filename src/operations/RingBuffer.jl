@@ -24,6 +24,8 @@ mutable struct RingBuffer{T} <: StreamOperation
     end
 end
 
+operation_output_type(::RingBuffer{T}) where {T} = CircularBuffer{T}
+
 function reset!(op::RingBuffer)
     empty!(op.buffer)
     nothing
@@ -39,7 +41,5 @@ end
 @inline get_state(op::RingBuffer) = op.buffer
 
 @inline Base.length(op::RingBuffer) = length(op.buffer)
-
-operation_output_type(::RingBuffer{T}) where {T} = CircularBuffer{T}
 
 export RingBuffer

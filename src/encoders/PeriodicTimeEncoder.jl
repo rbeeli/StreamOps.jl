@@ -25,6 +25,8 @@ mutable struct PeriodicTimeEncoder{T} <: StreamOperation
     end
 end
 
+operation_output_type(::PeriodicTimeEncoder) = Tuple{Float64,Float64}
+
 function reset!(op::PeriodicTimeEncoder)
     op.current = (0.0, 0.0)
     op.counter = 0
@@ -50,7 +52,5 @@ end
 @inline function get_state(op::PeriodicTimeEncoder)::Tuple{Float64,Float64}
     op.current
 end
-
-operation_output_type(::PeriodicTimeEncoder) = Tuple{Float64,Float64}
 
 export PeriodicTimeEncoder

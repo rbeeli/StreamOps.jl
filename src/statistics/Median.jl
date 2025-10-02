@@ -46,6 +46,8 @@ mutable struct Median{In<:Number,Out<:Number,full_only} <: StreamOperation
     end
 end
 
+operation_output_type(::Median{In,Out,full_only}) where {In,Out,full_only} = Out
+
 function reset!(op::Median{In,Out,full_only}) where {In,Out,full_only}
     while !isempty(op.low_heap)
         pop!(op.low_heap)
@@ -236,7 +238,5 @@ end
         return first(op.low_heap)[1]
     end
 end
-
-operation_output_type(::Median{In,Out,full_only}) where {In,Out,full_only} = Out
 
 export Median, TupleForward, TupleReverse, ValueLocation

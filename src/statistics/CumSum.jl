@@ -22,6 +22,8 @@ mutable struct CumSum{In<:Number,Out<:Number} <: StreamOperation
     end
 end
 
+operation_output_type(::CumSum{In,Out}) where {In,Out} = Out
+
 function reset!(op::CumSum{In,Out}) where {In,Out}
     op.sum = op.init
     op.valid = op.init_valid
@@ -41,7 +43,5 @@ end
 @inline function get_state(op::CumSum{In,Out})::Out where {In,Out}
     op.sum
 end
-
-operation_output_type(::CumSum{In,Out}) where {In,Out} = Out
 
 export CumSum

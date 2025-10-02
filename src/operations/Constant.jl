@@ -7,6 +7,8 @@ mutable struct Constant{T} <: StreamOperation
     Constant(value::T) where {T} = new{T}(value)
 end
 
+operation_output_type(::Constant{T}) where {T} = T
+
 function reset!(op::Constant)
     nothing
 end
@@ -21,7 +23,5 @@ end
 @inline function get_state(op::Constant{T})::T where {T}
     op.value
 end
-
-operation_output_type(::Constant{T}) where {T} = T
 
 export Constant

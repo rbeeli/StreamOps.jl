@@ -20,6 +20,8 @@ mutable struct Lag{In} <: StreamOperation
     end
 end
 
+operation_output_type(::Lag{In}) where {In} = In
+
 function reset!(op::Lag)
     empty!(op.buffer)
     nothing
@@ -33,7 +35,5 @@ end
 @inline is_valid(op::Lag) = isfull(op.buffer)
 
 @inline get_state(op::Lag) = @inbounds first(op.buffer)
-
-operation_output_type(::Lag{In}) where {In} = In
 
 export Lag

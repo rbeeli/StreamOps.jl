@@ -10,6 +10,8 @@ struct Print{F<:Function} <: StreamOperation
     end
 end
 
+operation_output_type(::Print) = Nothing
+
 function reset!(op::Print)
     nothing
 end
@@ -22,7 +24,5 @@ end
 @inline is_valid(op::Print) = true
 
 @inline get_state(op::Print) = nothing
-
-operation_output_type(::Print) = Nothing
 
 export Print

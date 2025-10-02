@@ -31,6 +31,8 @@ mutable struct EWZScore{In<:Number,Out<:Number,corrected} <: StreamOperation
     end
 end
 
+operation_output_type(::EWZScore{In,Out,corrected}) where {In,Out,corrected} = Out
+
 function reset!(op::EWZScore{In,Out,corrected}) where {In,Out,corrected}
     op.sum_wt = one(Out)
     op.sum_wt2 = one(Out)
@@ -136,7 +138,5 @@ end
 @inline function get_state(op::EWZScore{In,Out})::Out where {In,Out}
     op.current_zscore
 end
-
-operation_output_type(::EWZScore{In,Out,corrected}) where {In,Out,corrected} = Out
 
 export EWZScore

@@ -35,6 +35,8 @@ mutable struct Variance{In<:Number,Out<:Number,corrected,std} <: StreamOperation
     end
 end
 
+operation_output_type(::Variance{In,Out,corrected,std}) where {In,Out,corrected,std} = Out
+
 function reset!(op::Variance{In,Out,corrected,std}) where {In,Out,corrected,std}
     empty!(op.buffer)
     op.M1 = zero(Out)
@@ -96,7 +98,5 @@ end
     # therefore, need to ensure >= 0
     op.window_size > 1 ? sqrt(max(zero(Out), op.M2 / (op.window_size - 1))) : zero(Out)
 end
-
-operation_output_type(::Variance{In,Out,corrected,std}) where {In,Out,corrected,std} = Out
 
 export Variance

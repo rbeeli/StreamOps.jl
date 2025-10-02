@@ -15,6 +15,8 @@ mutable struct Diff{T<:Number} <: StreamOperation
     end
 end
 
+operation_output_type(::Diff{T}) where {T} = T
+
 function reset!(op::Diff{T}) where {T}
     op.current = op.init
     op.prev = op.init
@@ -34,7 +36,5 @@ end
 @inline function get_state(op::Diff{T})::T where {T}
     op.current - op.prev
 end
-
-operation_output_type(::Diff{T}) where {T} = T
 
 export Diff

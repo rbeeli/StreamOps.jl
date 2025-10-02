@@ -26,6 +26,8 @@ mutable struct PeriodicWeekdayEncoder{T} <: StreamOperation
     end
 end
 
+operation_output_type(::PeriodicWeekdayEncoder) = Tuple{Float64,Float64}
+
 function reset!(op::PeriodicWeekdayEncoder)
     op.current = (0.0, 1.0)
     op.counter = 0
@@ -55,7 +57,5 @@ end
 @inline function get_state(op::PeriodicWeekdayEncoder)::Tuple{Float64,Float64}
     op.current
 end
-
-operation_output_type(::PeriodicWeekdayEncoder) = Tuple{Float64,Float64}
 
 export PeriodicWeekdayEncoder

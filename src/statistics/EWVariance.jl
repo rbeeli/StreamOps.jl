@@ -38,6 +38,8 @@ mutable struct EWVariance{In<:Number,Out<:Number,corrected,std} <: StreamOperati
     end
 end
 
+operation_output_type(::EWVariance{In,Out,corrected,std}) where {In,Out,corrected,std} = Out
+
 function reset!(op::EWVariance{In,Out,corrected,std}) where {In,Out,corrected,std}
     op.sum_wt = one(Out)
     op.sum_wt2 = one(Out)
@@ -157,7 +159,5 @@ end
     end
     zero(Out)
 end
-
-operation_output_type(::EWVariance{In,Out,corrected,std}) where {In,Out,corrected,std} = Out
 
 export EWVariance

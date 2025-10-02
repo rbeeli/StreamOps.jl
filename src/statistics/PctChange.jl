@@ -26,6 +26,8 @@ mutable struct PctChange{In<:Number,Out<:Number} <: StreamOperation
     end
 end
 
+operation_output_type(::PctChange{In,Out}) where {In,Out} = Out
+
 function reset!(op::PctChange)
     op.current = op.init_current
     op.pct_change = op.init_pct_change
@@ -45,7 +47,5 @@ end
 @inline is_valid(op::PctChange) = op.counter >= op.min_count
 
 @inline get_state(op::PctChange) = op.pct_change
-
-operation_output_type(::PctChange{In,Out}) where {In,Out} = Out
 
 export PctChange

@@ -16,6 +16,8 @@ mutable struct Counter{T} <: StreamOperation
     Counter{T}(; min_count::T=0) where {T} = new{T}(min_count, zero(T), zero(T))
 end
 
+operation_output_type(::Counter{T}) where {T} = T
+
 function reset!(op::Counter{T}) where {T}
     op.counter = op.start
     nothing
@@ -31,7 +33,5 @@ end
 @inline function get_state(op::Counter{T})::T where {T}
     op.counter
 end
-
-operation_output_type(::Counter{T}) where {T} = T
 
 export Counter

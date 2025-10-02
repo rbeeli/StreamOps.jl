@@ -26,6 +26,12 @@ mutable struct TimeSum{TTime,TValue,TPeriod,interval_mode} <: StreamOperation
     end
 end
 
+function operation_output_type(
+    ::TimeSum{TTime,TValue,TPeriod,interval_mode}
+) where {TTime,TValue,TPeriod,interval_mode}
+    TValue
+end
+
 function reset!(
     op::TimeSum{TTime,TValue,TPeriod,interval_mode}
 ) where {TTime,TValue,TPeriod,interval_mode}
@@ -89,8 +95,5 @@ end
 ) where {TTime,TValue,TPeriod,interval_mode}
     op.current_sum
 end
-
-operation_output_type(::TimeSum{TTime,TValue,TPeriod,interval_mode}) where {TTime,TValue,TPeriod,interval_mode} =
-    TValue
 
 export TimeSum, update_time!

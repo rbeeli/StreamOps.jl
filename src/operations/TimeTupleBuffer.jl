@@ -25,6 +25,10 @@ mutable struct TimeTupleBuffer{TTime,TValue} <: StreamOperation
     end
 end
 
+function operation_output_type(::TimeTupleBuffer{TTime,TValue}) where {TTime,TValue}
+    Vector{Tuple{TTime,TValue}}
+end
+
 function reset!(op::TimeTupleBuffer)
     empty!(op.buffer)
     nothing
@@ -38,8 +42,5 @@ end
 @inline is_valid(op::TimeTupleBuffer) = length(op.buffer) >= op.min_count
 
 @inline get_state(op::TimeTupleBuffer) = op.buffer
-
-operation_output_type(::TimeTupleBuffer{TTime,TValue}) where {TTime,TValue} =
-    Vector{Tuple{TTime,TValue}}
 
 export TimeTupleBuffer

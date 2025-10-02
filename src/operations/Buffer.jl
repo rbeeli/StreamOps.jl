@@ -31,6 +31,8 @@ mutable struct Buffer{T,auto_cast} <: StreamOperation
     end
 end
 
+operation_output_type(::Buffer{T,auto_cast}) where {T,auto_cast} = Vector{T}
+
 function reset!(op::Buffer)
     empty!(op.buffer)
     nothing
@@ -49,7 +51,5 @@ end
 @inline is_valid(op::Buffer) = length(op.buffer) >= op.min_count
 
 @inline get_state(op::Buffer) = op.buffer
-
-operation_output_type(::Buffer{T,auto_cast}) where {T,auto_cast} = Vector{T}
 
 export Buffer

@@ -30,6 +30,8 @@ mutable struct FractionalDiff{In<:Number,Out<:Number} <: StreamOperation
     end
 end
 
+operation_output_type(::FractionalDiff{In,Out}) where {In,Out} = Out
+
 function reset!(op::FractionalDiff{In,Out}) where {In,Out}
     empty!(op.buffer)
     op.current_value = op.init_value
@@ -53,8 +55,6 @@ end
 @inline function get_state(op::FractionalDiff{In,Out})::Out where {In,Out}
     op.current_value
 end
-
-operation_output_type(::FractionalDiff{In,Out}) where {In,Out} = Out
 
 function fractional_diff_weights(::Type{T}, order, weight_threshold=1e-4) where {T}
     memory_weights = [1.0]

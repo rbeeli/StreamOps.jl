@@ -36,6 +36,8 @@ mutable struct ZScore{In<:Number,Out<:Number,corrected} <: StreamOperation
     end
 end
 
+operation_output_type(::ZScore{In,Out,corrected}) where {In,Out,corrected} = Out
+
 function reset!(op::ZScore{In,Out,corrected}) where {In,Out,corrected}
     empty!(op.buffer)
     op.M1 = zero(Out)
@@ -95,7 +97,5 @@ end
 @inline function calculate_variance(op::ZScore{In,Out,false}, n::Int)::Out where {In,Out}
     n > 0 ? op.M2 / n : zero(Out)
 end
-
-operation_output_type(::ZScore{In,Out,corrected}) where {In,Out,corrected} = Out
 
 export ZScore, calculate_variance

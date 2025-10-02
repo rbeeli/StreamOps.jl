@@ -20,6 +20,12 @@ mutable struct TimeCount{TTime,TPeriod,interval_mode} <: StreamOperation
     end
 end
 
+function operation_output_type(
+    ::TimeCount{TTime,TPeriod,interval_mode}
+) where {TTime,TPeriod,interval_mode}
+    Int
+end
+
 function reset!(op::TimeCount)
     empty!(op.time_buffer)
     op.current_count = 0
@@ -83,7 +89,5 @@ end
 )::Int where {TTime,TPeriod,interval_mode}
     op.current_count
 end
-
-operation_output_type(::TimeCount{TTime,TPeriod,interval_mode}) where {TTime,TPeriod,interval_mode} = Int
 
 export TimeCount, update_time!

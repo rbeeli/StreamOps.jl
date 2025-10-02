@@ -29,6 +29,8 @@ mutable struct ForwardFill{T,F<:Function} <: StreamOperation
     end
 end
 
+operation_output_type(::ForwardFill{T}) where {T} = T
+
 function reset!(op::ForwardFill)
     op.called = false
     op.last_valid = op.init
@@ -49,7 +51,5 @@ end
 @inline is_valid(op::ForwardFill) = op.called
 
 @inline get_state(op::ForwardFill{T}) where {T} = op.last_valid
-
-operation_output_type(::ForwardFill{T}) where {T} = T
 
 export ForwardFill

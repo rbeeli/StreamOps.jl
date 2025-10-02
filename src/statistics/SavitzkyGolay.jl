@@ -28,6 +28,8 @@ mutable struct SavitzkyGolay{In<:Number,Out<:Number} <: StreamOperation
     end
 end
 
+operation_output_type(::SavitzkyGolay{In,Out}) where {In,Out} = Out
+
 function reset!(op::SavitzkyGolay{In,Out}) where {In,Out}
     empty!(op.buffer)
     op.filtered = zero(Out)
@@ -48,8 +50,6 @@ end
 @inline function get_state(op::SavitzkyGolay{In,Out})::Out where {In,Out}
     op.filtered
 end
-
-operation_output_type(::SavitzkyGolay{In,Out}) where {In,Out} = Out
 
 function _precompute_h(window_size, order)
     h_table = Vector{Vector{Float64}}()

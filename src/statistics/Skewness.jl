@@ -48,6 +48,8 @@ mutable struct Skewness{In<:Number,Out<:Number} <: StreamOperation
     end
 end
 
+operation_output_type(::Skewness{In,Out}) where {In,Out} = Out
+
 function reset!(op::Skewness{In,Out}) where {In,Out}
     empty!(op.buffer)
     op.x = zero(Out)
@@ -140,7 +142,5 @@ end
         ((sqrt(dnobs * (dnobs - 1)) * C) / ((dnobs - 2) * R * R * R))
     end
 end
-
-operation_output_type(::Skewness{In,Out}) where {In,Out} = Out
 
 export Skewness

@@ -20,6 +20,8 @@ mutable struct Copy{Out} <: StreamOperation
     end
 end
 
+operation_output_type(::Copy{Out}) where {Out} = Out
+
 function reset!(op::Copy)
     op.last_value = op.init
     nothing
@@ -33,7 +35,5 @@ end
 @inline is_valid(op::Copy{Out}) where {Out} = !isnothing(op.last_value)
 
 @inline get_state(op::Copy{Out}) where {Out} = op.last_value
-
-operation_output_type(::Copy{Out}) where {Out} = Out
 
 export Copy

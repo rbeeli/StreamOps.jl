@@ -21,6 +21,8 @@ mutable struct Func{T,TFunc,TIsValid} <: StreamOperation
     # end
 end
 
+operation_output_type(::Func{T}) where {T} = T
+
 function reset!(op::Func)
     op.last_value = op.init
     nothing
@@ -46,7 +48,5 @@ end
 @inline is_valid(op::Func{T,TFunc,TIsValid}) where {T,TFunc,TIsValid} = op.is_valid(op.last_value)
 
 @inline get_state(op::Func{T}) where {T} = op.last_value
-
-operation_output_type(::Func{T}) where {T} = T
 
 export Func, has_output

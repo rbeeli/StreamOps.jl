@@ -69,6 +69,17 @@ end
     nothing
 end
 
+function operation_output_type(
+    op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,false}
+) where {TTime,TValue,TPeriod,interval_mode}
+    typeof(view(op.value_buffer, :))
+end
+function operation_output_type(
+    ::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,true}
+) where {TTime,TValue,TPeriod,interval_mode}
+    Vector{TValue}
+end
+
 @inline function (op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode})(
     executor, value
 ) where {TTime,TValue,TPeriod,interval_mode}
@@ -99,12 +110,5 @@ end
 ) where {TTime,TValue,TPeriod,interval_mode}
     collect(op.value_buffer)
 end
-
-operation_output_type(
-    op::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,false}
-) where {TTime,TValue,TPeriod,interval_mode} = typeof(view(op.value_buffer, :))
-operation_output_type(
-    ::TimeWindowBuffer{TTime,TValue,TPeriod,interval_mode,true}
-) where {TTime,TValue,TPeriod,interval_mode} = Vector{TValue}
 
 export TimeWindowBuffer

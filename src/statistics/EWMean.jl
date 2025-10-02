@@ -45,6 +45,8 @@ mutable struct EWMean{In<:Number,Out<:Number,corrected} <: StreamOperation
     end
 end
 
+operation_output_type(::EWMean{In,Out,corrected}) where {In,Out,corrected} = Out
+
 function reset!(op::EWMean{In,Out,corrected}) where {In,Out,corrected}
     op.M = zero(Out)
     op.ci = corrected ? one(Out) : zero(Out)
@@ -86,7 +88,5 @@ end
 @inline function get_state(op::EWMean{In,Out,true})::Out where {In,Out}
     op.M / (one(Out) - op.ci)
 end
-
-operation_output_type(::EWMean{In,Out,corrected}) where {In,Out,corrected} = Out
 
 export EWMean

@@ -21,6 +21,8 @@ mutable struct Mean{In<:Number,Out<:Number,full_only} <: StreamOperation
     end
 end
 
+operation_output_type(::Mean{In,Out,full_only}) where {In,Out,full_only} = Out
+
 function reset!(op::Mean{In,Out,full_only}) where {In,Out,full_only}
     empty!(op.buffer)
     op.M1 = zero(Out)
@@ -49,7 +51,5 @@ end
 @inline function get_state(op::Mean{In,Out})::Out where {In,Out}
     op.M1 / length(op.buffer)
 end
-
-operation_output_type(::Mean{In,Out,full_only}) where {In,Out,full_only} = Out
 
 export Mean

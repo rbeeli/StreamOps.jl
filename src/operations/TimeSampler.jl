@@ -14,6 +14,8 @@ mutable struct TimeSampler{TTime,TValue,TPeriod} <: StreamOperation
     end
 end
 
+operation_output_type(::TimeSampler{TTime,TValue,TPeriod}) where {TTime,TValue,TPeriod} = TValue
+
 function reset!(op::TimeSampler)
     op.last_value = op.init
     op.next_time = op.origin
@@ -53,7 +55,5 @@ end
 @inline function get_state(op::TimeSampler{TTime,TValue,TPeriod}) where {TTime,TValue,TPeriod}
     op.last_value
 end
-
-operation_output_type(::TimeSampler{TTime,TValue,TPeriod}) where {TTime,TValue,TPeriod} = TValue
 
 export TimeSampler, update_time!
