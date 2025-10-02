@@ -5,7 +5,7 @@
 
     vals = [2, 3, -1, 0, 3]
     source!(g, :values, HistoricIterable(Int, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)]))
-    op!(g, :buffer, Func((exe, x) -> throw(ErrorException("My error")), 0), out=Int)
+    op!(g, :buffer, Func((exe, x) -> throw(ErrorException("My error")), 0))
     sink!(g, :output, Buffer{Int}())
 
     bind!(g, :values, :buffer)

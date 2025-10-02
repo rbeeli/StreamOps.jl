@@ -17,7 +17,7 @@ end
 	input = [1, 2, 3]
 	values_data = Tuple{DateTime,Vector{Int}}[(DateTime(2000, 1, 1), input)]
 	values = source!(g, :values, HistoricIterable(Vector{Int}, values_data))
-	buffer = op!(g, :buffer, Copy{Vector{Int}}(), out = Vector{Int})
+	buffer = op!(g, :buffer, Copy{Vector{Int}}())
 	output = sink!(g, :output, Buffer{Vector{Int}}())
 
 	bind!(g, values, buffer)
@@ -42,7 +42,7 @@ end
 	input = [1, 2, 3]
 	values_data = Tuple{DateTime,Vector{Int}}[(DateTime(2000, 1, 1), input)]
 	values = source!(g, :values, HistoricIterable(Vector{Int}, values_data))
-	buffer = op!(g, :buffer, Copy(Int[]), out = Vector{Int})
+	buffer = op!(g, :buffer, Copy(Int[]))
 	output = sink!(g, :output, Buffer{Vector{Int}}())
 
 	bind!(g, values, buffer)

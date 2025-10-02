@@ -43,7 +43,7 @@ end
 		(DateTime(2000, 1, 4), 4),
 	]
 	values = source!(g, :values, HistoricIterable(Int, input))
-	buffer = op!(g, :buffer, TimeTupleBuffer{DateTime, Int}(min_count = 3), out = Vector{Tuple{DateTime, Int}})
+	buffer = op!(g, :buffer, TimeTupleBuffer{DateTime, Int}(min_count = 3))
 	output = sink!(g, :output, Counter())
 	@test buffer.operation.min_count == 3
 	bind!(g, values, buffer)
@@ -85,12 +85,12 @@ end
 	values = source!(g, :values, HistoricIterable(Float64, input))
 
 	# Create operation nodes
-	buffer = op!(g, :buffer, TimeTupleBuffer{DateTime, Float64}(), out = TimeTupleBuffer{DateTime, Float64})
+	buffer = op!(g, :buffer, TimeTupleBuffer{DateTime, Float64}())
 	flush_buffer = op!(g, :flush_buffer, Func{Vector{Tuple{DateTime, Float64}}}((exe, buf, dt) -> begin
 				vals = copy(buf)
 				empty!(buf)
 				vals
-			end, Tuple{DateTime, Float64}[]), out = Vector{Tuple{DateTime, Float64}})
+			end, Tuple{DateTime, Float64}[]))
 
 	@test buffer.operation.min_count == 0
 

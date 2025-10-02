@@ -3,7 +3,7 @@
     
     g = StreamGraph()
     values = source!(g, :values, HistoricIterable(Int, Tuple{DateTime,Int}[(DateTime(0), 0)]))
-    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed), out=Float64)
+    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed))
 
     # empty by default invalid with value "empty_value=NaN"
     @test !is_valid(rolling.operation)
@@ -13,7 +13,7 @@
 
     g = StreamGraph()
     values = source!(g, :values, HistoricIterable(Int, Tuple{DateTime,Int}[(DateTime(0), 0)]))
-    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed, empty_valid=true), out=Float64)
+    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed, empty_valid=true))
     @test is_valid(rolling.operation)
     reset!(rolling.operation)
     @test is_valid(rolling.operation)
@@ -25,7 +25,7 @@ end
     g = StreamGraph()
 
     values = source!(g, :values, HistoricIterable(Int, Tuple{DateTime,Int}[(DateTime(0), 0)]))
-    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed, empty_valid=false), out=Float64)
+    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed, empty_valid=false))
 
     @test !is_valid(rolling.operation)
     reset!(rolling.operation)
@@ -45,7 +45,7 @@ end
         (DateTime(2000, 1, 1, 0, 10, 0), 10),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed), out=Float64)
+    rolling = op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Minute(2), :closed))
 
     @test !is_valid(values.operation)
     @test !is_valid(rolling.operation)
@@ -89,7 +89,7 @@ end
     ]
     source!(g, :values, HistoricIterable(Int, values_data))
 
-    op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Day(2), :closed), out=Float64)
+    op!(g, :rolling, TimeMean{DateTime,Int,Float64}(Day(2), :closed))
     bind!(g, :values, :rolling)
 
     @test !is_valid(g[:values].operation)

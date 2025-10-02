@@ -11,7 +11,7 @@
         (DateTime(2000, 1, 1, 0, 10, 0), 10),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed, copy=true), out=Vector{Int})
+    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed, copy=true))
 
     @test rolling.operation.copy
     @test !is_valid(values.operation) # HistoricIterable has no initial value
@@ -56,7 +56,7 @@ end
         (DateTime(2000, 1, 1, 0, 10, 0), 10),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=true), out=Vector{Int})
+    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=true))
 
     @test rolling.operation.copy
     @test !is_valid(values.operation) # adapter becomes valid after first event
@@ -96,7 +96,7 @@ end
 
     values_data = Tuple{DateTime,Int}[(DateTime(2000, 1, 1, 0, 0, 0), 1)]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed; copy=false), out=AbstractVector{Int})
+    rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed; copy=false))
 
     @test !rolling.operation.copy
 
@@ -139,7 +139,7 @@ end
     ]
     source!(g, :values, HistoricIterable(Int, values_data))
 
-    op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Day(2), :closed; copy=true), out=Vector{Int})
+    op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Day(2), :closed; copy=true))
     bind!(g, :values, :rolling)
 
     sink!(g, :output, Buffer{Tuple{DateTime,Vector{Int}}}())

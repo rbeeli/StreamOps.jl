@@ -11,7 +11,7 @@
         (DateTime(2000, 1, 1, 0, 10, 0), 10),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    rolling = op!(g, :rolling, TimeSum{DateTime,Int}(Minute(2), :closed), out=Int)
+    rolling = op!(g, :rolling, TimeSum{DateTime,Int}(Minute(2), :closed))
 
     @test !is_valid(values.operation)
     @test !is_valid(rolling.operation)

@@ -24,7 +24,7 @@ end
         (DateTime(2000, 1, 5), 1),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    pct_change = op!(g, :pct_change, LogPctChange{Int,Float64}(), out=Float64)
+    pct_change = op!(g, :pct_change, LogPctChange{Int,Float64}())
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, pct_change)
     bind!(g, pct_change, output)

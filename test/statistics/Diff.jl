@@ -11,7 +11,7 @@
         (DateTime(2000, 1, 5), 10),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    diff = op!(g, :diff, Diff{Int}(), out=Int)
+    diff = op!(g, :diff, Diff{Int}())
     output = sink!(g, :output, Buffer{Int}())
 
     bind!(g, values, diff)

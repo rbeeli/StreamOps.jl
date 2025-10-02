@@ -27,7 +27,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, Variance{Float64,Float64}(window_size), out=Float64)
+    avg = op!(g, :avg, Variance{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)
@@ -60,7 +60,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false), out=Float64)
+    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)
@@ -93,7 +93,7 @@ end
     expected = [0.0, 0.0, 0.0, 0.0, 0.0]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false), out=Float64)
+    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)
@@ -126,7 +126,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, std=true), out=Float64)
+    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, std=true))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)

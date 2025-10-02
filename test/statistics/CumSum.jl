@@ -11,7 +11,7 @@
     expected = [1.0, 3.0, 6.0, 10.0, 15.0]
 
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    cumsum = op!(g, :cumsum, CumSum{Int,Float64}(), out=Float64)
+    cumsum = op!(g, :cumsum, CumSum{Int,Float64}())
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, cumsum)
@@ -43,7 +43,7 @@ end
     expected = [101.0, 103.0, 106.0, 110.0, 115.0]
 
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    cumsum = op!(g, :cumsum, CumSum{Int,Float64}(init=100.0), out=Float64)
+    cumsum = op!(g, :cumsum, CumSum{Int,Float64}(init=100.0))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, cumsum)
@@ -72,7 +72,7 @@ end
     expected = [101.0, 103.0, 106.0, 110.0, 115.0]
 
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    cumsum = op!(g, :cumsum, CumSum{Int,Float64}(init=100.0, init_valid=true), out=Float64)
+    cumsum = op!(g, :cumsum, CumSum{Int,Float64}(init=100.0, init_valid=true))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, cumsum)
@@ -105,7 +105,7 @@ end
     expected = [101.0, 103.0, 106.0]
 
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    cumsum = op!(g, :cumsum, CumSum{Int,Float64}(init=100.0), out=Float64)
+    cumsum = op!(g, :cumsum, CumSum{Int,Float64}(init=100.0))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, cumsum)

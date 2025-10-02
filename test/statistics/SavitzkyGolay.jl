@@ -76,7 +76,7 @@ end
         ]
 
         values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order), out=Float64)
+        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order))
         output = sink!(g, :output, Buffer{Float64}())
         bind!(g, values, avg)
         bind!(g, avg, output)
@@ -106,7 +106,7 @@ end
         ]
 
         values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order), out=Float64)
+        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order))
         output = sink!(g, :output, Buffer{Float64}())
         bind!(g, values, avg)
         bind!(g, avg, output)
@@ -136,7 +136,7 @@ end
         ]
 
         values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order), out=Float64)
+        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order))
         output = sink!(g, :output, Buffer{Float64}())
         bind!(g, values, avg)
         bind!(g, avg, output)

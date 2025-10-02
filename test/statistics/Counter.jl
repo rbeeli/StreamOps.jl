@@ -29,7 +29,7 @@ end
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 15)
     source!(g, :timer, HistoricTimer(interval=Day(1), start_time=start))
-    op!(g, :counter, Counter(min_count=3), out=Int)
+    op!(g, :counter, Counter(min_count=3))
     bind!(g, :timer, :counter)
     sink!(g, :output, Buffer{Int}())
     bind!(g, :counter, :output)

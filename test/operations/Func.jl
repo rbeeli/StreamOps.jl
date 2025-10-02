@@ -16,7 +16,7 @@ end
 		for (i, x) in enumerate(vals)
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	buffer = op!(g, :buffer, Func((exe, x) -> x^2, 0), out = Int)
+	buffer = op!(g, :buffer, Func((exe, x) -> x^2, 0))
 	output = sink!(g, :output, Buffer{Int}())
 
 	bind!(g, values, buffer)
@@ -44,7 +44,7 @@ end
 		for (i, x) in enumerate(vals)
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	buffer = op!(g, :buffer, Func{Int}((exe, x) -> x^2, 0), out = Int)
+	buffer = op!(g, :buffer, Func{Int}((exe, x) -> x^2, 0))
 	output = sink!(g, :output, Buffer{Int}())
 
 	bind!(g, values, buffer)
@@ -74,7 +74,7 @@ end
 		(DateTime(2000, 1, 2), 2),
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	buffer = op!(g, :buffer, Func((exe, x) -> do_nothing(), nothing), out = Nothing)
+	buffer = op!(g, :buffer, Func((exe, x) -> do_nothing(), nothing))
 	output = sink!(g, :output, Buffer{Nothing}())
 
 	bind!(g, values, buffer)
@@ -104,7 +104,7 @@ end
 		for (i, x) in enumerate(vals)
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	buffer = op!(g, :buffer, Func{Int}((exe, x) -> x, 0, is_valid = v -> v > 0), out = Int)
+	buffer = op!(g, :buffer, Func{Int}((exe, x) -> x, 0, is_valid = v -> v > 0))
 	output = sink!(g, :output, Buffer{Int}())
 
 	bind!(g, values, buffer)

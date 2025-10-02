@@ -104,7 +104,7 @@ end
         (DateTime(2000, 1, 4), 4),
     ]
     source!(g, :values, HistoricIterable(Int, values_data))
-    op!(g, :buffer, RingBuffer{Int}(5, min_count=3), out=RingBuffer{Int})
+    op!(g, :buffer, RingBuffer{Int}(5, min_count=3))
     sink!(g, :output, Counter())
 
     @test g[:buffer].operation.min_count == 3
@@ -144,12 +144,12 @@ end
     source!(g, :values, HistoricIterable(Float64, values_data))
 
     # Create operation nodes
-    op!(g, :buffer, RingBuffer{Float64}(5), out=RingBuffer{Float64})
+    op!(g, :buffer, RingBuffer{Float64}(5))
     op!(g, :flush_buffer, Func{Vector{Float64}}((exe, buf, dt) -> begin
             vals = copy(buf)
             empty!(buf)
             vals
-        end, Float64[]), out=Vector{Float64})
+        end, Float64[]))
 
     @test g[:buffer].operation.min_count == 0
 

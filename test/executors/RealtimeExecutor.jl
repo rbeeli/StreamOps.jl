@@ -4,7 +4,7 @@
 #         g = StreamGraph()
 
 #         buffer = Float64[]
-#         source!(g, :values, out=Float64, init=0.0)
+#         source!(g, :values)
 #         sink!(g, :output, Buffer{Float64}(buffer))
 #         bind!(g, :values, :output)
 
@@ -30,7 +30,7 @@
 #     #     g = StreamGraph()
 
 #     #     buffer = DateTime[]
-#     #     source!(g, :time, out=DateTime, init=DateTime(0))
+#     #     source!(g, :time))
 #     #     sink!(g, :output, Buffer{DateTime}(buffer))
 #     #     bind!(g, :time, :output)
 

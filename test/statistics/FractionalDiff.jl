@@ -24,7 +24,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(0.99), out=Float64)
+    frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(0.99))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, frac_diff)
@@ -62,7 +62,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(1.0), out=Float64)
+    frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(1.0))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, frac_diff)
@@ -95,7 +95,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(0.0), out=Float64)
+    frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(0.0))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, frac_diff)

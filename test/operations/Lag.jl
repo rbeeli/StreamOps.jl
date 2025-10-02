@@ -23,7 +23,7 @@ end
 		(DateTime(2000, 1, 5), 5),
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	lag_op = op!(g, :lag, Lag{Int}(), out = Int)
+	lag_op = op!(g, :lag, Lag{Int}())
 	output = sink!(g, :output, Buffer{Int}())
 
 	bind!(g, values, lag_op)
@@ -52,7 +52,7 @@ end
 		(DateTime(2000, 1, 5), 5),
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	lag_op = op!(g, :lag, Lag{Int}(2), out = Int)
+	lag_op = op!(g, :lag, Lag{Int}(2))
 	output = sink!(g, :output, Buffer{Int}())
 
 	bind!(g, values, lag_op)
@@ -81,7 +81,7 @@ end
 		(DateTime(2000, 1, 5), 5),
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	lag_op = op!(g, :lag, Lag{Int}(0), out = Int)
+	lag_op = op!(g, :lag, Lag{Int}(0))
 	output = sink!(g, :output, Buffer{Int}())
 
 	bind!(g, values, lag_op)

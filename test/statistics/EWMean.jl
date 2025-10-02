@@ -25,7 +25,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, EWMean{Float64,Float64}(alpha=0.9, corrected=false), out=Float64)
+    avg = op!(g, :avg, EWMean{Float64,Float64}(alpha=0.9, corrected=false))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)
@@ -68,7 +68,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, EWMean{Float64,Float64}(alpha=0.9), out=Float64)
+    avg = op!(g, :avg, EWMean{Float64,Float64}(alpha=0.9))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)
@@ -107,7 +107,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, EWMean{Float64,Float64}(alpha=0.3), out=Float64)
+    avg = op!(g, :avg, EWMean{Float64,Float64}(alpha=0.3))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)

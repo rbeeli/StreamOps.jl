@@ -5,7 +5,7 @@
 
     source!(g, :timer, HistoricTimer(; interval=Day(1), start_time=DateTime(0)))
 
-    op!(g, :never_valid, Func((exe, v) -> v, DateTime(0); is_valid=x -> false); out=DateTime)
+    op!(g, :never_valid, Func((exe, v) -> v, DateTime(0); is_valid=x -> false))
     bind!(g, :timer, :never_valid)
 
     sink!(g, :output, Buffer{DateTime}())
@@ -24,7 +24,7 @@ end
 
     source!(g, :timer, HistoricTimer(; interval=Day(1), start_time=DateTime(0)))
 
-    op!(g, :never_valid, Func((exe, v) -> v, DateTime(0); is_valid=x -> false); out=DateTime)
+    op!(g, :never_valid, Func((exe, v) -> v, DateTime(0); is_valid=x -> false))
     bind!(g, :timer, :never_valid)
 
     sink!(g, :output, Buffer{Tuple{DateTime,DateTime}}())
@@ -46,7 +46,7 @@ end
 
     source!(g, :timer, HistoricTimer(; interval=Day(1), start_time=start))
 
-    op!(g, :never_valid, Func((exe, v) -> v, DateTime(0); is_valid=x -> false); out=DateTime)
+    op!(g, :never_valid, Func((exe, v) -> v, DateTime(0); is_valid=x -> false))
     bind!(g, :timer, :never_valid)
 
     sink!(g, :output, Buffer{DateTime}())
@@ -77,9 +77,9 @@ end
 
     source!(g, :a, HistoricIterable(Int, data))
 
-    op!(g, :lag1, Lag{Int}(3); out=Int)
+    op!(g, :lag1, Lag{Int}(3))
     bind!(g, :a, :lag1)
-    op!(g, :lag2, Lag{Int}(1); out=Int)
+    op!(g, :lag2, Lag{Int}(1))
     bind!(g, :a, :lag2)
 
     sink!(g, :output, Buffer{NTuple{2,Int}}())
@@ -114,9 +114,9 @@ end
 
     source!(g, :a, HistoricIterable(Int, data))
 
-    op!(g, :lag1, Lag{Int}(3); out=Int)
+    op!(g, :lag1, Lag{Int}(3))
     bind!(g, :a, :lag1)
-    op!(g, :lag2, Lag{Int}(1); out=Int)
+    op!(g, :lag2, Lag{Int}(1))
     bind!(g, :a, :lag2)
 
     sink!(g, :output, Buffer{NTuple{2,Int}}())
@@ -151,9 +151,9 @@ end
 
     source!(g, :a, HistoricIterable(Int, data))
 
-    op!(g, :lag1, Lag{Int}(3); out=Int)
+    op!(g, :lag1, Lag{Int}(3))
     bind!(g, :a, :lag1)
-    op!(g, :lag2, Lag{Int}(1); out=Int)
+    op!(g, :lag2, Lag{Int}(1))
     bind!(g, :a, :lag2)
 
     sink!(g, :output, Buffer{NTuple{2,Int}}())
@@ -185,7 +185,7 @@ end
 
     source!(g, :timer, HistoricTimer(; interval=Day(1), start_time=start))
 
-    op!(g, :never_valid, Func((exe, v) -> NaN, NaN; is_valid=x -> false); out=Float64)
+    op!(g, :never_valid, Func((exe, v) -> NaN, NaN; is_valid=x -> false))
     bind!(g, :timer, :never_valid)
 
     sink!(g, :output, Buffer{Float64}())
@@ -217,8 +217,7 @@ end
     op!(
         g,
         :call_if_1,
-        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)));
-        out=NTuple{2,DateTime},
+        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)))
     )
     bind!(g, (:timer1, :timer2), :call_if_1; call_policies=IfSource(:timer1))
 
@@ -250,8 +249,7 @@ end
     op!(
         g,
         :call_if_1,
-        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)));
-        out=NTuple{2,DateTime},
+        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)))
     )
     bind!(g, (:timer1, :timer2), :call_if_1; call_policies=IfSource("timer1"))
 
@@ -290,7 +288,7 @@ end
     source!(g, :vals1, HistoricIterable(Float64, vals1_data))
     source!(g, :vals2, HistoricIterable(Float64, vals2_data))
 
-    op!(g, :call_any, Func((exe) -> time(exe), DateTime(0)); out=DateTime)
+    op!(g, :call_any, Func((exe) -> time(exe), DateTime(0)))
     bind!(g, (:vals1, :vals2), :call_any; bind_as=NoBind(), call_policies=IfExecuted(:any))
 
     sink!(g, :output, Buffer{DateTime}())
@@ -325,10 +323,10 @@ end
 
 #     g = StreamGraph()
 
-#     source!(g, :a, out=Int, init=0)
-#     source!(g, :b, out=Int, init=0)
+#     source!(g, :a)
+#     source!(g, :b)
 
-#     op!(g, :call_if_1, Func((exe, _) -> time(exe), DateTime(0)), out=DateTime)
+#     op!(g, :call_if_1, Func((exe, _) -> time(exe), DateTime(0)))
 #     bind!(g, :a, :call_if_1, call_policies=IfNotExecuted())
 
 #     sink!(g, :output, Buffer{DateTime}())
@@ -373,8 +371,7 @@ end
     op!(
         g,
         :call_if_1,
-        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)));
-        out=NTuple{2,DateTime},
+        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)))
     )
     bind!(g, (:timer1, :timer2), :call_if_1; call_policies=IfExecuted(:timer1))
 
@@ -406,8 +403,7 @@ end
     op!(
         g,
         :call_if_1,
-        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)));
-        out=NTuple{2,DateTime},
+        Func((exe, dt1, dt2) -> (dt1, dt2), (DateTime(0), DateTime(0)))
     )
     bind!(g, (:timer1, :timer2), :call_if_1; call_policies=IfExecuted("timer1"))
 
@@ -432,8 +428,8 @@ end
     # Test case 1: Valid specific node reference
     g = StreamGraph()
     source!(g, :source, HistoricIterable(Int, [(DateTime(0), 0)]))
-    op!(g, :a, Func((exe, x) -> x + 1, 0); out=Int)
-    op!(g, :b, Func((exe, x) -> x * 2, 0); out=Int)
+    op!(g, :a, Func((exe, x) -> x + 1, 0))
+    op!(g, :b, Func((exe, x) -> x * 2, 0))
     bind!(g, :source, :a)
     bind!(g, :a, :b; call_policies=IfExecuted(:a))
     @test_nowarn compile_graph!(DateTime, g)
@@ -442,7 +438,7 @@ end
     g = StreamGraph()
     source!(g, :source1, HistoricIterable(Int, [(DateTime(0), 0)]))
     source!(g, :source2, HistoricIterable(Int, [(DateTime(0), 0)]))
-    op!(g, :target, Func((exe, x, y) -> x + y, 0); out=Int)
+    op!(g, :target, Func((exe, x, y) -> x + y, 0))
     bind!(g, (:source1, :source2), :target; call_policies=IfExecuted(:any))
     @test_nowarn compile_graph!(DateTime, g)
 end
@@ -454,9 +450,9 @@ end
     # Test case 1: Invalid specific node reference (b depends on c which comes after)
     g = StreamGraph()
     source!(g, :source, HistoricIterable(Int, [(DateTime(0), 0)]))
-    op!(g, :a, Func((exe, x) -> x + 1, 0); out=Int)
-    op!(g, :b, Func((exe, x) -> x * 2, 0); out=Int)
-    op!(g, :c, Func((exe, x) -> x * 3, 0); out=Int)
+    op!(g, :a, Func((exe, x) -> x + 1, 0))
+    op!(g, :b, Func((exe, x) -> x * 2, 0))
+    op!(g, :c, Func((exe, x) -> x * 3, 0))
     bind!(g, :source, :a)
     bind!(g, :a, :c)
     bind!(g, :a, :b; call_policies=IfExecuted(:c))
@@ -467,7 +463,7 @@ end
     # Test case 2: Invalid :any/:all case (target depends on source2 which comes after in topo order)
     g = StreamGraph()
     source!(g, :source1, HistoricIterable(Int, [(DateTime(0), 0)]))
-    op!(g, :target, Func((exe, x) -> x * 2, 0); out=Int)
+    op!(g, :target, Func((exe, x) -> x * 2, 0))
     source!(g, :source2, HistoricIterable(Int, [(DateTime(0), 0)]))
     bind!(g, :source1, :target)
     bind!(g, :source2, :target; call_policies=IfExecuted(:any))

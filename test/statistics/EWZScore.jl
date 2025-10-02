@@ -24,7 +24,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha), out=Float64)
+    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, ewzscore)
@@ -63,7 +63,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha, corrected=false), out=Float64)
+    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha, corrected=false))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, ewzscore)
@@ -98,7 +98,7 @@ end
     values_data = Tuple{DateTime,Float64}[(DateTime(2000, 1, 1), 1.0)]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha), out=Float64)
+    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, ewzscore)
     bind!(g, ewzscore, output)
@@ -129,7 +129,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha), out=Float64)
+    ewzscore = op!(g, :ewzscore, EWZScore{Float64,Float64}(alpha=alpha))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, ewzscore)
     bind!(g, ewzscore, output)

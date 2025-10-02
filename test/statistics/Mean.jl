@@ -25,7 +25,7 @@ end
         (DateTime(2000, 1, 5), 1),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    avg = op!(g, :avg, Mean{Int,Float64}(3), out=Float64)
+    avg = op!(g, :avg, Mean{Int,Float64}(3))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, avg)
     bind!(g, avg, output)
@@ -53,7 +53,7 @@ end
         (DateTime(2000, 1, 5), 1),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    avg = op!(g, :avg, Mean{Int,Float64}(3; full_only=true), out=Float64)
+    avg = op!(g, :avg, Mean{Int,Float64}(3; full_only=true))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, avg)
     bind!(g, avg, output)

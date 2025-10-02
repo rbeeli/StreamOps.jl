@@ -25,7 +25,7 @@ end
         (DateTime(2000, 1, 5), 1),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    med = op!(g, :med, Median{Int,Float64}(3), out=Float64)
+    med = op!(g, :med, Median{Int,Float64}(3))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, med)
     bind!(g, med, output)
@@ -59,7 +59,7 @@ end
         (DateTime(2000, 1, 5), 1),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    med = op!(g, :med, Median{Int,Float64}(3; full_only=true), out=Float64)
+    med = op!(g, :med, Median{Int,Float64}(3; full_only=true))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, med)
     bind!(g, med, output)

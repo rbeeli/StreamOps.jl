@@ -15,12 +15,12 @@
 
     source!(g, :values, HistoricIterable(Int, values_data))
 
-    op!(g, :sampler, TimeSampler{DateTime,Int}(Minute(1)), out=Int)
+    op!(g, :sampler, TimeSampler{DateTime,Int}(Minute(1)))
     bind!(g, :values, :sampler)
 
     @test !is_valid(g[:sampler].operation)
 
-    op!(g, :timestamper, Func{Tuple{DateTime,Int}}((exe, x) -> (time(exe), x), (DateTime(0), 0)), out=Tuple{DateTime,Int})
+    op!(g, :timestamper, Func{Tuple{DateTime,Int}}((exe, x) -> (time(exe), x), (DateTime(0), 0)))
     bind!(g, :sampler, :timestamper)
 
     output = sink!(g, :output, Buffer{Tuple{DateTime,Int}}())
@@ -72,12 +72,12 @@ end
 
     source!(g, :values, HistoricIterable(Int, values_data))
 
-    op!(g, :sampler, TimeSampler{DateTime,Int}(Minute(1), origin=DateTime(0, 1, 1, 0, 0, 30)), out=Int)
+    op!(g, :sampler, TimeSampler{DateTime,Int}(Minute(1), origin=DateTime(0, 1, 1, 0, 0, 30)))
     bind!(g, :values, :sampler)
 
     @test !is_valid(g[:sampler].operation)
 
-    op!(g, :timestamper, Func{Tuple{DateTime,Int}}((exe, x) -> (time(exe), x), (DateTime(0), 0)), out=Tuple{DateTime,Int})
+    op!(g, :timestamper, Func{Tuple{DateTime,Int}}((exe, x) -> (time(exe), x), (DateTime(0), 0)))
     bind!(g, :sampler, :timestamper)
 
     output = sink!(g, :output, Buffer{Tuple{DateTime,Int}}())

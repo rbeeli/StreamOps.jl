@@ -30,7 +30,7 @@ end
     expected = [2.16310746, 2.22811474, -1.64652492]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
+    skew = op!(g, :skew, Skewness{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, skew)
     bind!(g, skew, output)
@@ -64,7 +64,7 @@ end
         1.71926473, -1.18345510]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
+    skew = op!(g, :skew, Skewness{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, skew)
     bind!(g, skew, output)
@@ -96,7 +96,7 @@ end
     expected = [0.0, 0.0, 0.0, 0.0, 0.0]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
+    skew = op!(g, :skew, Skewness{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, skew)
     bind!(g, skew, output)

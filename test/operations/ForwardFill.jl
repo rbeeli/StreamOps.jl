@@ -20,7 +20,7 @@ end
 		for (i, x) in enumerate(vals)
 	]
 	values = source!(g, :values, HistoricIterable(Union{Missing,Float64}, values_data))
-	ffill = op!(g, :ffill, ForwardFill{Float64}(), out = Float64)
+	ffill = op!(g, :ffill, ForwardFill{Float64}())
 	output = sink!(g, :output, Buffer{Float64}())
 
 	bind!(g, values, ffill)
@@ -50,7 +50,7 @@ end
 		for (i, x) in enumerate(vals)
 	]
 	values = source!(g, :values, HistoricIterable(Union{Missing,String}, values_data))
-	ffill = op!(g, :ffill, ForwardFill{String}(), out = String)
+	ffill = op!(g, :ffill, ForwardFill{String}())
 	output = sink!(g, :output, Buffer{String}())
 
 	bind!(g, values, ffill)
@@ -80,7 +80,7 @@ end
 		for (i, x) in enumerate(vals)
 	]
 	values = source!(g, :values, HistoricIterable(Int, values_data))
-	ffill = op!(g, :ffill, ForwardFill{Int}(x -> x == 0, init = 99), out = Int)
+	ffill = op!(g, :ffill, ForwardFill{Int}(x -> x == 0, init = 99))
 	output = sink!(g, :output, Buffer{Int}())
 
 	bind!(g, values, ffill)

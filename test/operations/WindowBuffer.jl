@@ -9,7 +9,7 @@
         (DateTime(2000, 1, 4), 4),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    rolling = op!(g, :rolling, WindowBuffer{Int}(3), out=AbstractVector{Int})
+    rolling = op!(g, :rolling, WindowBuffer{Int}(3))
 
     @test !rolling.operation.copy
     @test !is_valid(values.operation) # HistoricIterable has no value until first event
@@ -49,7 +49,7 @@ end
         (DateTime(2000, 1, 4), 4),
     ]
     values = source!(g, :values, HistoricIterable(Int, values_data))
-    rolling = op!(g, :rolling, WindowBuffer{Int}(3; copy=true), out=Vector{Int})
+    rolling = op!(g, :rolling, WindowBuffer{Int}(3; copy=true))
 
     @test rolling.operation.copy
     @test !is_valid(values.operation) # adapter remains invalid before polling data

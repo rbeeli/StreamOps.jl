@@ -23,7 +23,7 @@ end
             for (i, x) in enumerate(vals)
         ]
         values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, ModifiedSinc{Float64,Float64}(window_size, deg); out=Float64)
+        avg = op!(g, :avg, ModifiedSinc{Float64,Float64}(window_size, deg))
         output = sink!(g, :output, Buffer{Float64}())
         bind!(g, values, avg)
         bind!(g, avg, output)
@@ -52,7 +52,7 @@ end
             for (i, x) in enumerate(vals)
         ]
         values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, ModifiedSinc{Float64,Float64}(window_size, deg); out=Float64)
+        avg = op!(g, :avg, ModifiedSinc{Float64,Float64}(window_size, deg))
         output = sink!(g, :output, Buffer{Float64}())
         bind!(g, values, avg)
         bind!(g, avg, output)

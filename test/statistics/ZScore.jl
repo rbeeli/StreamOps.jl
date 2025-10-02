@@ -26,7 +26,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size), out=Float64)
+    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, zscore)
@@ -60,7 +60,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size, corrected=false), out=Float64)
+    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size, corrected=false))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, zscore)
@@ -87,7 +87,7 @@ end
     g = StreamGraph()
     values_data = Tuple{DateTime,Float64}[(DateTime(2000, 1, 1), 1.0)]
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size), out=Float64)
+    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, zscore)
     bind!(g, zscore, output)
@@ -116,7 +116,7 @@ end
         for (i, x) in enumerate(constant_vals)
     ]
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size), out=Float64)
+    zscore = op!(g, :zscore, ZScore{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, zscore)
     bind!(g, zscore, output)
