@@ -1,68 +1,63 @@
 using Dates
 import Base.Libc: systemsleep
 
-mutable struct RealtimeIterable{TData,TItem,TAdapterFunc} <: SourceAdapter
-    node::StreamNode
-    adapter_func::TAdapterFunc
+mutable struct RealtimeIterable{TData,TItem,TOutput} <: SourceAdapter
+    adapter_func::Union{Nothing,Function}
     data::TData
     iterate_state::Union{Nothing,Tuple{TItem,Int}}
+    last_value::Base.RefValue{TOutput}
+    has_value::Bool
     task::Union{Task,Nothing}
     stop_flag::Threads.Atomic{Bool}
     stop_check_interval::Millisecond
     process_queue::Channel{TItem}
+    output_type::Type{TOutput}
 
     function RealtimeIterable(
-        ::Type{TItem},
-        executor::TExecutor,
-        node::StreamNode,
+        ::Type{TOutput},
         data::TData;
         stop_check_interval::Millisecond=Millisecond(50),
         max_queue_size=1024,
-    ) where {TExecutor<:GraphExecutor,TData,TItem}
-        adapter_func = executor.adapter_funcs[node.index]
-        stop_flag = Threads.Atomic{Bool}(false)
-        new{TData,TItem,typeof(adapter_func)}(
-            node,
-            adapter_func,
-            data,
-            nothing, # iterate_state
-            nothing, # task
-            stop_flag,
-            stop_check_interval,
-            Channel{TItem}(max_queue_size), # process_queue
-        )
-    end
-
-    function RealtimeIterable(
-        executor::TExecutor,
-        node::StreamNode,
-        data::TData;
-        stop_check_interval::Millisecond=Millisecond(50),
-        max_queue_size=1024,
-    ) where {TExecutor<:GraphExecutor,TData}
-        eltype(data) != Any || throw(
+    ) where {TData,TOutput}
+        TItem = eltype(data)
+        TItem != Any || throw(
             ArgumentError(
-                "Element type detected as Any. Use typed HistoricIterable constructor to avoid performance penality of Any.",
+                "Element type detected as Any. Use typed RealtimeIterable constructor to avoid performance penalty of Any.",
             ),
         )
-        adapter_func = executor.adapter_funcs[node.index]
-        stop_flag = Threads.Atomic{Bool}(false)
-        new{TData,eltype(data),typeof(adapter_func)}(
-            node,
-            adapter_func,
+        new{TData,TItem,TOutput}(
+            nothing,
             data,
-            nothing, # iterate_state
-            nothing, # task
-            stop_flag,
+            nothing,
+            Ref{TOutput}(),
+            false,
+            nothing,
+            Threads.Atomic{Bool}(false),
             stop_check_interval,
-            Channel{eltype(data)}(max_queue_size), # process_queue
+            Channel{TItem}(max_queue_size),
+            TOutput,
         )
     end
 end
 
+source_output_type(adapter::RealtimeIterable) = adapter.output_type
+
+function set_adapter_func!(adapter::RealtimeIterable, func::Function)
+    adapter.adapter_func = func
+    adapter
+end
+
+@inline function get_state(
+    adapter::RealtimeIterable{TData,TItem,TOutput}
+) where {TData,TItem,TOutput}
+    adapter.has_value ? adapter.last_value[] : nothing
+end
+
+@inline is_valid(adapter::RealtimeIterable) = adapter.has_value
+
 function worker(
-    adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecutor{TStates,TTime}
-) where {TData,TItem,TStates,TTime}
+    adapter::RealtimeIterable{TData,TItem,TOutput}, executor::RealtimeExecutor{TStates,TTime}
+) where {TData,TItem,TOutput,TStates,TTime}
     while !isnothing(adapter.iterate_state)
         next_item = @inbounds adapter.iterate_state[1]
         next_time = @inbounds next_item[1]
@@ -90,17 +85,17 @@ function worker(
         adapter.stop_flag[] && break
     end
 
-    println("RealtimeIterable: Thread [$(adapter.node.label)] ended")
+    println("RealtimeIterable: Thread ended")
 end
 
 function run!(
-    adapter::RealtimeIterable{TData,TItem}, executor::RealtimeExecutor{TStates,TTime}
-) where {TData,TItem,TStates,TTime}
+    adapter::RealtimeIterable{TData,TItem,TOutput}, executor::RealtimeExecutor{TStates,TTime}
+) where {TData,TItem,TOutput,TStates,TTime}
     adapter.iterate_state = iterate(adapter.data)
 
     if !isnothing(adapter.iterate_state)
         adapter.task = Threads.@spawn worker(adapter, executor)
-        println("RealtimeIterable: Thread [$(adapter.node.label)] started")
+        println("RealtimeIterable: Thread started")
     else
         @warn "RealtimeIterable did not receive any records, doing nothing."
     end
@@ -109,24 +104,39 @@ function run!(
 end
 
 function process_event!(
-    adapter::RealtimeIterable{TData,TItem},
+    adapter::RealtimeIterable{TData,TItem,TOutput},
     executor::RealtimeExecutor{TStates,TTime},
     event::ExecutionEvent{TTime},
-) where {TData,TItem,TStates,TTime}
+) where {TData,TItem,TOutput,TStates,TTime}
     # Execute subgraph based on current value
     if !isready(adapter.process_queue)
         throw(ErrorException("Logic error: process_queue is empty when calling process_event!"))
     end
-    time, input_data = take!(adapter.process_queue)
+    _time, input_data = take!(adapter.process_queue)
     adapter.adapter_func(executor, input_data)
     nothing
 end
 
-function destroy!(adapter::RealtimeIterable{TData,TItem}) where {TData,TItem}
+function destroy!(adapter::RealtimeIterable{TData,TItem,TOutput}) where {TData,TItem,TOutput}
     if !isnothing(adapter.task)
         adapter.stop_flag[] = true
         wait(adapter.task) # will also catch and rethrow any exceptions
         adapter.task = nothing
+    end
+    adapter.stop_flag[] = false
+    adapter.has_value = false
+    while isready(adapter.process_queue)
+        take!(adapter.process_queue)
+    end
+    nothing
+end
+
+function reset!(adapter::RealtimeIterable)
+    adapter.iterate_state = nothing
+    adapter.has_value = false
+    adapter.stop_flag[] = false
+    while isready(adapter.process_queue)
+        take!(adapter.process_queue)
     end
     nothing
 end

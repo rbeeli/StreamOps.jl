@@ -1,22 +1,37 @@
-mutable struct HistoricTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
-    node::StreamNode
-    adapter_func::TAdapterFunc
+mutable struct HistoricTimer{TPeriod,TTime} <: SourceAdapter
+    adapter_func::Union{Nothing,Function}
     interval::TPeriod
     start_time::TTime
     current_time::TTime
+    last_value::Base.RefValue{TTime}
+    has_value::Bool
 
-    function HistoricTimer{TTime}(
-        executor, node::StreamNode; interval::TPeriod, start_time::TTime
-    ) where {TPeriod,TTime}
-        adapter_func = executor.adapter_funcs[node.index]
-        new{TPeriod,TTime,typeof(adapter_func)}(
-            node,
-            adapter_func,
-            interval,
-            start_time,
-            start_time,
-        )
+    function HistoricTimer{TTime}(; interval::TPeriod, start_time::TTime) where {TPeriod,TTime}
+        new{TPeriod,TTime}(nothing, interval, start_time, start_time, Ref{TTime}(start_time), true)
     end
+end
+
+function HistoricTimer(; interval::TPeriod, start_time::TTime) where {TPeriod,TTime}
+    HistoricTimer{TTime}(; interval=interval, start_time=start_time)
+end
+
+source_output_type(::HistoricTimer{TPeriod,TTime}) where {TPeriod,TTime} = TTime
+
+function set_adapter_func!(adapter::HistoricTimer, func::Function)
+    adapter.adapter_func = func
+    adapter
+end
+
+@inline get_state(adapter::HistoricTimer{TPeriod,TTime}) where {TPeriod,TTime} =
+    adapter.last_value[]
+
+@inline is_valid(adapter::HistoricTimer) = adapter.has_value
+
+function reset!(adapter::HistoricTimer)
+    adapter.current_time = adapter.start_time
+    adapter.last_value[] = adapter.start_time
+    adapter.has_value = true
+    nothing
 end
 
 function setup!(
@@ -24,6 +39,8 @@ function setup!(
 ) where {TPeriod,TStates,TTime}
     # Initialize current time of the timer
     adapter.current_time = max(adapter.start_time, start_time(executor))
+    adapter.last_value[] = adapter.current_time
+    adapter.has_value = true
 
     if adapter.current_time > end_time(executor)
         return nothing
@@ -54,11 +71,6 @@ function advance!(
         event = ExecutionEvent(adapter.current_time, adapter)
         push!(executor.event_queue, event)
     end
-    nothing
-end
-
-function reset!(adapter::HistoricTimer)
-    adapter.current_time = adapter.start_time
     nothing
 end
 

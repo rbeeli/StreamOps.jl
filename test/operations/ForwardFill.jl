@@ -14,7 +14,12 @@ end
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Union{Float64, Missing}, init = NaN)
+	vals = [1.0, NaN, 2.0, -1.0, NaN, NaN, 3.0, NaN, 4.0, missing]
+	values_data = Tuple{DateTime,Union{Missing,Float64}}[
+		(DateTime(2000, 1, i), x)
+		for (i, x) in enumerate(vals)
+	]
+	values = source!(g, :values, HistoricIterable(Union{Missing,Float64}, values_data))
 	ffill = op!(g, :ffill, ForwardFill{Float64}(), out = Float64)
 	output = sink!(g, :output, Buffer{Float64}())
 
@@ -25,17 +30,10 @@ end
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	vals = [1.0, NaN, 2.0, -1.0, NaN, NaN, 3.0, NaN, 4.0, missing]
 	expected = [1.0, 1.0, 2.0, -1.0, -1.0, -1.0, 3.0, 3.0, 4.0, 4.0]
 
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, length(vals))
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, [
-			(DateTime(2000, 1, i), x)
-			for (i, x) in enumerate(vals)
-		]),
-	])
 
 	run!(exe, start, stop)
 	@test output.operation.buffer == expected
@@ -46,7 +44,12 @@ end
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Union{String, Missing}, init = "")
+	vals = ["a", missing, "", "c", missing, missing, "d", missing, "e", missing]
+	values_data = Tuple{DateTime,Union{Missing,String}}[
+		(DateTime(2000, 1, i), x)
+		for (i, x) in enumerate(vals)
+	]
+	values = source!(g, :values, HistoricIterable(Union{Missing,String}, values_data))
 	ffill = op!(g, :ffill, ForwardFill{String}(), out = String)
 	output = sink!(g, :output, Buffer{String}())
 
@@ -57,17 +60,10 @@ end
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	vals = ["a", missing, "", "c", missing, missing, "d", missing, "e", missing]
 	expected = ["a", "a", "a", "c", "c", "c", "d", "d", "e", "e"]
 
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, length(vals))
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, [
-			(DateTime(2000, 1, i), x)
-			for (i, x) in enumerate(vals)
-		]),
-	])
 
 	run!(exe, start, stop)
 	@test output.operation.buffer == expected
@@ -78,7 +74,12 @@ end
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Int, init = 0)
+	vals = [0, 1, 3, 0, -2, 4, 3]
+	values_data = Tuple{DateTime,Int}[
+		(DateTime(2000, 1, i), x)
+		for (i, x) in enumerate(vals)
+	]
+	values = source!(g, :values, HistoricIterable(Int, values_data))
 	ffill = op!(g, :ffill, ForwardFill{Int}(x -> x == 0, init = 99), out = Int)
 	output = sink!(g, :output, Buffer{Int}())
 
@@ -89,17 +90,10 @@ end
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	vals = [0, 1, 3, 0, -2, 4, 3]
 	expected = [99, 1, 3, 3, -2, 4, 3]
 
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, length(vals))
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, [
-			(DateTime(2000, 1, i), x)
-			for (i, x) in enumerate(vals)
-		]),
-	])
 
 	run!(exe, start, stop)
 	@test output.operation.buffer == expected

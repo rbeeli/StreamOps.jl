@@ -12,7 +12,8 @@ using Dates
 g = StreamGraph()
 
 # Create source nodes
-source!(g, :source_timer, out=DateTime, init=DateTime(0))
+start = DateTime(2000, 1, 1, 0, 0, 0)
+source!(g, :source_timer, HistoricTimer(interval=Second(5), start_time=start))
 
 # Create sink nodes
 sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
@@ -28,12 +29,7 @@ exe = HistoricExecutor{DateTime}(g, states)
 setup!(exe, debug=true)
 
 # Run simulation
-start = DateTime(2000, 1, 1, 0, 0, 0)
 stop = DateTime(2000, 1, 1, 0, 0, 59)
-
-set_adapters!(exe, [
-    HistoricTimer{DateTime}(exe, g[:source_timer], interval=Second(5), start_time=start),
-])
 @time run!(exe, start, stop)
 
 println("Counter: ", get_state(g[:counter].operation))
@@ -51,12 +47,12 @@ dump(exe.states)
 @code_warntype run!(exe, start, stop)
 
 # Inspect code for executing a source adapter
-@code_warntype advance!(exe.adapters[1], exe)
+@code_warntype advance!(exe.source_adapters[1], exe)
 
 # Inspect generated computation graph code of the source node (adapter).
 # This is where the actual computation of nodes happens and the graph is traversed.
 # For best performance, this code should be type-stable and
 # allocations should be minimized.
-@code_warntype exe.adapters[1].adapter_func(exe, exe.adapters[1].current_time)
+@code_warntype exe.source_adapters[1].adapter_func(exe, exe.source_adapters[1].current_time)
 
-@code_native exe.adapters[1].adapter_func(exe, exe.adapters[1].current_time)
+@code_native exe.source_adapters[1].adapter_func(exe, exe.source_adapters[1].current_time)

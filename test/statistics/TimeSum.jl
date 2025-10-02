@@ -3,10 +3,17 @@
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1, 0, 0, 0), 1),
+        (DateTime(2000, 1, 1, 0, 1, 0), 2),
+        (DateTime(2000, 1, 1, 0, 2, 0), 3),
+        (DateTime(2000, 1, 1, 0, 3, 0), 4),
+        (DateTime(2000, 1, 1, 0, 10, 0), 10),
+    ]
+    values = source!(g, :values, HistoricIterable(Int, values_data))
     rolling = op!(g, :rolling, TimeSum{DateTime,Int}(Minute(2), :closed), out=Int)
 
-    @test is_valid(values.operation) # != nothing -> is_valid
+    @test !is_valid(values.operation)
     @test !is_valid(rolling.operation)
 
     output = sink!(g, :output, Buffer{Int}())
@@ -20,15 +27,6 @@
 
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 10, 0)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1, 0, 0, 0), 1),
-            (DateTime(2000, 1, 1, 0, 1, 0), 2),
-            (DateTime(2000, 1, 1, 0, 2, 0), 3),
-            (DateTime(2000, 1, 1, 0, 3, 0), 4),
-            (DateTime(2000, 1, 1, 0, 10, 0), 10)
-        ])
-    ])
     run!(exe, start, stop)
 
     # values right on the cutoff time are included

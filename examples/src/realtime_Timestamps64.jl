@@ -20,10 +20,13 @@ end
 StreamOps.time_now(::Type{Timestamp64}) = now(Timestamp64)
 StreamOps.time_zero(::Type{Timestamp64}) = Timestamp64(0)
 
+start = round_origin(now(Timestamp64), Second(1), RoundUp)
+stop = start + Second(5)
+
 g = StreamGraph()
 
 # Create source nodes
-source!(g, :timer, out=Timestamp64, init=Timestamp64(0))
+source!(g, :timer, RealtimeTimer(interval=Millisecond(1000), start_time=start))
 
 # Create sink node
 sink!(g, :output, Func((exe, x) -> begin
@@ -39,9 +42,4 @@ exe = RealtimeExecutor{Timestamp64}(g, states)
 setup!(exe)
 
 # Run in realtime mode
-start = round_origin(now(Timestamp64), Second(1), RoundUp)
-stop = start + Second(5)
-set_adapters!(exe, [
-    RealtimeTimer{Timestamp64}(exe, g[:timer], interval=Millisecond(1000), start_time=start),
-])
 @time run!(exe, start, stop)

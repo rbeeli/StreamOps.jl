@@ -3,7 +3,8 @@
     
     g = StreamGraph()
 
-    source!(g, :values, out=Int, init=0)
+    vals = [2, 3, -1, 0, 3]
+    source!(g, :values, HistoricIterable(Int, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)]))
     op!(g, :buffer, Func((exe, x) -> throw(ErrorException("My error")), 0), out=Int)
     sink!(g, :output, Buffer{Int}())
 
@@ -14,15 +15,8 @@
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe, debug=true)
 
-    vals = [2, 3, -1, 0, 3]
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     
     err_msg = "StreamOpsError at node [buffer]: Execution of node [buffer] with inputs [values] at time 2000-01-01T00:00:00 failed. Inner exception: My error"
     @test_throws err_msg run!(exe, start, stop)

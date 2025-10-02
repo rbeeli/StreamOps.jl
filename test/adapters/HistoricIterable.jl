@@ -3,9 +3,15 @@ using DataStructures
 @testitem "default" begin
     using Dates
 
+    data = [
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 3), 3),
+    ]
+
     g = StreamGraph()
 
-    values = source!(g, :values, out=Int, init=0)
+    values = source!(g, :values, HistoricIterable(Int, data))
     buffer = sink!(g, :buffer, Buffer{Int}())
 
     @test buffer.operation.min_count == 0
@@ -16,11 +22,7 @@ using DataStructures
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    adapter = HistoricIterable(exe, values, [
-        (DateTime(2000, 1, 1), 1),
-        (DateTime(2000, 1, 2), 2),
-        (DateTime(2000, 1, 3), 3)
-    ])
+    adapter = exe.source_adapters[1]
 
     # first event is scheduled
     setup!(adapter, exe)

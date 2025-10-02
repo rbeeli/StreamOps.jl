@@ -12,13 +12,18 @@ mutable struct StreamNode
     index::Int
     is_source::Bool
     is_sink::Bool
-    operation::StreamOperation
+    operation::Union{StreamOperation,SourceAdapter}
     input_bindings::Vector{InputBinding{StreamNode}}
     output_type::Type
     label::Symbol
     field_name::Symbol
     function StreamNode(
-        index, is_source, is_sink, operation::StreamOperation, output_type, label::Symbol
+        index,
+        is_source,
+        is_sink,
+        operation::Union{StreamOperation,SourceAdapter},
+        output_type,
+        label::Symbol,
     )
         input_bindings = InputBinding{StreamNode}[]
         field_name = label

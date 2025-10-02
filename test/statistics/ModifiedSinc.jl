@@ -17,7 +17,12 @@ end
 
     for window_size in 2:2:10
         g = StreamGraph()
-        values = source!(g, :values; out=Float64, init=0.0)
+        vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+        values_data = Tuple{DateTime,Float64}[
+            (DateTime(2000, 1, i), x)
+            for (i, x) in enumerate(vals)
+        ]
+        values = source!(g, :values, HistoricIterable(Float64, values_data))
         avg = op!(g, :avg, ModifiedSinc{Float64,Float64}(window_size, deg); out=Float64)
         output = sink!(g, :output, Buffer{Float64}())
         bind!(g, values, avg)
@@ -26,16 +31,6 @@ end
         states = compile_graph!(DateTime, g)
         exe = HistoricExecutor{DateTime}(g, states)
         setup!(exe)
-
-        vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-        set_adapters!(
-            exe,
-            [
-                HistoricIterable(
-                    exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)]
-                ),
-            ],
-        )
         run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
 
         @test output.operation.buffer[end] ≈ StreamOps._ModifiedSincOrig.smoothMS(
@@ -51,7 +46,12 @@ end
 
     for window_size in 2:2:10
         g = StreamGraph()
-        values = source!(g, :values; out=Float64, init=0.0)
+        vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+        values_data = Tuple{DateTime,Float64}[
+            (DateTime(2000, 1, i), x)
+            for (i, x) in enumerate(vals)
+        ]
+        values = source!(g, :values, HistoricIterable(Float64, values_data))
         avg = op!(g, :avg, ModifiedSinc{Float64,Float64}(window_size, deg); out=Float64)
         output = sink!(g, :output, Buffer{Float64}())
         bind!(g, values, avg)
@@ -60,16 +60,6 @@ end
         states = compile_graph!(DateTime, g)
         exe = HistoricExecutor{DateTime}(g, states)
         setup!(exe)
-
-        vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-        set_adapters!(
-            exe,
-            [
-                HistoricIterable(
-                    exe, values, [(DateTime(2000, 1, i), x) for (i, x) in enumerate(vals)]
-                ),
-            ],
-        )
         run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
 
         @test output.operation.buffer[end] ≈ StreamOps._ModifiedSincOrig.smoothMS(

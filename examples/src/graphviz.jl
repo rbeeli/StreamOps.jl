@@ -9,9 +9,25 @@ using Dates
 g = StreamGraph()
 
 # Create source nodes
-source!(g, :source1, out=Float64, init=NaN)
-source!(g, :source2, out=Float64, init=NaN)
-source!(g, :source3, out=Float64, init=NaN)
+source1_data = [
+    (DateTime(2000, 1, 1, 0, 0, 1), 2.0),
+    (DateTime(2000, 1, 1, 0, 0, 3), 4.0),
+    (DateTime(2000, 1, 1, 0, 0, 5), 6.0),
+]
+source2_data = [
+    (DateTime(2000, 1, 1, 0, 0, 2), 10.0),
+    (DateTime(2000, 1, 1, 0, 0, 4), 20.0),
+    (DateTime(2000, 1, 1, 0, 0, 6), 30.0),
+]
+source3_data = [
+    (DateTime(2000, 1, 1, 0, 0, 2), 10.0),
+    (DateTime(2000, 1, 1, 0, 0, 4), 20.0),
+    (DateTime(2000, 1, 1, 0, 0, 6), 30.0),
+]
+
+source!(g, :source1, HistoricIterable(Float64, source1_data))
+source!(g, :source2, HistoricIterable(Float64, source2_data))
+source!(g, :source3, HistoricIterable(Float64, source3_data))
 
 # Create compute nodes
 op!(g, :square, Func{Float64}((exe, x) -> x^2, 0.0); out=Float64)
@@ -40,23 +56,6 @@ exe = HistoricExecutor{DateTime}(g, states)
 setup!(exe)
 
 # Run simulation
-set_adapters!(exe, [
-    HistoricIterable(exe, g[:source1], [
-        (DateTime(2000, 1, 1, 0, 0, 1), 2.0),
-        (DateTime(2000, 1, 1, 0, 0, 3), 4.0),
-        (DateTime(2000, 1, 1, 0, 0, 5), 6.0)
-    ]),
-    HistoricIterable(exe, g[:source2], [
-        (DateTime(2000, 1, 1, 0, 0, 2), 10.0),
-        (DateTime(2000, 1, 1, 0, 0, 4), 20.0),
-        (DateTime(2000, 1, 1, 0, 0, 6), 30.0)
-    ]),
-    HistoricIterable(exe, g[:source3], [
-        (DateTime(2000, 1, 1, 0, 0, 2), 10.0),
-        (DateTime(2000, 1, 1, 0, 0, 4), 20.0),
-        (DateTime(2000, 1, 1, 0, 0, 6), 30.0)
-    ])
-])
 run!(exe, DateTime(2000, 1, 1, 0, 0, 1), DateTime(2000, 1, 1, 0, 0, 6))
 
 # Visualize the computation graph

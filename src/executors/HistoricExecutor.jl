@@ -12,13 +12,16 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     end_time::TTime
     current_time::TTime
     const event_queue::BinaryMinHeap{ExecutionEvent{TTime}}
-    const adapters::Vector{SourceAdapter}
-    const adapter_funcs::Dict{Int,Function}
+    const source_adapters::Vector{SourceAdapter}
     const drop_events_before_start::Bool
 
     function HistoricExecutor{TTime}(
         graph::StreamGraph, states::TStates; drop_events_before_start::Bool=false
     ) where {TStates,TTime}
+        adapters = Vector{SourceAdapter}(undef, length(graph.source_nodes))
+        for (i, ix) in enumerate(graph.source_nodes)
+            adapters[i] = getfield(states, graph.nodes[ix].field_name)
+        end
         new{TStates,TTime}(
             graph,
             states,
@@ -26,8 +29,7 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
             time_zero(TTime), # end_time
             zero(TTime), # current_time
             BinaryMinHeap{ExecutionEvent{TTime}}(), # event_queue
-            Vector{SourceAdapter}(), # adapters
-            Dict{Int,Function}(), # adapter_funcs
+            adapters,
             drop_events_before_start,
         )
     end
@@ -45,17 +47,12 @@ end
     executor.end_time
 end
 
-function set_adapters!(executor::HistoricExecutor, adapters)
-    @assert length(adapters) >= length(executor.adapter_funcs) "Number of executor adapters must be greater than or equal to number of source nodes"
-    empty!(executor.adapters)
-    append!(executor.adapters, adapters)
-end
-
 function setup!(executor::HistoricExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
     # Compile source functions
-    for source_ix in executor.graph.source_nodes
-        source_fn = compile_source!(executor, executor.graph.nodes[source_ix]; debug=debug)
-        executor.adapter_funcs[source_ix] = source_fn
+    for (adapter, source_ix) in zip(executor.source_adapters, executor.graph.source_nodes)
+        node = executor.graph.nodes[source_ix]
+        source_fn = compile_source!(executor, node; debug=debug)
+        set_adapter_func!(adapter, source_fn)
     end
 end
 
@@ -63,7 +60,7 @@ function run!(
     executor::HistoricExecutor{TStates,TTime}, start_time::TTime, end_time::TTime
 ) where {TStates,TTime}
     @assert start_time <= end_time "Start time cannot be after end time"
-    @assert !isempty(executor.adapters) "No adapters have been defined for HistoricExecutor"
+    @assert !isempty(executor.source_adapters) "No adapters have been defined for HistoricExecutor"
 
     # Set executor time bounds
     executor.start_time = start_time
@@ -73,7 +70,7 @@ function run!(
     # need invokelatest because states struct is dynamically compiled,
     # which may live in a newer world age than the caller.
     Base.invokelatest() do
-        adapters = executor.adapters
+        adapters = executor.source_adapters
         event_queue = executor.event_queue
 
         # Initialize adapters
@@ -113,4 +110,4 @@ function run!(
     nothing
 end
 
-export HistoricExecutor, set_adapters!, start_time, end_time
+export HistoricExecutor, start_time, end_time

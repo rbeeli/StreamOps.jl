@@ -13,7 +13,13 @@ end
 
     g = StreamGraph()
 
-    source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 3), 3),
+        (DateTime(2000, 1, 4), 4),
+    ]
+    source!(g, :values, HistoricIterable(Int, values_data))
     sink!(g, :buffer, RingBuffer{Int}(1))
 
     @test g[:buffer].operation.min_count == 0
@@ -26,14 +32,6 @@ end
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 4)
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, 1), 1),
-            (DateTime(2000, 1, 2), 2),
-            (DateTime(2000, 1, 3), 3),
-            (DateTime(2000, 1, 4), 4)
-        ])
-    ])
     run!(exe, start, stop)
     @test get_state(g[:buffer].operation) == [4]
 end
@@ -43,7 +41,13 @@ end
     
     g = StreamGraph()
 
-    source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 3), 3),
+        (DateTime(2000, 1, 4), 4),
+    ]
+    source!(g, :values, HistoricIterable(Int, values_data))
     sink!(g, :buffer, RingBuffer{Int}(4))
 
     @test g[:buffer].operation.min_count == 0
@@ -56,14 +60,6 @@ end
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 4)
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, 1), 1),
-            (DateTime(2000, 1, 2), 2),
-            (DateTime(2000, 1, 3), 3),
-            (DateTime(2000, 1, 4), 4)
-        ])
-    ])
     run!(exe, start, stop)
     @test get_state(g[:buffer].operation) == [1, 2, 3, 4]
 end
@@ -73,7 +69,13 @@ end
     
     g = StreamGraph()
 
-    source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 3), 3),
+        (DateTime(2000, 1, 4), 4),
+    ]
+    source!(g, :values, HistoricIterable(Int, values_data))
     sink!(g, :buffer, RingBuffer{Int}(10))
 
     @test g[:buffer].operation.min_count == 0
@@ -86,14 +88,6 @@ end
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 4)
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, 1), 1),
-            (DateTime(2000, 1, 2), 2),
-            (DateTime(2000, 1, 3), 3),
-            (DateTime(2000, 1, 4), 4)
-        ])
-    ])
     run!(exe, start, stop)
     @test get_state(g[:buffer].operation) == [1, 2, 3, 4]
 end
@@ -103,7 +97,13 @@ end
     
     g = StreamGraph()
 
-    source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 3), 3),
+        (DateTime(2000, 1, 4), 4),
+    ]
+    source!(g, :values, HistoricIterable(Int, values_data))
     op!(g, :buffer, RingBuffer{Int}(5, min_count=3), out=RingBuffer{Int})
     sink!(g, :output, Counter())
 
@@ -118,14 +118,6 @@ end
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 4)
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, 1), 1),
-            (DateTime(2000, 1, 2), 2),
-            (DateTime(2000, 1, 3), 3),
-            (DateTime(2000, 1, 4), 4)
-        ])
-    ])
     run!(exe, start, stop)
     
     # output should only be called twice because of min_count=3
@@ -138,8 +130,18 @@ end
     g = StreamGraph()
 
     # Create source nodes
-    source!(g, :timer, out=DateTime, init=DateTime(0))
-    source!(g, :values, out=Float64, init=0.0)
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 6)
+    source!(g, :timer, HistoricTimer(interval=Day(2), start_time=start))
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, 1), 1.0),
+        (DateTime(2000, 1, 2), 2.0),
+        (DateTime(2000, 1, 3), 3.0),
+        (DateTime(2000, 1, 4), 4.0),
+        (DateTime(2000, 1, 5), 5.0),
+        (DateTime(2000, 1, 6), 6.0)
+    ]
+    source!(g, :values, HistoricIterable(Float64, values_data))
 
     # Create operation nodes
     op!(g, :buffer, RingBuffer{Float64}(5), out=RingBuffer{Float64})
@@ -165,19 +167,6 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    start = DateTime(2000, 1, 1)
-    stop = DateTime(2000, 1, 6)
-    set_adapters!(exe, [
-        HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(2), start_time=start),
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, 1), 1.0),
-            (DateTime(2000, 1, 2), 2.0),
-            (DateTime(2000, 1, 3), 3.0),
-            (DateTime(2000, 1, 4), 4.0),
-            (DateTime(2000, 1, 5), 5.0),
-            (DateTime(2000, 1, 6), 6.0)
-        ])
-    ])
     run!(exe, start, stop)
     @test collected[1] == Float64[]
     @test collected[2] == [1.0, 2.0]

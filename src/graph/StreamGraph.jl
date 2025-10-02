@@ -37,13 +37,12 @@ function _make_node!(
     node
 end
 
-function source!(
-    graph::StreamGraph, label::Union{Symbol,String}; out::Type{TOutput}, init::TOutput
-) where {TOutput}
+function source!(graph::StreamGraph, label::Union{Symbol,String}, adapter::SourceAdapter)
     if label isa String
         label = Symbol(label)
     end
-    _make_node!(graph, true, false, AdapterStorage{TOutput}(init), TOutput, label)
+    output_type = source_output_type(adapter)
+    _make_node!(graph, true, false, adapter, output_type, label)
 end
 
 function op!(
@@ -672,7 +671,13 @@ function compile_source!(
     push!(exec_exprs, :(fill!(states.__executed, false)))
 
     # Save value in source storage
-    push!(exec_exprs, :(states.$(source_node.field_name)(executor, event_value)))
+    push!(
+        exec_exprs,
+        :(begin
+            states.$(source_node.field_name).last_value[] = event_value
+            states.$(source_node.field_name).has_value = true
+        end),
+    )
 
     # Mark the source node as executed
     push!(exec_exprs, :(@inbounds states.__executed[$(source_node.index)] = true))

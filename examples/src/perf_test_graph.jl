@@ -7,16 +7,19 @@ StreamOps.time_now(::Type{Timestamp64}) = now(Timestamp64)
 StreamOps.time_zero(::Type{Timestamp64}) = Timestamp64(0)
 
 function run()
-    dts = Timestamp64[]
+    dts_buffer = Timestamp64[]
     counts = Float32[]
     wnd = Nanosecond(100)
 
+    data_points = [Timestamp64(i) for i in 1:20_000_000]
+    values_iter = ((x, x) for x in data_points)
+
     g = StreamGraph()
-    source!(g, :values, out=Timestamp64, init=Timestamp64(0))
+    source!(g, :values, HistoricIterable(Timestamp64, values_iter))
     op!(g, :rolling, TimeWindowBuffer{Timestamp64,Timestamp64}(wnd, :closed), out=AbstractVector{Timestamp64})
     op!(g, :dts_node, Func((exe, x) -> time(exe), Timestamp64(0)), out=Timestamp64)
     op!(g, :counts_node, Func((exe, x) -> Float32(length(x)), 0.0f32), out=Float32)
-    sink!(g, :sink_dts, Buffer(dts))
+    sink!(g, :sink_dts, Buffer(dts_buffer))
     sink!(g, :sink_counts, Buffer(counts))
 
     # Create edges between nodes (define the computation graph)
@@ -32,17 +35,8 @@ function run()
     setup!(exe)
 
     # Run simulation
-    dts = [Timestamp64(i) for i in 1:20_000_000]
-    start = first(dts)
-    stop = last(dts)
-    set_adapters!(exe, [
-        HistoricIterable(
-            Tuple{Timestamp64,Timestamp64},
-            exe,
-            g[:values],
-            (x, x) for x in dts
-        )
-    ])
+    start = first(data_points)
+    stop = last(data_points)
     run!(exe, start, stop)
 
     nothing

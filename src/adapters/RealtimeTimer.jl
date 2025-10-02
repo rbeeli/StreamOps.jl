@@ -1,29 +1,51 @@
 using Dates
 import Base.Libc: systemsleep
 
-mutable struct RealtimeTimer{TPeriod,TTime,TAdapterFunc} <: SourceAdapter
-    node::StreamNode
-    adapter_func::TAdapterFunc
+mutable struct RealtimeTimer{TPeriod,TTime} <: SourceAdapter
+    adapter_func::Union{Nothing,Function}
     interval::TPeriod
     start_time::TTime
+    last_value::Base.RefValue{TTime}
+    has_value::Bool
     task::Union{Task,Nothing}
     stop_flag::Threads.Atomic{Bool}
     stop_check_interval::Millisecond
 
-    function RealtimeTimer{TTime}(
-        executor,
-        node::StreamNode;
-        interval::TPeriod,
-        start_time::TTime,
-        stop_check_interval::Millisecond=Millisecond(50),
+    function RealtimeTimer{TTime}(;
+        interval::TPeriod, start_time::TTime, stop_check_interval::Millisecond=Millisecond(50)
     ) where {TPeriod,TTime}
-        adapter_func = executor.adapter_funcs[node.index]
-        stop_flag = Threads.Atomic{Bool}(false)
-        new{TPeriod,TTime,typeof(adapter_func)}(
-            node, adapter_func, interval, start_time, nothing, stop_flag, stop_check_interval
+        new{TPeriod,TTime}(
+            nothing,
+            interval,
+            start_time,
+            Ref{TTime}(start_time),
+            true,
+            nothing,
+            Threads.Atomic{Bool}(false),
+            stop_check_interval,
         )
     end
 end
+
+function RealtimeTimer(;
+    interval::TPeriod, start_time::TTime, stop_check_interval::Millisecond=Millisecond(50)
+) where {TPeriod,TTime}
+    RealtimeTimer{TTime}(;
+        interval=interval, start_time=start_time, stop_check_interval=stop_check_interval
+    )
+end
+
+source_output_type(::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime} = TTime
+
+function set_adapter_func!(adapter::RealtimeTimer, func::Function)
+    adapter.adapter_func = func
+    adapter
+end
+
+@inline get_state(adapter::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime} =
+    adapter.last_value[]
+
+@inline is_valid(adapter::RealtimeTimer) = adapter.has_value
 
 function worker(
     adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}
@@ -54,7 +76,7 @@ function worker(
         adapter.stop_flag[] && break
     end
 
-    println("RealtimeTimer: Timer [$(adapter.node.label)] thread ended")
+    println("RealtimeTimer: Timer thread ended")
 end
 
 function _calc_next_time(
@@ -69,7 +91,7 @@ function run!(
     adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}
 ) where {TPeriod,TStates,TTime}
     adapter.task = Threads.@spawn worker(adapter, executor)
-    println("RealtimeTimer: Timer [$(adapter.node.label)] thread started")
+    println("RealtimeTimer: Timer thread started")
     nothing
 end
 
@@ -89,6 +111,16 @@ function destroy!(adapter::RealtimeTimer{TPeriod,TTime}) where {TPeriod,TTime}
         wait(adapter.task) # will also catch and rethrow any exceptions
         adapter.task = nothing
     end
+    adapter.stop_flag[] = false
+    adapter.last_value[] = adapter.start_time
+    adapter.has_value = true
+    nothing
+end
+
+function reset!(adapter::RealtimeTimer)
+    adapter.last_value[] = adapter.start_time
+    adapter.has_value = true
+    adapter.stop_flag[] = false
     nothing
 end
 

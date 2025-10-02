@@ -15,7 +15,15 @@ end
     
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0, 50.0, 1.5, 1.1, 4.0, #
+        -3.0, 150.0, -400.0, 50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0, #
+        50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(0.99), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
 
@@ -26,17 +34,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0, 50.0, 1.5, 1.1, 4.0, #
-        -3.0, 150.0, -400.0, 50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0, #
-        50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
 
     # Reference values generated using Python script ./FractionalDiff.py
@@ -54,7 +53,15 @@ end
     
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, 1), 1.0),
+        (DateTime(2000, 1, 2), 3.0),
+        (DateTime(2000, 1, 3), 6.0),
+        (DateTime(2000, 1, 4), 10.0),
+        (DateTime(2000, 1, 5), 15.0),
+    ]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(1.0), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
 
@@ -67,15 +74,6 @@ end
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 5)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1), 1.0),
-            (DateTime(2000, 1, 2), 3.0),
-            (DateTime(2000, 1, 3), 6.0),
-            (DateTime(2000, 1, 4), 10.0),
-            (DateTime(2000, 1, 5), 15.0)
-        ])
-    ])
     run!(exe, start, stop)
 
     # For order 1, we expect first differences
@@ -88,7 +86,15 @@ end
     
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, 1), 1.0),
+        (DateTime(2000, 1, 2), 2.0),
+        (DateTime(2000, 1, 3), 3.0),
+        (DateTime(2000, 1, 4), 4.0),
+        (DateTime(2000, 1, 5), 5.0),
+    ]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     frac_diff = op!(g, :frac_diff, FractionalDiff{Float64,Float64}(0.0), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
 
@@ -101,15 +107,6 @@ end
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 5)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1), 1.0),
-            (DateTime(2000, 1, 2), 2.0),
-            (DateTime(2000, 1, 3), 3.0),
-            (DateTime(2000, 1, 4), 4.0),
-            (DateTime(2000, 1, 5), 5.0)
-        ])
-    ])
     run!(exe, start, stop)
 
     # For order 0, we expect the original values

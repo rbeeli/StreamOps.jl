@@ -3,11 +3,18 @@
     
     g = StreamGraph()
 
-    values = source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1, 0, 0, 0), 1),
+        (DateTime(2000, 1, 1, 0, 1, 0), 2),
+        (DateTime(2000, 1, 1, 0, 2, 0), 3),
+        (DateTime(2000, 1, 1, 0, 3, 0), 4),
+        (DateTime(2000, 1, 1, 0, 10, 0), 10),
+    ]
+    values = source!(g, :values, HistoricIterable(Int, values_data))
     rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed, copy=true), out=Vector{Int})
 
     @test rolling.operation.copy
-    @test is_valid(values.operation) # != nothing -> is_valid
+    @test !is_valid(values.operation) # HistoricIterable has no initial value
     @test !is_valid(rolling.operation) # valid_if_empty=false is default
 
     output = sink!(g, :output, Buffer{Vector{Int}}())
@@ -21,15 +28,6 @@
 
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 10, 0)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1, 0, 0, 0), 1),
-            (DateTime(2000, 1, 1, 0, 1, 0), 2),
-            (DateTime(2000, 1, 1, 0, 2, 0), 3),
-            (DateTime(2000, 1, 1, 0, 3, 0), 4),
-            (DateTime(2000, 1, 1, 0, 10, 0), 10)
-        ])
-    ])
     run!(exe, start, stop)
 
     # values right on the cutoff time are included
@@ -50,11 +48,18 @@ end
     
     g = StreamGraph()
 
-    values = source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1, 0, 0, 0), 1),
+        (DateTime(2000, 1, 1, 0, 1, 0), 2),
+        (DateTime(2000, 1, 1, 0, 2, 0), 3),
+        (DateTime(2000, 1, 1, 0, 3, 0), 4),
+        (DateTime(2000, 1, 1, 0, 10, 0), 10),
+    ]
+    values = source!(g, :values, HistoricIterable(Int, values_data))
     rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :open, copy=true, valid_if_empty=true), out=Vector{Int})
 
     @test rolling.operation.copy
-    @test is_valid(values.operation) # != nothing -> is_valid
+    @test !is_valid(values.operation) # adapter becomes valid after first event
     @test is_valid(rolling.operation) # valid_if_empty=true
 
     output = sink!(g, :output, Buffer{Vector{Int}}())
@@ -68,15 +73,6 @@ end
 
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 10, 0)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1, 0, 0, 0), 1),
-            (DateTime(2000, 1, 1, 0, 1, 0), 2),
-            (DateTime(2000, 1, 1, 0, 2, 0), 3),
-            (DateTime(2000, 1, 1, 0, 3, 0), 4),
-            (DateTime(2000, 1, 1, 0, 10, 0), 10)
-        ])
-    ])
     run!(exe, start, stop)
 
     # values right on the cutoff time are excluded
@@ -98,7 +94,8 @@ end
     
     g = StreamGraph()
 
-    values = source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[(DateTime(2000, 1, 1, 0, 0, 0), 1)]
+    values = source!(g, :values, HistoricIterable(Int, values_data))
     rolling = op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Minute(2), :closed; copy=false), out=AbstractVector{Int})
 
     @test !rolling.operation.copy
@@ -114,11 +111,6 @@ end
 
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 1, 0)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1, 0, 0, 0), 1),
-        ])
-    ])
     run!(exe, start, stop)
 
     @test output.operation.buffer[1] == [1]
@@ -137,8 +129,15 @@ end
 
     g = StreamGraph()
 
-    source!(g, :timer, out=DateTime, init=DateTime(0))
-    source!(g, :values, out=Int, init=0)
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 7)
+    source!(g, :timer, HistoricTimer(interval=Day(1), start_time=start + Second(1)))
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 6), 6),
+    ]
+    source!(g, :values, HistoricIterable(Int, values_data))
 
     op!(g, :rolling, TimeWindowBuffer{DateTime,Int}(Day(2), :closed; copy=true), out=Vector{Int})
     bind!(g, :values, :rolling)
@@ -151,16 +150,6 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    start = DateTime(2000, 1, 1)
-    stop = DateTime(2000, 1, 7)
-    set_adapters!(exe, [
-        HistoricTimer{DateTime}(exe, g[:timer]; interval=Day(1), start_time=start + Second(1)),
-        HistoricIterable(exe, g[:values], [
-            (DateTime(2000, 1, 1), 1),
-            (DateTime(2000, 1, 2), 2),
-            (DateTime(2000, 1, 6), 6),
-        ])
-    ])
     run!(exe, start, stop)
 
     buffer = g[:output].operation.buffer

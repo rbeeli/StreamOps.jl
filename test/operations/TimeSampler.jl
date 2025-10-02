@@ -2,8 +2,18 @@
     using Dates
     
     g = StreamGraph()
+    values_data = Tuple{DateTime,Int}[
+        (DateTime("2000-01-01T00:00:00"), 0),
+        (DateTime("2000-01-01T00:00:10"), 10),
+        (DateTime("2000-01-01T00:01:00"), 100),
+        (DateTime("2000-01-01T00:02:00"), 200),
+        (DateTime("2000-01-01T00:02:59"), 259),
+        (DateTime("2000-01-01T00:03:00"), 300),
+        (DateTime("2000-01-01T00:04:00"), 400),
+        (DateTime("2000-01-01T00:08:00"), 800),
+    ]
 
-    source!(g, :values, out=Int, init=0)
+    source!(g, :values, HistoricIterable(Int, values_data))
 
     op!(g, :sampler, TimeSampler{DateTime,Int}(Minute(1)), out=Int)
     bind!(g, :values, :sampler)
@@ -22,18 +32,6 @@
 
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 8, 0)
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime("2000-01-01T00:00:00"), 0),
-            (DateTime("2000-01-01T00:00:10"), 10),
-            (DateTime("2000-01-01T00:01:00"), 100),
-            (DateTime("2000-01-01T00:02:00"), 200),
-            (DateTime("2000-01-01T00:02:59"), 259),
-            (DateTime("2000-01-01T00:03:00"), 300),
-            (DateTime("2000-01-01T00:04:00"), 400),
-            (DateTime("2000-01-01T00:08:00"), 800)
-        ])
-    ])
     run!(exe, start, stop)
 
     buffer = output.operation.buffer
@@ -58,8 +56,21 @@ end
     g = StreamGraph()
 
     # sample every half minute, i.e. 00:30, 01:30, 02:30, etc.
+    values_data = Tuple{DateTime,Int}[
+        (DateTime("2000-01-01T00:00:00"), 0),   # 00:00:30 next sample (first)
+        (DateTime("2000-01-01T00:00:10"), 10),  # 00:00:30 next sample (skip)
+        (DateTime("2000-01-01T00:00:40"), 40),  # 00:01:30 next sample
+        (DateTime("2000-01-01T00:01:00"), 100), # 00:01:30 next sample (skip)
+        (DateTime("2000-01-01T00:02:00"), 200), # 00:02:30 next sample
+        (DateTime("2000-01-01T00:02:10"), 210), # 00:02:30 next sample (skip)
+        (DateTime("2000-01-01T00:02:59"), 259), # 00:03:30 next sample
+        (DateTime("2000-01-01T00:03:00"), 300), # 00:03:30 next sample (skip)
+        (DateTime("2000-01-01T00:03:30"), 330), # 00:04:30 next sample
+        (DateTime("2000-01-01T00:04:00"), 400), # 00:04:30 next sample (skip)
+        (DateTime("2000-01-01T00:08:00"), 800), # 00:08:30 next sample
+    ]
 
-    source!(g, :values, out=Int, init=0)
+    source!(g, :values, HistoricIterable(Int, values_data))
 
     op!(g, :sampler, TimeSampler{DateTime,Int}(Minute(1), origin=DateTime(0, 1, 1, 0, 0, 30)), out=Int)
     bind!(g, :values, :sampler)
@@ -78,21 +89,6 @@ end
 
     start = DateTime(2000, 1, 1, 0, 0, 0)
     stop = DateTime(2000, 1, 1, 0, 8, 0)
-    set_adapters!(exe, [
-        HistoricIterable(exe, g[:values], [
-            (DateTime("2000-01-01T00:00:00"), 0),   # 00:00:30 next sample (first)
-            (DateTime("2000-01-01T00:00:10"), 10),  # 00:00:30 next sample (skip)
-            (DateTime("2000-01-01T00:00:40"), 40),  # 00:01:30 next sample
-            (DateTime("2000-01-01T00:01:00"), 100), # 00:01:30 next sample (skip)
-            (DateTime("2000-01-01T00:02:00"), 200), # 00:02:30 next sample
-            (DateTime("2000-01-01T00:02:10"), 210), # 00:02:30 next sample (skip)
-            (DateTime("2000-01-01T00:02:59"), 259), # 00:03:30 next sample
-            (DateTime("2000-01-01T00:03:00"), 300), # 00:03:30 next sample (skip)
-            (DateTime("2000-01-01T00:03:30"), 330), # 00:04:30 next sample
-            (DateTime("2000-01-01T00:04:00"), 400), # 00:04:30 next sample (skip)
-            (DateTime("2000-01-01T00:08:00"), 800)  # 00:08:30 next sample
-        ])
-    ])
     run!(exe, start, stop)
 
     buffer = output.operation.buffer

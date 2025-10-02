@@ -14,7 +14,9 @@ end
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Vector{Int}, init = Int[])
+	input = [1, 2, 3]
+	values_data = Tuple{DateTime,Vector{Int}}[(DateTime(2000, 1, 1), input)]
+	values = source!(g, :values, HistoricIterable(Vector{Int}, values_data))
 	buffer = op!(g, :buffer, Copy{Vector{Int}}(), out = Vector{Int})
 	output = sink!(g, :output, Buffer{Vector{Int}}())
 
@@ -25,15 +27,8 @@ end
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	input = [1, 2, 3]
-
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, 4)
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, [
-			(DateTime(2000, 1, 1), input)
-		]),
-	])
 	run!(exe, start, stop)
 	@test output.operation.buffer[1] == input # same contents
 	@test output.operation.buffer[1] !== input # different objects (copy)
@@ -44,7 +39,9 @@ end
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Vector{Int}, init = Int[])
+	input = [1, 2, 3]
+	values_data = Tuple{DateTime,Vector{Int}}[(DateTime(2000, 1, 1), input)]
+	values = source!(g, :values, HistoricIterable(Vector{Int}, values_data))
 	buffer = op!(g, :buffer, Copy(Int[]), out = Vector{Int})
 	output = sink!(g, :output, Buffer{Vector{Int}}())
 
@@ -55,15 +52,8 @@ end
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	input = [1, 2, 3]
-
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, 4)
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, [
-			(DateTime(2000, 1, 1), input)
-		]),
-	])
 	run!(exe, start, stop)
 	@test output.operation.buffer[1] == input # same contents
 	@test output.operation.buffer[1] !== input # different objects (copy)

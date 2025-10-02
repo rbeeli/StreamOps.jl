@@ -1,3 +1,6 @@
+# Source adapter helpers
+export source_output_type, set_adapter_func!
+
 # Operation state helpers
 export reset!, is_valid, get_state
 

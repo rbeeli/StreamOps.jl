@@ -17,7 +17,6 @@ include("executors/ExecutionEvent.jl")
 include("executors/HistoricExecutor.jl")
 include("executors/RealtimeExecutor.jl")
 
-include("adapters/AdapterStorage.jl")
 include("adapters/HistoricTimer.jl")
 include("adapters/HistoricIterable.jl")
 include("adapters/RealtimeTimer.jl")

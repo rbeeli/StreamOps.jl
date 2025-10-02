@@ -10,8 +10,19 @@ using Dates
 g = StreamGraph()
 
 # Create source nodes
-source!(g, :timer, out=DateTime, init=DateTime(0))
-source!(g, :values, out=Float64, init=0.0)
+source!(g, :timer, HistoricTimer(interval=Day(2), start_time=DateTime(0)))
+values_data = [
+    (DateTime(2000, 1, 1, 0, 1, 1), 1.0),
+    (DateTime(2000, 1, 1, 0, 1, 2), 1.5),
+    (DateTime(2000, 1, 2, 0, 0, 0), 2.0),
+    (DateTime(2000, 1, 2, 1, 0, 0), 2.1),
+    (DateTime(2000, 1, 3, 0, 0, 1), 3.0),
+    (DateTime(2000, 1, 4, 0, 0, 1), 4.0),
+    (DateTime(2000, 1, 4, 1, 0, 1), 4.1),
+    (DateTime(2000, 1, 5, 0, 0, 1), 5.0),
+    (DateTime(2000, 1, 6, 0, 0, 0), 6.0),
+]
+source!(g, :values, HistoricIterable(Float64, values_data))
 
 # Create operation nodes
 op!(g, :buffer, Buffer{Float64}(), out=Buffer{Float64})
@@ -37,20 +48,6 @@ setup!(exe)
 # Run simulation
 start = DateTime(2000, 1, 1)
 stop = DateTime(2000, 1, 6)
-set_adapters!(exe, [
-    HistoricTimer{DateTime}(exe, g[:timer], interval=Day(2), start_time=start),
-    HistoricIterable(exe, g[:values], [
-        (DateTime(2000, 1, 1, 0, 1, 1), 1.0),
-        (DateTime(2000, 1, 1, 0, 1, 2), 1.5),
-        (DateTime(2000, 1, 2, 0, 0, 0), 2.0),
-        (DateTime(2000, 1, 2, 1, 0, 0), 2.1),
-        (DateTime(2000, 1, 3, 0, 0, 1), 3.0),
-        (DateTime(2000, 1, 4, 0, 0, 1), 4.0),
-        (DateTime(2000, 1, 4, 1, 0, 1), 4.1),
-        (DateTime(2000, 1, 5, 0, 0, 1), 5.0),
-        (DateTime(2000, 1, 6, 0, 0, 0), 6.0)
-    ])
-])
 @time run!(exe, start, stop)
 
 # Visualize the computation graph

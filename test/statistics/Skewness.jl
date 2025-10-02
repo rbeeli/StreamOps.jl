@@ -21,7 +21,15 @@ end
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    # Reference values generated using Python script ./Skewness.py
+    vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+    expected = [2.16310746, 2.22811474, -1.64652492]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, skew)
@@ -31,18 +39,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    # Reference values generated using Python script ./Skewness.py
-    vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
-    expected = [2.16310746, 2.22811474, -1.64652492]
-
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
     
     @test length(output.operation.buffer) == length(expected)
@@ -56,7 +54,16 @@ end
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    # Reference values generated using Python script ./Skewness.py
+    vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+    expected = [1.73165647, 1.60668343, -0.50516543,
+        1.71926473, -1.18345510]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, skew)
@@ -66,19 +73,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    # Reference values generated using Python script ./Skewness.py
-    vals = [50.0, 1.5, 1.1, 4.0, -3.0, 150.0, -400.0]
-    expected = [1.73165647, 1.60668343, -0.50516543,
-        1.71926473, -1.18345510]
-
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
     
     @test length(output.operation.buffer) == length(expected)
@@ -92,7 +88,14 @@ end
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    vals = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+    expected = [0.0, 0.0, 0.0, 0.0, 0.0]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     skew = op!(g, :skew, Skewness{Float64,Float64}(window_size), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
     bind!(g, values, skew)
@@ -102,17 +105,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    vals = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    expected = [0.0, 0.0, 0.0, 0.0, 0.0]
-
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
     
     @test length(output.operation.buffer) == length(expected)

@@ -20,7 +20,13 @@ end
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     avg = op!(g, :avg, Variance{Float64,Float64}(window_size), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
 
@@ -31,15 +37,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
     for i in window_size:length(vals)
         @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=true)
@@ -54,7 +53,13 @@ end
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
 
@@ -65,15 +70,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
     for i in window_size:length(vals)
         @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=false)
@@ -87,7 +85,14 @@ end
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    vals = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+    expected = [0.0, 0.0, 0.0, 0.0, 0.0]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
 
@@ -98,17 +103,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    vals = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    expected = [0.0, 0.0, 0.0, 0.0, 0.0]
-
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
 
     @test length(output.operation.buffer) == length(expected)
@@ -123,7 +119,13 @@ end
 
     g = StreamGraph()
 
-    values = source!(g, :values, out=Float64, init=0.0)
+    vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
+    values_data = Tuple{DateTime,Float64}[
+        (DateTime(2000, 1, i), x)
+        for (i, x) in enumerate(vals)
+    ]
+
+    values = source!(g, :values, HistoricIterable(Float64, values_data))
     avg = op!(g, :avg, Variance{Float64,Float64}(window_size, std=true), out=Float64)
     output = sink!(g, :output, Buffer{Float64}())
 
@@ -134,15 +136,8 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    vals = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0]
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, length(vals))
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ])
-    ])
     run!(exe, start, stop)
     for i in window_size:length(vals)
         @test output.operation.buffer[i-window_size+1] ≈ std(vals[i-window_size+1:i], corrected=true)

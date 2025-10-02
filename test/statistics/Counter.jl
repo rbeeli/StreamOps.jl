@@ -3,7 +3,9 @@
     
     g = StreamGraph()
 
-    source!(g, :timer, out=DateTime, init=DateTime(0))
+    start = DateTime(2000, 1, 1, 0, 0, 0)
+    stop = DateTime(2000, 1, 1, 0, 0, 15)
+    source!(g, :timer, HistoricTimer(interval=Second(5), start_time=start))
     sink!(g, :counter, Counter())
     bind!(g, :timer, :counter)
 
@@ -11,11 +13,6 @@
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    start = DateTime(2000, 1, 1, 0, 0, 0)
-    stop = DateTime(2000, 1, 1, 0, 0, 15)
-    set_adapters!(exe, [
-        HistoricTimer{DateTime}(exe, g[:timer], interval=Second(5), start_time=start),
-    ])
     run!(exe, start, stop)
 
     @test get_state(g[:counter].operation) == 4 # 0, 5, 10, 15
@@ -29,7 +26,9 @@ end
     
     g = StreamGraph()
 
-    source!(g, :timer, out=DateTime, init=DateTime(0))
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 15)
+    source!(g, :timer, HistoricTimer(interval=Day(1), start_time=start))
     op!(g, :counter, Counter(min_count=3), out=Int)
     bind!(g, :timer, :counter)
     sink!(g, :output, Buffer{Int}())
@@ -39,11 +38,6 @@ end
     exe = HistoricExecutor{DateTime}(g, states)
     setup!(exe)
 
-    start = DateTime(2000, 1, 1)
-    stop = DateTime(2000, 1, 15)
-    set_adapters!(exe, [
-        HistoricTimer{DateTime}(exe, g[:timer], interval=Day(1), start_time=start),
-    ])
     run!(exe, start, stop)
 
     @test get_state(g[:counter].operation) == 15

@@ -10,20 +10,22 @@ mutable struct RealtimeExecutor{TStates,TTime} <: GraphExecutor
     start_time::TTime
     end_time::TTime
     event_queue::Channel{ExecutionEvent{TTime}}
-    adapters::Vector{SourceAdapter}
-    adapter_funcs::Dict{Int,Function}
+    const source_adapters::Vector{SourceAdapter}
 
     function RealtimeExecutor{TTime}(
         graph::StreamGraph, states::TStates; max_queue_size::Int=typemax(Int)
     ) where {TStates,TTime}
+        adapters = Vector{SourceAdapter}(undef, length(graph.source_nodes))
+        for (i, ix) in enumerate(graph.source_nodes)
+            adapters[i] = getfield(states, graph.nodes[ix].field_name)
+        end
         new{TStates,TTime}(
             graph,
             states,
             time_zero(TTime), # start_time
             time_zero(TTime), # end_time
             Channel{ExecutionEvent{TTime}}(max_queue_size), # event_queue
-            Vector{SourceAdapter}(), # adapters
-            Dict{Int,Function}(), # adapter_funcs
+            adapters,
         )
     end
 end
@@ -49,22 +51,18 @@ end
 
 function setup!(executor::RealtimeExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
     # Compile source functions
-    for source_ix in executor.graph.source_nodes
-        source_fn = compile_source!(executor, executor.graph.nodes[source_ix]; debug=debug)
-        executor.adapter_funcs[source_ix] = source_fn
+    for (adapter, source_ix) in zip(executor.source_adapters, executor.graph.source_nodes)
+        node = executor.graph.nodes[source_ix]
+        source_fn = compile_source!(executor, node; debug=debug)
+        set_adapter_func!(adapter, source_fn)
     end
-end
-
-function set_adapters!(executor::RealtimeExecutor, adapters)
-    @assert length(adapters) >= length(executor.adapter_funcs) "Number of executor adapters must be greater than or equal to number of source nodes"
-    executor.adapters = collect(adapters)
 end
 
 function run!(
     executor::RealtimeExecutor{TStates,TTime}, start_time::TTime, end_time::TTime
 ) where {TStates,TTime}
     @assert start_time < end_time "Start time '$start_time' must be before end time '$end_time'"
-    @assert !isempty(executor.adapters) "No adapters have been defined for HistoricExecutor"
+    @assert !isempty(executor.source_adapters) "No adapters have been defined for RealtimeExecutor"
 
     # Set executor time bounds
     executor.start_time = start_time
@@ -74,8 +72,9 @@ function run!(
     # which may live in a newer world age than the caller.
     Base.invokelatest() do
         # Initialize adapters
+        adapters = executor.source_adapters
         println("RealtimeExecutor: Setting up adapters...")
-        init_secs = @elapsed run!.(executor.adapters, Ref(executor))
+        init_secs = @elapsed run!.(adapters, Ref(executor))
         println("RealtimeExecutor: Adapters set up in $(round(sum(init_secs); digits=3))s")
     end
 
@@ -125,7 +124,7 @@ function run!(
                 if !isa(adapter, WakeUpAdapter)
                     # # Check if before start time
                     # if timestamp < start_time
-                    #     println("RealtimeExecutor: Dropping event from source [$(label(adapter.node))] at time $timestamp before start time $(start_time)")
+                    #     println("RealtimeExecutor: Dropping event from source at time $timestamp before start time $(start_time)")
                     #     continue
                     # end
 
@@ -148,11 +147,11 @@ function run!(
             println("RealtimeExecutor: Error stopping wake-up thread: $e")
         end
 
-        destroy!.(executor.adapters)
+        destroy!.(executor.source_adapters)
         println("RealtimeExecutor: Adapters destroyed")
     end
 
     nothing
 end
 
-export RealtimeExecutor, WakeUpAdapter, set_adapters!, start_time, end_time
+export RealtimeExecutor, start_time, end_time

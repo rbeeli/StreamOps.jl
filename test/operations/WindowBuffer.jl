@@ -2,12 +2,17 @@
     using Dates
     
     g = StreamGraph()
-
-    values = source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 3), 3),
+        (DateTime(2000, 1, 4), 4),
+    ]
+    values = source!(g, :values, HistoricIterable(Int, values_data))
     rolling = op!(g, :rolling, WindowBuffer{Int}(3), out=AbstractVector{Int})
 
     @test !rolling.operation.copy
-    @test is_valid(values.operation) # != nothing -> is_valid
+    @test !is_valid(values.operation) # HistoricIterable has no value until first event
     @test !is_valid(rolling.operation)
 
     output = sink!(g, :output, Buffer{AbstractVector{Int}}())
@@ -21,14 +26,6 @@
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 4)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1), 1),
-            (DateTime(2000, 1, 2), 2),
-            (DateTime(2000, 1, 3), 3),
-            (DateTime(2000, 1, 4), 4)
-        ])
-    ])
     run!(exe, start, stop)
 
     # all the same values since it's a view into the buffer
@@ -45,12 +42,17 @@ end
     using Dates
     
     g = StreamGraph()
-
-    values = source!(g, :values, out=Int, init=0)
+    values_data = Tuple{DateTime,Int}[
+        (DateTime(2000, 1, 1), 1),
+        (DateTime(2000, 1, 2), 2),
+        (DateTime(2000, 1, 3), 3),
+        (DateTime(2000, 1, 4), 4),
+    ]
+    values = source!(g, :values, HistoricIterable(Int, values_data))
     rolling = op!(g, :rolling, WindowBuffer{Int}(3; copy=true), out=Vector{Int})
 
     @test rolling.operation.copy
-    @test is_valid(values.operation) # != nothing -> is_valid
+    @test !is_valid(values.operation) # adapter remains invalid before polling data
     @test !is_valid(rolling.operation)
 
     output = sink!(g, :output, Buffer{Vector{Int}}())
@@ -64,14 +66,6 @@ end
 
     start = DateTime(2000, 1, 1)
     stop = DateTime(2000, 1, 4)
-    set_adapters!(exe, [
-        HistoricIterable(exe, values, [
-            (DateTime(2000, 1, 1), 1),
-            (DateTime(2000, 1, 2), 2),
-            (DateTime(2000, 1, 3), 3),
-            (DateTime(2000, 1, 4), 4)
-        ])
-    ])
     run!(exe, start, stop)
 
     @test output.operation.buffer[1] == [1, 2, 3]

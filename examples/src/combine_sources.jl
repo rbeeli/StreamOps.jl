@@ -10,10 +10,30 @@ using Dates
 g = StreamGraph()
 
 # Create source nodes
-source!(g, :values1, out=Float64, init=NaN)
-source!(g, :values2, out=Float64, init=NaN)
-source!(g, :values3, out=Float64, init=NaN)
-source!(g, :values4, out=Float64, init=NaN)
+values1_data = [
+    (DateTime(2000, 1, 1), 1.0),
+    (DateTime(2000, 1, 2), 2.0),
+    (DateTime(2000, 1, 3), 3.0),
+    (DateTime(2000, 1, 4), 4.0),
+    (DateTime(2000, 1, 5), 5.0),
+    (DateTime(2000, 1, 6), 6.0),
+    (DateTime(2000, 1, 7), 7.0),
+]
+values2_data = [
+    (DateTime(2000, 1, 2), 20.0),
+    (DateTime(2000, 1, 4), 40.0),
+    (DateTime(2000, 1, 6), 60.0),
+    (DateTime(2000, 1, 8), 80.0),
+]
+values3_data = [
+    (DateTime(1999, 12, 31), 1000.0),
+]
+values4_data = Float64[]
+
+source!(g, :values1, HistoricIterable(Float64, values1_data))
+source!(g, :values2, HistoricIterable(Float64, values2_data))
+source!(g, :values3, HistoricIterable(Float64, values3_data))
+source!(g, :values4, HistoricIterable(Float64, values4_data))
 
 # Create combine node
 op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)), out=NTuple{4,Any})
@@ -33,27 +53,6 @@ setup!(exe)
 # Run simulation
 start = DateTime(1999, 12, 31)
 stop = DateTime(2000, 1, 10)
-set_adapters!(exe, [
-    HistoricIterable(exe, g[:values1], [
-        (DateTime(2000, 1, 1), 1.0),
-        (DateTime(2000, 1, 2), 2.0),
-        (DateTime(2000, 1, 3), 3.0),
-        (DateTime(2000, 1, 4), 4.0),
-        (DateTime(2000, 1, 5), 5.0),
-        (DateTime(2000, 1, 6), 6.0),
-        (DateTime(2000, 1, 7), 7.0),
-    ]),
-    HistoricIterable(exe, g[:values2], [
-        (DateTime(2000, 1, 2), 20.0),
-        (DateTime(2000, 1, 4), 40.0),
-        (DateTime(2000, 1, 6), 60.0),
-        (DateTime(2000, 1, 8), 80.0),
-    ]),
-    HistoricIterable(exe, g[:values3], [
-        (DateTime(1999, 12, 31), 1000.0),
-    ]),
-    HistoricIterable(exe, g[:values4], Float64[]) # empty
-])
 @time run!(exe, start, stop)
 
 # Visualize the computation graph

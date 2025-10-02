@@ -4,7 +4,13 @@
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Int, init = 0)
+	values_data = Tuple{DateTime,Int}[
+		(DateTime(2000, 1, 1), 1),
+		(DateTime(2000, 1, 2), 2),
+		(DateTime(2000, 1, 3), 3),
+		(DateTime(2000, 1, 4), 4),
+	]
+	values = source!(g, :values, HistoricIterable(Int, values_data))
 	buffer = sink!(g, :buffer, Print())
 
 	bind!(g, values, buffer)
@@ -15,14 +21,6 @@
 
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, 4)
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, [
-			(DateTime(2000, 1, 1), 1),
-			(DateTime(2000, 1, 2), 2),
-			(DateTime(2000, 1, 3), 3),
-			(DateTime(2000, 1, 4), 4),
-		]),
-	])
 	output = @capture_out begin
 		run!(exe, start, stop)
 	end
@@ -37,7 +35,13 @@ end
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Int, init = 0)
+	values_data = Tuple{DateTime,Int}[
+		(DateTime(2000, 1, 1), 1),
+		(DateTime(2000, 1, 2), 2),
+		(DateTime(2000, 1, 3), 3),
+		(DateTime(2000, 1, 4), 4),
+	]
+	values = source!(g, :values, HistoricIterable(Int, values_data))
 	buffer = sink!(g, :buffer, Print((exe, x) -> println("x=$x")))
 
 	bind!(g, values, buffer)
@@ -48,14 +52,6 @@ end
 
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, 4)
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, [
-			(DateTime(2000, 1, 1), 1),
-			(DateTime(2000, 1, 2), 2),
-			(DateTime(2000, 1, 3), 3),
-			(DateTime(2000, 1, 4), 4),
-		]),
-	])
 	output = @capture_out begin
 		run!(exe, start, stop)
 	end

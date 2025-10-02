@@ -8,9 +8,11 @@ StreamOps.time_now(::Type{Timestamp64}) = now(Timestamp64)
 StreamOps.time_zero(::Type{Timestamp64}) = Timestamp64(0)
 
 function run()
+    values_iter = ((Timestamp64(i), i) for i in 1:10_000_000)
+
     g = StreamGraph()
 
-    source!(g, :values, out=Int, init=0)
+    source!(g, :values, HistoricIterable(Int, values_iter))
     # buffer = sink!(g, :buffer, Buffer{Int}())
 
     # bind!(g, values, buffer)
@@ -20,12 +22,8 @@ function run()
     setup!(exe)
 
     Base.invokelatest() do
-        adapter = HistoricIterable(exe, g[:values], 
-            [(Timestamp64(x), x) for x in 1:10_000_000]
-        )
-        
-        setup!(adapter, exe)
-        
+        adapter = exe.source_adapters[1]
+
         # display(@code_native advance!(adapter, exe))
 
         for _ in 1:10_000_000

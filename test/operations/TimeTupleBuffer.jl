@@ -3,7 +3,13 @@
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Int, init = 0)
+	input = Tuple{DateTime, Int}[
+		(DateTime(2000, 1, 1), 1),
+		(DateTime(2000, 1, 2), 2),
+		(DateTime(2000, 1, 3), 3),
+		(DateTime(2000, 1, 4), 4),
+	]
+	values = source!(g, :values, HistoricIterable(Int, input))
 	buffer = sink!(g, :buffer, TimeTupleBuffer{DateTime, Int}())
 	@test buffer.operation.min_count == 0
 	bind!(g, values, buffer)
@@ -12,17 +18,8 @@
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	input = [
-		(DateTime(2000, 1, 1), 1),
-		(DateTime(2000, 1, 2), 2),
-		(DateTime(2000, 1, 3), 3),
-		(DateTime(2000, 1, 4), 4),
-	]
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, 4)
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, input),
-	])
 	run!(exe, start, stop)
 
 	actual = get_state(buffer.operation)
@@ -39,7 +36,13 @@ end
 
 	g = StreamGraph()
 
-	values = source!(g, :values, out = Int, init = 0)
+	input = Tuple{DateTime, Int}[
+		(DateTime(2000, 1, 1), 1),
+		(DateTime(2000, 1, 2), 2),
+		(DateTime(2000, 1, 3), 3),
+		(DateTime(2000, 1, 4), 4),
+	]
+	values = source!(g, :values, HistoricIterable(Int, input))
 	buffer = op!(g, :buffer, TimeTupleBuffer{DateTime, Int}(min_count = 3), out = Vector{Tuple{DateTime, Int}})
 	output = sink!(g, :output, Counter())
 	@test buffer.operation.min_count == 3
@@ -50,17 +53,8 @@ end
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	input = [
-		(DateTime(2000, 1, 1), 1),
-		(DateTime(2000, 1, 2), 2),
-		(DateTime(2000, 1, 3), 3),
-		(DateTime(2000, 1, 4), 4),
-	]
 	start = DateTime(2000, 1, 1)
 	stop = DateTime(2000, 1, 4)
-	set_adapters!(exe, [
-		HistoricIterable(exe, values, input),
-	])
 	run!(exe, start, stop)
 
 	# output should only be called twice because of min_count=3
@@ -77,8 +71,18 @@ end
 	g = StreamGraph()
 
 	# Create source nodes
-	timer = source!(g, :timer, out = DateTime, init = DateTime(0))
-	values = source!(g, :values, out = Float64, init = 0.0)
+	start = DateTime(2000, 1, 1)
+	stop = DateTime(2000, 1, 6)
+	timer = source!(g, :timer, HistoricTimer(interval = Day(2), start_time = start))
+	input = Tuple{DateTime, Float64}[
+		(DateTime(2000, 1, 1), 1.0),
+		(DateTime(2000, 1, 2), 2.0),
+		(DateTime(2000, 1, 3), 3.0),
+		(DateTime(2000, 1, 4), 4.0),
+		(DateTime(2000, 1, 5), 5.0),
+		(DateTime(2000, 1, 6), 6.0),
+	]
+	values = source!(g, :values, HistoricIterable(Float64, input))
 
 	# Create operation nodes
 	buffer = op!(g, :buffer, TimeTupleBuffer{DateTime, Float64}(), out = TimeTupleBuffer{DateTime, Float64})
@@ -104,20 +108,6 @@ end
 	exe = HistoricExecutor{DateTime}(g, states)
 	setup!(exe)
 
-	input = [
-		(DateTime(2000, 1, 1), 1.0),
-		(DateTime(2000, 1, 2), 2.0),
-		(DateTime(2000, 1, 3), 3.0),
-		(DateTime(2000, 1, 4), 4.0),
-		(DateTime(2000, 1, 5), 5.0),
-		(DateTime(2000, 1, 6), 6.0),
-	]
-	start = DateTime(2000, 1, 1)
-	stop = DateTime(2000, 1, 6)
-	set_adapters!(exe, [
-		HistoricTimer{DateTime}(exe, timer; interval = Day(2), start_time = start),
-		HistoricIterable(exe, values, input),
-	])
 	run!(exe, start, stop)
 	@test collected[1] == Tuple{DateTime, Float64}[]
 	@test collected[2] == input[1:2]
