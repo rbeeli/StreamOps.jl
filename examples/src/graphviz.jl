@@ -30,11 +30,11 @@ source!(g, :source2, HistoricIterable(Float64, source2_data))
 source!(g, :source3, HistoricIterable(Float64, source3_data))
 
 # Create compute nodes
-op!(g, :square, Func{Float64}((exe, x) -> x^2, 0.0); out=Float64)
-op!(g, :divide_by_2, Func{Float64}((exe, x) -> x / 2, 0.0); out=Float64)
-op!(g, :negate, Func{Float64}((exe, x) -> -x, 0.0); out=Float64)
-op!(g, :combine, Func{Tuple{Float64,Float64}}((exe, x, y) -> (x, y), (0.0, 0.0)); out=Tuple{Float64,Float64})
-op!(g, :final_multiply, Func{Tuple{Float64,Float64}}((exe, tuple, src2, src3) -> tuple .* src2 .+ src3, (0.0, 0.0)); out=Tuple{Float64,Float64})
+op!(g, :square, Func{Float64}((exe, x) -> x^2, 0.0))
+op!(g, :divide_by_2, Func{Float64}((exe, x) -> x / 2, 0.0))
+op!(g, :negate, Func{Float64}((exe, x) -> -x, 0.0))
+op!(g, :combine, Func{Tuple{Float64,Float64}}((exe, x, y) -> (x, y), (0.0, 0.0)))
+op!(g, :final_multiply, Func{Tuple{Float64,Float64}}((exe, tuple, src2, src3) -> tuple .* src2 .+ src3, (0.0, 0.0)))
 
 # Create sink nodes
 sink!(g, :output1, Func((exe, x) -> println("output #1 at time $(time(exe)): $x"), nothing))

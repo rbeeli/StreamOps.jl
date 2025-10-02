@@ -45,13 +45,12 @@ function source!(graph::StreamGraph, label::Union{Symbol,String}, adapter::Sourc
     _make_node!(graph, true, false, adapter, output_type, label)
 end
 
-function op!(
-    graph::StreamGraph, label::Union{Symbol,String}, operation::StreamOperation; out::Type{TOutput}
-) where {TOutput}
+function op!(graph::StreamGraph, label::Union{Symbol,String}, operation::StreamOperation)
     if label isa String
         label = Symbol(label)
     end
-    _make_node!(graph, false, false, operation, TOutput, label)
+    output_type = operation_output_type(operation)
+    _make_node!(graph, false, false, operation, output_type, label)
 end
 
 function sink!(graph::StreamGraph, label::Union{Symbol,String}, operation::StreamOperation)

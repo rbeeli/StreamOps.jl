@@ -50,4 +50,6 @@ end
 
 @inline get_state(op::Buffer) = op.buffer
 
+operation_output_type(::Buffer{T,auto_cast}) where {T,auto_cast} = Vector{T}
+
 export Buffer

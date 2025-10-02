@@ -36,7 +36,7 @@ source!(g, :values3, HistoricIterable(Float64, values3_data))
 source!(g, :values4, HistoricIterable(Float64, values4_data))
 
 # Create combine node
-op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)), out=NTuple{4,Any})
+op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)))
 
 # Create sink node
 sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))

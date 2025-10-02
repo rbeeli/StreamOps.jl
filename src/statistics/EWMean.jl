@@ -87,4 +87,6 @@ end
     op.M / (one(Out) - op.ci)
 end
 
+operation_output_type(::EWMean{In,Out,corrected}) where {In,Out,corrected} = Out
+
 export EWMean

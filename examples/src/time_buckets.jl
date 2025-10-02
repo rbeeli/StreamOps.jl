@@ -25,12 +25,12 @@ values_data = [
 source!(g, :values, HistoricIterable(Float64, values_data))
 
 # Create operation nodes
-op!(g, :buffer, Buffer{Float64}(), out=Buffer{Float64})
+op!(g, :buffer, Buffer{Float64}())
 op!(g, :flush, Func{Vector{Float64}}((exe, dt, buf) -> begin
     vals = copy(buf)
     empty!(buf)
     vals
-end, Float64[]), out=Vector{Float64})
+end, Float64[]))
 
 # Create sink nodes
 sink!(g, :output1, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))

@@ -54,4 +54,6 @@ end
     op.last_value
 end
 
+operation_output_type(::TimeSampler{TTime,TValue,TPeriod}) where {TTime,TValue,TPeriod} = TValue
+
 export TimeSampler, update_time!

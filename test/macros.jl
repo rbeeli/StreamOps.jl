@@ -29,7 +29,7 @@ end
 @testitem "@op without binding" begin
     g = StreamGraph()
 
-    dest = @op g :transform Func((exe, value) -> value, 0.0) out=Float64
+    dest = @op g :transform Func((exe, value) -> value, 0.0)
 
     node = get_node(g, :transform)
 
@@ -47,7 +47,7 @@ end
 
     source!(g, :a, HistoricIterable(Int, Tuple{DateTime,Int}[]))
     source!(g, :b, HistoricIterable(Int, Tuple{DateTime,Int}[]))
-    dest = @op g (:a, :b) => :sum Func((exe, x, y) -> x + y, 0) out=Int call_policies=[IfExecuted(:all)] bind_as=TupleParams()
+    dest = @op g (:a, :b) => :sum Func((exe, x, y) -> x + y, 0) call_policies=[IfExecuted(:all)] bind_as=TupleParams()
 
     node = get_node(g, :sum)
     binding = only(node.input_bindings)

@@ -40,4 +40,6 @@ end
 
 @inline Base.length(op::RingBuffer) = length(op.buffer)
 
+operation_output_type(::RingBuffer{T}) where {T} = CircularBuffer{T}
+
 export RingBuffer

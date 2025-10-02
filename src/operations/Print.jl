@@ -23,4 +23,6 @@ end
 
 @inline get_state(op::Print) = nothing
 
+operation_output_type(::Print) = Nothing
+
 export Print

@@ -34,4 +34,6 @@ end
 
 @inline get_state(op::Copy{Out}) where {Out} = op.last_value
 
+operation_output_type(::Copy{Out}) where {Out} = Out
+
 export Copy

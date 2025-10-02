@@ -49,6 +49,8 @@ end
     op.filtered
 end
 
+operation_output_type(::SavitzkyGolay{In,Out}) where {In,Out} = Out
+
 function _precompute_h(window_size, order)
     h_table = Vector{Vector{Float64}}()
     for n in 1:window_size

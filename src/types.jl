@@ -19,5 +19,13 @@ abstract type OperationTimeSync end
 # default = false
 OperationTimeSync(::Any) = false
 
+function operation_output_type end
+
 export CallPolicy,
-    ParamsBinding, StreamOperation, GraphState, GraphExecutor, SourceAdapter, OperationTimeSync
+    ParamsBinding,
+    StreamOperation,
+    GraphState,
+    GraphExecutor,
+    SourceAdapter,
+    OperationTimeSync,
+    operation_output_type

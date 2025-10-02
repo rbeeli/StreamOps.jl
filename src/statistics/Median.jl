@@ -237,4 +237,6 @@ end
     end
 end
 
+operation_output_type(::Median{In,Out,full_only}) where {In,Out,full_only} = Out
+
 export Median, TupleForward, TupleReverse, ValueLocation

@@ -137,4 +137,6 @@ end
     op.current_zscore
 end
 
+operation_output_type(::EWZScore{In,Out,corrected}) where {In,Out,corrected} = Out
+
 export EWZScore

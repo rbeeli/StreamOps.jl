@@ -50,4 +50,6 @@ end
 
 @inline get_state(op::ForwardFill{T}) where {T} = op.last_valid
 
+operation_output_type(::ForwardFill{T}) where {T} = T
+
 export ForwardFill

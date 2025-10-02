@@ -32,4 +32,6 @@ end
     op.counter
 end
 
+operation_output_type(::Counter{T}) where {T} = T
+
 export Counter

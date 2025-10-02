@@ -50,4 +50,6 @@ end
     op.M1 / length(op.buffer)
 end
 
+operation_output_type(::Mean{In,Out,full_only}) where {In,Out,full_only} = Out
+
 export Mean

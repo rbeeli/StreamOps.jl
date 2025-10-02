@@ -370,4 +370,6 @@ end
     op.filtered
 end
 
+operation_output_type(::ModifiedSinc{In,Out}) where {In,Out} = Out
+
 export ModifiedSinc

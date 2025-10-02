@@ -56,4 +56,6 @@ end
     op.current
 end
 
+operation_output_type(::PeriodicWeekdayEncoder) = Tuple{Float64,Float64}
+
 export PeriodicWeekdayEncoder

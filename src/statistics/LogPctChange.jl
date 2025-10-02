@@ -46,4 +46,6 @@ end
 
 @inline get_state(op::LogPctChange) = op.pct_change
 
+operation_output_type(::LogPctChange{In,Out}) where {In,Out} = Out
+
 export LogPctChange

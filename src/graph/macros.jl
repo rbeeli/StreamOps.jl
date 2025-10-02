@@ -95,14 +95,11 @@ macro sink(g, args...)
 end
 
 """
-    @op g :dest OpExpr out=Type
-    @op g :src => :dest OpExpr out=Type [bind kwargs...]
-    @op g (:s1, :s2, ...) => :dest OpExpr out=Type [bind kwargs...]
+    @op g :dest OpExpr
+    @op g :src => :dest OpExpr [bind kwargs...]
+    @op g (:s1, :s2, ...) => :dest OpExpr [bind kwargs...]
 
 Create an operation via op! and optionally bind source(s).
-
-Mandatory:
-    out=Type  (return type for op!)
 
 Binding kwargs (forwarded to bind!):
     call_policies=...
@@ -110,9 +107,9 @@ Binding kwargs (forwarded to bind!):
     any other keyword accepted by bind!
 
 Examples:
-    @op g :VIX9D_daily Func((exe, v)->v, NaN, is_valid=isfinite) out=Float64
-    @op g :close_ind => :VIX9D_daily Func((exe,v)->v, NaN) out=Float64 call_policies=[IfExecuted(:close_ind)]
-    @op g (:A,:B) => :C Func((exe,a,b)->a+b, 0.0) out=Float64 call_policies=[IfExecuted(:all), IfValid(:all)]
+    @op g :VIX9D_daily Func((exe, v)->v, NaN, is_valid=isfinite)
+    @op g :close_ind => :VIX9D_daily Func((exe,v)->v, NaN) call_policies=[IfExecuted(:close_ind)]
+    @op g (:A,:B) => :C Func((exe,a,b)->a+b, 0.0) call_policies=[IfExecuted(:all), IfValid(:all)]
 """
 macro op(g, args...)
     args_vec = collect(args)
@@ -132,23 +129,16 @@ macro op(g, args...)
         extra = args_vec[3:end]
     end
 
-    out_type = nothing
     bind_kw_pairs = Expr[]
     for ex in extra
-        if ex isa Expr && ex.head == :(=) && ex.args[1] == :out
-            out_type === nothing || error("@op: duplicate out=")
-            out_type = ex.args[2]
-        elseif ex isa Expr && ex.head == :(=)
+        if ex isa Expr && ex.head == :(=)
             push!(bind_kw_pairs, ex)
         else
             error("@op: unexpected argument $(ex)")
         end
     end
-    out_type === nothing && error("@op: missing mandatory out=Type")
 
-    # Build op! call with keyword
-    op_kw = Expr(:parameters, Expr(:kw, :out, esc(out_type)))
-    op_call = Expr(:call, :op!, op_kw, esc(g), QuoteNode(dest_sym), esc(op_expr))
+    op_call = Expr(:call, :op!, esc(g), QuoteNode(dest_sym), esc(op_expr))
 
     block = Expr(:block, op_call)
     if has_binding

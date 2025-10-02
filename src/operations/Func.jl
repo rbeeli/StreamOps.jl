@@ -47,4 +47,6 @@ end
 
 @inline get_state(op::Func{T}) where {T} = op.last_value
 
+operation_output_type(::Func{T}) where {T} = T
+
 export Func, has_output

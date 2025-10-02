@@ -22,4 +22,6 @@ end
     op.value
 end
 
+operation_output_type(::Constant{T}) where {T} = T
+
 export Constant

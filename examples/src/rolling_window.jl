@@ -20,7 +20,7 @@ values_data = [
 ]
 
 source!(g, :values, HistoricIterable(Float64, values_data))
-op!(g, :rolling, WindowBuffer{Float64}(3), out=AbstractVector{Float64})
+op!(g, :rolling, WindowBuffer{Float64}(3))
 sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 
 # Create edges between nodes (define the computation graph)

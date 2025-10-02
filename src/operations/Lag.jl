@@ -34,4 +34,6 @@ end
 
 @inline get_state(op::Lag) = @inbounds first(op.buffer)
 
+operation_output_type(::Lag{In}) where {In} = In
+
 export Lag

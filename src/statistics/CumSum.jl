@@ -42,4 +42,6 @@ end
     op.sum
 end
 
+operation_output_type(::CumSum{In,Out}) where {In,Out} = Out
+
 export CumSum

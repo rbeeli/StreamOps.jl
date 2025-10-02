@@ -97,4 +97,6 @@ end
     op.window_size > 1 ? sqrt(max(zero(Out), op.M2 / (op.window_size - 1))) : zero(Out)
 end
 
+operation_output_type(::Variance{In,Out,corrected,std}) where {In,Out,corrected,std} = Out
+
 export Variance

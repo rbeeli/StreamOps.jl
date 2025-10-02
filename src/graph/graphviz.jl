@@ -15,8 +15,18 @@ function graphviz(
     println(io, "  node [fontsize=$nodefontsize fontname=\"$nodefontname\"];")
     println(io, "  edge [fontsize=$edgefontsize fontname=\"$edgefontname\" fontcolor=\"#666666\"];")
 
+    function html_escape(str::AbstractString)
+        replaced = replace(str, '&' => "&amp;")
+        replaced = replace(replaced, '<' => "&lt;")
+        replace(replaced, '>' => "&gt;")
+    end
+
+    type_font_size = ceil(Int, 0.6nodefontsize)
+
     function make_label(node::StreamNode)
-        return "$(node.label)<FONT POINT-SIZE=\"5\"> </FONT><SUP><FONT COLOR=\"gray\" POINT-SIZE=\"$(ceil(Int, 0.7nodefontsize))\">[$(node.index)]</FONT></SUP>"
+        base = "$(node.label)<FONT POINT-SIZE=\"5\"> </FONT><SUP><FONT COLOR=\"gray\" POINT-SIZE=\"$(ceil(Int, 0.7nodefontsize))\">[$(node.index)]</FONT></SUP>"
+        type_str = sprint(show, node.output_type)
+        return base * "<BR/><FONT COLOR=\"gray\" POINT-SIZE=\"$type_font_size\">::" * html_escape(type_str) * "</FONT>"
     end
 
     # Source nodes (at the top)
@@ -24,7 +34,7 @@ function graphviz(
     for node in filter(is_source, graph.nodes)
         println(
             io,
-            "    node$(node.index) [label=<$(make_label(node))> shape=ellipse color=blue penwidth=0.75];",
+            "    node$(node.index) [label=<$(make_label(node))> shape=rect color=blue penwidth=0.75 style=\"rounded\"];",
         )
     end
     println(io, "  }")
@@ -34,7 +44,7 @@ function graphviz(
         if !is_source(node) && !is_sink(node)
             println(
                 io,
-                "  node$(node.index) [label=<$(make_label(node))> shape=ellipse color=black penwidth=0.75];",
+                "  node$(node.index) [label=<$(make_label(node))> shape=rect color=black penwidth=0.75 style=\"rounded\"];",
             )
         end
     end
@@ -44,7 +54,7 @@ function graphviz(
     for node in filter(is_sink, graph.nodes)
         println(
             io,
-            "    node$(node.index) [label=<$(make_label(node))> shape=ellipse color=green penwidth=1];",
+            "    node$(node.index) [label=<$(make_label(node))> shape=rect color=green penwidth=1 style=\"rounded\"];",
         )
     end
     println(io, "  }")

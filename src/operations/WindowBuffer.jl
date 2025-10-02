@@ -48,4 +48,7 @@ end
 
 @inline Base.length(op::WindowBuffer) = length(op.buffer)
 
+operation_output_type(op::WindowBuffer{T,false}) where {T} = typeof(view(op.buffer, :))
+operation_output_type(::WindowBuffer{T,true}) where {T} = Vector{T}
+
 export WindowBuffer

@@ -35,4 +35,6 @@ end
     op.current - op.prev
 end
 
+operation_output_type(::Diff{T}) where {T} = T
+
 export Diff

@@ -96,4 +96,6 @@ end
     n > 0 ? op.M2 / n : zero(Out)
 end
 
+operation_output_type(::ZScore{In,Out,corrected}) where {In,Out,corrected} = Out
+
 export ZScore, calculate_variance

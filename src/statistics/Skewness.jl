@@ -141,4 +141,6 @@ end
     end
 end
 
+operation_output_type(::Skewness{In,Out}) where {In,Out} = Out
+
 export Skewness

@@ -54,6 +54,8 @@ end
     op.current_value
 end
 
+operation_output_type(::FractionalDiff{In,Out}) where {In,Out} = Out
+
 function fractional_diff_weights(::Type{T}, order, weight_threshold=1e-4) where {T}
     memory_weights = [1.0]
     k = 1

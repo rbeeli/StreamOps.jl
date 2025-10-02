@@ -13,20 +13,23 @@ g = StreamGraph()
 
 # Create source nodes
 start = DateTime(2000, 1, 1, 0, 0, 0)
-source!(g, :source_timer, HistoricTimer(interval=Second(5), start_time=start))
+source!(g, :source_timer, HistoricTimer(; interval=Second(5), start_time=start))
+
+op!(g, :add_second, Func{DateTime}((exe, x) -> x + Second(1), start))
+bind!(g, :source_timer, :add_second)
 
 # Create sink nodes
 sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))
 sink!(g, :counter, Counter())
 
 # Create edges between nodes (define the computation graph)
-bind!(g, :source_timer, :output)
+bind!(g, :add_second, :output)
 bind!(g, :source_timer, :counter)
 
 # Compile the graph with historical executor
-states = compile_graph!(DateTime, g, debug=true)
+states = compile_graph!(DateTime, g; debug=true)
 exe = HistoricExecutor{DateTime}(g, states)
-setup!(exe, debug=true)
+setup!(exe; debug=true)
 
 # Run simulation
 stop = DateTime(2000, 1, 1, 0, 0, 59)
@@ -55,4 +58,4 @@ dump(exe.states)
 # allocations should be minimized.
 @code_warntype exe.source_adapters[1].adapter_func(exe, exe.source_adapters[1].current_time)
 
-@code_native exe.source_adapters[1].adapter_func(exe, exe.source_adapters[1].current_time)
+# @code_native exe.source_adapters[1].adapter_func(exe, exe.source_adapters[1].current_time)

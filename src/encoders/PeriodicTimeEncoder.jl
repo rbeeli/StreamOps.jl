@@ -51,4 +51,6 @@ end
     op.current
 end
 
+operation_output_type(::PeriodicTimeEncoder) = Tuple{Float64,Float64}
+
 export PeriodicTimeEncoder

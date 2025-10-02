@@ -103,4 +103,7 @@ end
     n == 0 ? op.empty_value : op.current_sum / n
 end
 
+operation_output_type(::TimeMean{TTime,TIn,TOut,TPeriod,interval_mode}) where {TTime,TIn,TOut,TPeriod,interval_mode} =
+    TOut
+
 export TimeMean, update_time!

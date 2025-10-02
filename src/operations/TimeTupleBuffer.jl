@@ -39,4 +39,7 @@ end
 
 @inline get_state(op::TimeTupleBuffer) = op.buffer
 
+operation_output_type(::TimeTupleBuffer{TTime,TValue}) where {TTime,TValue} =
+    Vector{Tuple{TTime,TValue}}
+
 export TimeTupleBuffer

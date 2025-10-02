@@ -158,4 +158,6 @@ end
     zero(Out)
 end
 
+operation_output_type(::EWVariance{In,Out,corrected,std}) where {In,Out,corrected,std} = Out
+
 export EWVariance
