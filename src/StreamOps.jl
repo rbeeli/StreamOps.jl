@@ -10,6 +10,7 @@ include("graph/params_bindings.jl")
 include("graph/InputBinding.jl")
 include("graph/StreamNode.jl")
 include("graph/StreamGraph.jl")
+include("graph/macros.jl")
 include("graph/graphviz.jl")
 include("graph/GraphState.jl")
 
