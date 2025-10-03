@@ -1,5 +1,3 @@
-using DataStructures
-
 @testitem "RealtimeIterable(Int, data)" begin
     using Dates
 

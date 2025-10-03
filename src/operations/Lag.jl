@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 
 """
 Lag operation that lags the input stream by `lag` steps.

@@ -1,5 +1,3 @@
-using DataStructures
-
 @testitem "RealtimeTimer(DateTime, Millisecond)" begin
     using Dates
 

@@ -24,6 +24,72 @@
     @test all(buffer .== [1.0, 2.0])
 end
 
+@testitem "HistoricExecutor interpreted mode" begin
+    using Dates
+
+    g = StreamGraph()
+
+    buffer = Float64[]
+    values_data = [
+        (DateTime(2000, 1, 1), 1.0),
+        (DateTime(2000, 1, 2), 2.0),
+    ]
+
+    source!(g, :values, HistoricIterable(Float64, values_data))
+    op!(g, :double, Func{Float64}((_, x) -> x * 2, 0.0))
+    sink!(g, :output, Buffer{Float64}(buffer))
+    bind!(g, :values, :double)
+    bind!(g, :double, :output)
+
+    states = interpreted_states(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 10)
+
+    run!(exe, start, stop)
+
+    @test buffer == [2.0, 4.0]
+end
+
+@testitem "HistoricExecutor reset!" begin
+    using Dates
+
+    g = StreamGraph()
+
+    data = [
+        (DateTime(2000, 1, 1), 1.0),
+        (DateTime(2000, 1, 2), 2.0),
+    ]
+
+    source!(g, :values, HistoricIterable(Float64, data))
+    sink!(g, :collector, Buffer{Float64}())
+    bind!(g, :values, :collector)
+
+    states = compile_graph!(DateTime, g)
+    exe = HistoricExecutor{DateTime}(g, states)
+    setup!(exe)
+
+    start = DateTime(2000, 1, 1)
+    stop = DateTime(2000, 1, 3)
+    run!(exe, start, stop)
+
+    adapter = exe.source_adapters[1]
+    adapter.has_value = true
+    push!(exe.event_queue, ExecutionEvent(start, adapter))
+
+    reset!(exe)
+
+    zero_time = time_zero(DateTime)
+    @test start_time(exe) == zero_time
+    @test end_time(exe) == zero_time
+    @test time(exe) == zero_time
+    @test isempty(exe.event_queue)
+    @test all(!, exe.states.__executed)
+    @test !adapter.has_value
+end
+
 @testitem "HistoricIterable w/ drop_events_before_start" begin
     using Dates
 

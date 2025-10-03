@@ -14,15 +14,6 @@ include("graph/macros.jl")
 include("graph/graphviz.jl")
 include("graph/GraphState.jl")
 
-include("executors/ExecutionEvent.jl")
-include("executors/HistoricExecutor.jl")
-include("executors/RealtimeExecutor.jl")
-
-include("adapters/HistoricTimer.jl")
-include("adapters/HistoricIterable.jl")
-include("adapters/RealtimeTimer.jl")
-include("adapters/RealtimeIterable.jl")
-
 include("operations/Constant.jl")
 include("operations/Func.jl")
 include("operations/Print.jl")
@@ -57,5 +48,16 @@ include("statistics/ModifiedSinc.jl")
 include("statistics/CumSum.jl")
 include("encoders/PeriodicTimeEncoder.jl")
 include("encoders/PeriodicWeekdayEncoder.jl")
+
+include("graph/InterpretedRuntime.jl")
+
+include("executors/ExecutionEvent.jl")
+include("executors/HistoricExecutor.jl")
+include("executors/RealtimeExecutor.jl")
+
+include("adapters/HistoricTimer.jl")
+include("adapters/HistoricIterable.jl")
+include("adapters/RealtimeTimer.jl")
+include("adapters/RealtimeIterable.jl")
 
 end

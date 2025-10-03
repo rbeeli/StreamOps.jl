@@ -1,5 +1,3 @@
-using DataStructures
-
 @testitem "list" begin
     using Dates
 

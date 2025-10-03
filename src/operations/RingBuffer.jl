@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 
 """
 A circular buffer operation that maintains a fixed buffer of length `size`.

@@ -1,5 +1,3 @@
-using DataStructures
-
 @testitem "HistoricTimer(DateTime, Day)" begin
     using Dates
 

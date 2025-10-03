@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: BinaryMinHeap
 
 """
 An executor that runs a stream computation graph in historical mode.
@@ -16,11 +16,13 @@ mutable struct HistoricExecutor{TStates,TTime} <: GraphExecutor
     const drop_events_before_start::Bool
 
     function HistoricExecutor{TTime}(
-        graph::StreamGraph, states::TStates; drop_events_before_start::Bool=false
+        graph::StreamGraph,
+        states::TStates;
+        drop_events_before_start::Bool=false,
     ) where {TStates,TTime}
         adapters = Vector{SourceAdapter}(undef, length(graph.source_nodes))
         for (i, ix) in enumerate(graph.source_nodes)
-            adapters[i] = getfield(states, graph.nodes[ix].field_name)
+            adapters[i] = getproperty(states, graph.nodes[ix].field_name)
         end
         new{TStates,TTime}(
             graph,
@@ -48,11 +50,20 @@ end
 end
 
 function setup!(executor::HistoricExecutor{TStates,TTime}; debug=false) where {TStates,TTime}
-    # Compile source functions
-    for (adapter, source_ix) in zip(executor.source_adapters, executor.graph.source_nodes)
-        node = executor.graph.nodes[source_ix]
-        source_fn = compile_source!(executor, node; debug=debug)
-        set_adapter_func!(adapter, source_fn)
+    graph = executor.graph
+
+    if is_interpreted_state(executor.states)
+        for (adapter, source_ix) in zip(executor.source_adapters, graph.source_nodes)
+            node = graph.nodes[source_ix]
+            source_fn = build_interpreted_source!(executor, graph, node; debug=debug)
+            set_adapter_func!(adapter, source_fn)
+        end
+    else
+        for (adapter, source_ix) in zip(executor.source_adapters, graph.source_nodes)
+            node = graph.nodes[source_ix]
+            source_fn = compile_source!(executor, node; debug=debug)
+            set_adapter_func!(adapter, source_fn)
+        end
     end
 end
 
@@ -106,6 +117,23 @@ function run!(
     end
 
     # println("HistoricExecutor: Simulation ended at time $(time(executor))")
+
+    nothing
+end
+
+function reset!(executor::HistoricExecutor{TStates,TTime}) where {TStates,TTime}
+    zero_time = time_zero(TTime)
+    executor.start_time = zero_time
+    executor.end_time = zero_time
+    executor.current_time = zero_time
+
+    empty!(executor.event_queue)
+
+    Base.invokelatest(reset!, executor.states)
+
+    Base.invokelatest() do
+        foreach(reset!, executor.source_adapters)
+    end
 
     nothing
 end

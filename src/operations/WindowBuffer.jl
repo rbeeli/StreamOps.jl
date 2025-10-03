@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 
 """
 Maintains a rolling window of the last `window_size` values

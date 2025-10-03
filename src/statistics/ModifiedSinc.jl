@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 
 module _ModifiedSincOrig
 

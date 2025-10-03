@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 
 """
 Calculates the moving sample skewness with fixed window size in O(1) time.

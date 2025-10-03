@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 using LinearAlgebra
 
 """

@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 
 """
 Calculates the fractionally differenced values with a real-valued order `d`.
@@ -39,7 +39,7 @@ function reset!(op::FractionalDiff{In,Out}) where {In,Out}
 end
 
 @inline function (op::FractionalDiff{In,Out})(executor, value::In) where {In<:Number,Out<:Number}
-    DataStructures.push!(op.buffer, value)
+    push!(op.buffer, value)
 
     if isfull(op.buffer)
         op.current_value = sum(op.weights .* op.buffer)

@@ -1,4 +1,5 @@
-using DataStructures: DataStructures, MutableBinaryHeap, CircularBuffer, update!, top_with_handle
+import DataStructures
+using DataStructures: MutableBinaryHeap, CircularBuffer, update!, top_with_handle, isfull
 
 # Custom Orderings for DataStructures.MutableBinaryHeap
 struct TupleForward <: Base.Ordering end

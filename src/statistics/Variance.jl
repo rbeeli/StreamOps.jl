@@ -1,4 +1,4 @@
-using DataStructures
+using DataStructures: CircularBuffer
 
 """
 Calculates the simple moving variance with fixed window size in O(1) time.
