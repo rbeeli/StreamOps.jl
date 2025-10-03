@@ -14,10 +14,12 @@ values_data = [
 ]
 
 source!(g, :values, HistoricIterable(Float64, values_data))
+op!(g, :times_2, Func{Float64}((exe, x) -> 2x, NaN))
 sink!(g, :output, Print())
 
 # Create edges between nodes (define the computation graph)
-bind!(g, :values, :output)
+bind!(g, :values, :times_2)
+bind!(g, :times_2, :output)
 
 # Compile the graph with historical executor
 states = compile_graph!(DateTime, g)
