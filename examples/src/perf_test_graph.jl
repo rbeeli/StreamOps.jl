@@ -15,7 +15,7 @@ function run()
     values_iter = ((x, x) for x in data_points)
 
     g = StreamGraph()
-    source!(g, :values, HistoricIterable(Timestamp64, values_iter))
+    source!(g, :values, HistoricIterable(Timestamp64, Timestamp64, values_iter))
     op!(g, :rolling, TimeWindowBuffer{Timestamp64,Timestamp64}(wnd, :closed))
     op!(g, :dts_node, Func((exe, x) -> time(exe), Timestamp64(0)))
     op!(g, :counts_node, Func((exe, x) -> Float32(length(x)), 0.0f32))

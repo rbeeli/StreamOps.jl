@@ -25,10 +25,8 @@ values2_data = [
     (DateTime(2000, 1, 6), 60.0),
     (DateTime(2000, 1, 8), 80.0),
 ]
-values3_data = [
-    (DateTime(1999, 12, 31), 1000.0),
-]
-values4_data = Float64[]
+values3_data = [(DateTime(1999, 12, 31), 1000.0)]
+values4_data = Tuple{DateTime,Float64}[]
 
 source!(g, :values1, HistoricIterable(Float64, values1_data))
 source!(g, :values2, HistoricIterable(Float64, values2_data))
@@ -36,7 +34,11 @@ source!(g, :values3, HistoricIterable(Float64, values3_data))
 source!(g, :values4, HistoricIterable(Float64, values4_data))
 
 # Create combine node
-op!(g, :combine, Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)))
+op!(
+    g,
+    :combine,
+    Func{NTuple{4,Any}}((exe, x1, x2, x3, x4) -> tuple(x1, x2, x3, x4), ntuple(x -> 0.0, 4)),
+)
 
 # Create sink node
 sink!(g, :output, Func((exe, x) -> println("output at time $(time(exe)): $x"), nothing))

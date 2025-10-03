@@ -12,7 +12,7 @@ function run()
 
     g = StreamGraph()
 
-    source!(g, :values, HistoricIterable(Int, values_iter))
+    source!(g, :values, HistoricIterable(Timestamp64, Int, values_iter))
     # buffer = sink!(g, :buffer, Buffer{Int}())
 
     # bind!(g, values, buffer)

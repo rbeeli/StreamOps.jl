@@ -50,29 +50,31 @@ end
 function worker(
     adapter::RealtimeTimer{TPeriod,TTime}, executor::RealtimeExecutor{TStates,TTime}
 ) where {TPeriod,TStates,TTime}
-    time_now = time(executor)
-    next_time = _calc_next_time(adapter, executor)
+    exec_start = start_time(executor)
+    exec_end = end_time(executor)
+    next_time = max(_calc_next_time(adapter, executor), exec_start)
 
     while true
         time_now = time(executor)
 
-        # Check if past end time
-        time_now >= end_time(executor) && break
+        # Stop if outside executor window or our next trigger lies beyond it
+        (time_now >= exec_end || next_time > exec_end) && break
 
-        # Calculate sleep duration
-        sleep_ns = Nanosecond(min(next_time - time_now, adapter.stop_check_interval))
+        sleep_delta = next_time - time_now
+        sleep_delta = max(sleep_delta, zero(sleep_delta))
+        sleep_delta = min(sleep_delta, adapter.stop_check_interval)
+        sleep_ns = Nanosecond(sleep_delta)
 
-        # Wait until next event (or stop flag check)
-        # use Libc.systemsleep(secs) instead of Base.sleep(secs) for more accurate sleep time
         Dates.value(sleep_ns) > 0 && systemsleep(Dates.value(sleep_ns) / 1e9)
 
-        # If we've reached or passed next_time, schedule the event and calculate the next time
+        time_now = time(executor)
+        time_now >= exec_end && break
+
         if time_now >= next_time
-            put!(executor.event_queue, ExecutionEvent(time_now, adapter))
+            put!(executor.event_queue, ExecutionEvent(next_time, adapter))
             next_time = _calc_next_time(adapter, executor)
         end
 
-        # Check if to stop
         adapter.stop_flag[] && break
     end
 

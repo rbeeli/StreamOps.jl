@@ -1,41 +1,63 @@
 using Dates
 import Base.Libc: systemsleep
 
-mutable struct RealtimeIterable{TData,TItem,TOutput} <: SourceAdapter
+mutable struct RealtimeIterable{TTime,TValue,TData} <: SourceAdapter
     adapter_func::Union{Nothing,Function}
     data::TData
-    iterate_state::Union{Nothing,Tuple{TItem,Int}}
-    last_value::Base.RefValue{TOutput}
+    iterate_state::Union{Nothing,Tuple{Tuple{TTime,TValue},Int}}
+    last_value::Base.RefValue{TValue}
     has_value::Bool
     task::Union{Task,Nothing}
     stop_flag::Threads.Atomic{Bool}
     stop_check_interval::Millisecond
-    process_queue::Channel{TItem}
-    output_type::Type{TOutput}
+    process_queue::Channel{Tuple{TTime,TValue}}
+    output_type::Type{TValue}
 
     function RealtimeIterable(
-        ::Type{TOutput},
+        ::Type{TValue},
         data::TData;
         stop_check_interval::Millisecond=Millisecond(50),
         max_queue_size=1024,
-    ) where {TData,TOutput}
+    ) where {TData,TValue}
         TItem = eltype(data)
         TItem != Any || throw(
             ArgumentError(
                 "Element type detected as Any. Use typed RealtimeIterable constructor to avoid performance penalty of Any.",
             ),
         )
-        new{TData,TItem,TOutput}(
+        TTime = fieldtype(TItem, 1)
+        new{TTime,TValue,TData}(
             nothing,
             data,
             nothing,
-            Ref{TOutput}(),
+            Ref{TValue}(),
             false,
             nothing,
             Threads.Atomic{Bool}(false),
             stop_check_interval,
-            Channel{TItem}(max_queue_size),
-            TOutput,
+            Channel{Tuple{TTime,TValue}}(max_queue_size),
+            TValue,
+        )
+    end
+
+    function RealtimeIterable(
+        ::Type{TTime},
+        ::Type{TValue},
+        data::TData;
+        stop_check_interval::Millisecond=Millisecond(50),
+        max_queue_size=1024,
+    ) where {TTime,TValue,TData}
+        new{TTime,TValue,TData}(
+            nothing,
+            data,
+            nothing,
+            Ref{TValue}(),
+            false,
+            nothing,
+            Threads.Atomic{Bool}(false),
+            stop_check_interval,
+            Channel{Tuple{TTime,TValue}}(max_queue_size),
+            TValue,
         )
     end
 end
@@ -48,40 +70,48 @@ function set_adapter_func!(adapter::RealtimeIterable, func::Function)
 end
 
 @inline function get_state(
-    adapter::RealtimeIterable{TData,TItem,TOutput}
-) where {TData,TItem,TOutput}
+    adapter::RealtimeIterable{TTime,TValue,TData}
+) where {TTime,TValue,TData}
     adapter.has_value ? adapter.last_value[] : nothing
 end
 
 @inline is_valid(adapter::RealtimeIterable) = adapter.has_value
 
 function worker(
-    adapter::RealtimeIterable{TData,TItem,TOutput}, executor::RealtimeExecutor{TStates,TTime}
-) where {TData,TItem,TOutput,TStates,TTime}
+    adapter::RealtimeIterable{TTime,TValue,TData}, executor::RealtimeExecutor{TStates,TTime}
+) where {TTime,TValue,TData,TStates}
     while !isnothing(adapter.iterate_state)
-        next_item = @inbounds adapter.iterate_state[1]
-        next_time = @inbounds next_item[1]
-        time_now = time(executor)
+        entry, state = adapter.iterate_state
+        next_time = @inbounds entry[1]
 
-        # Check if past end time
-        time_now >= end_time(executor) && break
-
-        # Calculate sleep duration
-        sleep_ns = Nanosecond(min(next_time - time_now, adapter.stop_check_interval))
-
-        # Wait until next event (or stop flag check)
-        # use Libc.systemsleep(secs) instead of Base.sleep(secs) for more accurate sleep time
-        Dates.value(sleep_ns) > 0 && systemsleep(Dates.value(sleep_ns) / 1e9)
-
-        # If we've reached or passed next_time, schedule the event and calculate the next time
-        if time_now >= next_time
-            put!(executor.event_queue, ExecutionEvent(time_now, adapter))
-            put!(adapter.process_queue, next_item)
-            # next item in iterable
-            adapter.iterate_state = iterate(adapter.data, (@inbounds adapter.iterate_state[2]))
+        # Skip records before the executor's start time
+        if next_time < start_time(executor)
+            adapter.iterate_state = iterate(adapter.data, state)
+            continue
         end
 
-        # Check if to stop
+        exec_end = end_time(executor)
+        time_now = time(executor)
+
+        # Stop if we have passed the executor window or the record lies beyond it
+        (time_now >= exec_end || next_time > exec_end) && break
+
+        sleep_delta = next_time - time_now
+        sleep_delta = max(sleep_delta, zero(sleep_delta))
+        sleep_delta = min(sleep_delta, adapter.stop_check_interval)
+        sleep_ns = Nanosecond(sleep_delta)
+
+        Dates.value(sleep_ns) > 0 && systemsleep(Dates.value(sleep_ns) / 1e9)
+
+        time_now = time(executor)
+        time_now >= exec_end && break
+
+        if time_now >= next_time
+            put!(executor.event_queue, ExecutionEvent(next_time, adapter))
+            put!(adapter.process_queue, entry)
+            adapter.iterate_state = iterate(adapter.data, state)
+        end
+
         adapter.stop_flag[] && break
     end
 
@@ -89,8 +119,8 @@ function worker(
 end
 
 function run!(
-    adapter::RealtimeIterable{TData,TItem,TOutput}, executor::RealtimeExecutor{TStates,TTime}
-) where {TData,TItem,TOutput,TStates,TTime}
+    adapter::RealtimeIterable{TTime,TValue,TData}, executor::RealtimeExecutor{TStates,TTime}
+) where {TTime,TValue,TData,TStates}
     adapter.iterate_state = iterate(adapter.data)
 
     if !isnothing(adapter.iterate_state)
@@ -104,10 +134,10 @@ function run!(
 end
 
 function process_event!(
-    adapter::RealtimeIterable{TData,TItem,TOutput},
+    adapter::RealtimeIterable{TTime,TValue,TData},
     executor::RealtimeExecutor{TStates,TTime},
     event::ExecutionEvent{TTime},
-) where {TData,TItem,TOutput,TStates,TTime}
+) where {TTime,TValue,TData,TStates}
     # Execute subgraph based on current value
     if !isready(adapter.process_queue)
         throw(ErrorException("Logic error: process_queue is empty when calling process_event!"))
@@ -117,7 +147,7 @@ function process_event!(
     nothing
 end
 
-function destroy!(adapter::RealtimeIterable{TData,TItem,TOutput}) where {TData,TItem,TOutput}
+function destroy!(adapter::RealtimeIterable{TTime,TValue,TData}) where {TTime,TValue,TData}
     if !isnothing(adapter.task)
         adapter.stop_flag[] = true
         wait(adapter.task) # will also catch and rethrow any exceptions
