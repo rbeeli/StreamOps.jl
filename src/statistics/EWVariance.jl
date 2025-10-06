@@ -4,30 +4,25 @@ Calculates the expontentially weighted moving variance with optional bias correc
 # Arguments
 - `alpha::Out`: The weight of the new value, should be in the range [0, 1]. A new value has a weight of `alpha`, and the previous value has a weight of `1 - alpha`.
 - `corrected::Bool=true`: Whether to use corrected (unbiased) variance (default is true)
-- `std::Bool=false`: Whether to return the standard deviation instead of the variance (default is false)
 
 # References
 Incremental calculation of weighted mean and variance, Tony Finch, Feb 2009
 https://blog.fugue88.ws/archives/2017-01/The-correct-way-to-start-an-Exponential-Moving-Average-EMA
 https://github.com/pandas-dev/pandas/blob/main/pandas/_libs/window/aggregations.pyx#L1877
 """
-mutable struct EWVariance{In<:Number,Out<:Number,corrected,std} <: StreamOperation
+mutable struct EWVariance{In<:Number,Out<:Number,corrected} <: StreamOperation
     const alpha::Out
     const corrected::Bool # bias correction
-    const std::Bool
     sum_wt::Out
     sum_wt2::Out
     old_wt::Out
     mean::Out
     var::Out
     nobs::Int
-    function EWVariance{In,Out}(;
-        alpha::Out, corrected::Bool=true, std::Bool=false
-    ) where {In<:Number,Out<:Number}
-        new{In,Out,corrected,std}(
+    function EWVariance{In,Out}(; alpha::Out, corrected::Bool=true) where {In<:Number,Out<:Number}
+        new{In,Out,corrected}(
             alpha,
             corrected,
-            std,
             one(Out), # sum_wt
             one(Out), # sum_wt2
             one(Out), # old_wt
@@ -38,9 +33,9 @@ mutable struct EWVariance{In<:Number,Out<:Number,corrected,std} <: StreamOperati
     end
 end
 
-operation_output_type(::EWVariance{In,Out,corrected,std}) where {In,Out,corrected,std} = Out
+operation_output_type(::EWVariance{In,Out,corrected}) where {In,Out,corrected} = Out
 
-function reset!(op::EWVariance{In,Out,corrected,std}) where {In,Out,corrected,std}
+function reset!(op::EWVariance{In,Out,corrected}) where {In,Out,corrected}
     op.sum_wt = one(Out)
     op.sum_wt2 = one(Out)
     op.old_wt = one(Out)
@@ -71,11 +66,10 @@ end
         op.mean = (op.old_wt * old_mean + new_wt * value) / (op.old_wt + new_wt)
     end
 
-    op.var =
-        (
-            op.old_wt * (op.var + (old_mean - op.mean) * (old_mean - op.mean)) +
-            new_wt * (value - op.mean) * (value - op.mean)
-        ) / (op.old_wt + new_wt)
+    op.var = (
+        op.old_wt * (op.var + (old_mean - op.mean) * (old_mean - op.mean)) +
+        new_wt * (value - op.mean) * (value - op.mean)
+    ) / (op.old_wt + new_wt)
 
     op.sum_wt += new_wt
     op.sum_wt2 += new_wt * new_wt
@@ -111,11 +105,10 @@ end
         op.mean = (op.old_wt * old_mean + new_wt * value) / (op.old_wt + new_wt)
     end
 
-    op.var =
-        (
-            op.old_wt * (op.var + (old_mean - op.mean) * (old_mean - op.mean)) +
-            new_wt * (value - op.mean) * (value - op.mean)
-        ) / (op.old_wt + new_wt)
+    op.var = (
+        op.old_wt * (op.var + (old_mean - op.mean) * (old_mean - op.mean)) +
+        new_wt * (value - op.mean) * (value - op.mean)
+    ) / (op.old_wt + new_wt)
 
     op.old_wt += new_wt
 
@@ -127,34 +120,17 @@ end
 end
 
 # uncorrected variance
-@inline function get_state(op::EWVariance{In,Out,false,false})::Out where {In,Out}
+@inline function get_state(op::EWVariance{In,Out,false})::Out where {In,Out}
     op.nobs > 1 ? op.var : zero(Out)
 end
 
-# uncorrected std. deviation
-@inline function get_state(op::EWVariance{In,Out,false,true})::Out where {In,Out}
-    op.nobs > 1 ? sqrt(op.var) : zero(Out)
-end
-
 # bias corrected variance
-@inline function get_state(op::EWVariance{In,Out,true,false})::Out where {In,Out}
+@inline function get_state(op::EWVariance{In,Out,true})::Out where {In,Out}
     if op.nobs > 1
         num = op.sum_wt * op.sum_wt
         denom = num - op.sum_wt2
         if denom > 0
             return (num / denom) * op.var
-        end
-    end
-    zero(Out)
-end
-
-# bias corrected std. deviation
-@inline function get_state(op::EWVariance{In,Out,true,true})::Out where {In,Out}
-    if op.nobs > 1
-        num = op.sum_wt * op.sum_wt
-        denom = num - op.sum_wt2
-        if denom > 0
-            return sqrt((num / denom) * op.var)
         end
     end
     zero(Out)
