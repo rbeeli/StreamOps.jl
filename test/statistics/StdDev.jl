@@ -1,5 +1,5 @@
 @testitem "reset!" begin
-    op = Variance{Float64,Float64}(3)
+    op = StdDev{Float64,Float64}(3)
 
     @test !is_valid(op)
 
@@ -27,7 +27,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, Variance{Float64,Float64}(window_size))
+    avg = op!(g, :avg, StdDev{Float64,Float64}(window_size))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)
@@ -41,7 +41,7 @@ end
     stop = DateTime(2000, 1, length(vals))
     run!(exe, start, stop)
     for i in window_size:length(vals)
-        @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=true)
+        @test output.operation.buffer[i-window_size+1] ≈ std(vals[i-window_size+1:i], corrected=true)
     end
 end
 
@@ -60,7 +60,7 @@ end
     ]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false))
+    avg = op!(g, :avg, StdDev{Float64,Float64}(window_size, corrected=false))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)
@@ -74,7 +74,7 @@ end
     stop = DateTime(2000, 1, length(vals))
     run!(exe, start, stop)
     for i in window_size:length(vals)
-        @test output.operation.buffer[i-window_size+1] ≈ var(vals[i-window_size+1:i], corrected=false)
+        @test output.operation.buffer[i-window_size+1] ≈ std(vals[i-window_size+1:i], corrected=false)
     end
 end
 
@@ -93,7 +93,7 @@ end
     expected = [0.0, 0.0, 0.0, 0.0, 0.0]
 
     values = source!(g, :values, HistoricIterable(Float64, values_data))
-    avg = op!(g, :avg, Variance{Float64,Float64}(window_size, corrected=false))
+    avg = op!(g, :avg, StdDev{Float64,Float64}(window_size, corrected=false))
     output = sink!(g, :output, Buffer{Float64}())
 
     bind!(g, values, avg)

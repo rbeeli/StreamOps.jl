@@ -1,0 +1,1 @@
+To run Julia code or Julia unit tests, use the system installed, global `julia` command while activating the project environment. Do NOT download or create separate Julia installations or environments.
