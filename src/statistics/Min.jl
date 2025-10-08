@@ -7,46 +7,38 @@ The implementation updates in ``O(\\log n)`` time and uses ``O(n)`` space.
 NaN values are tracked separately to avoid ordering issues; if any NaN values
 are present in the current window, the reported minimum is NaN.
 """
-mutable struct Min{In<:Number,Out<:Number,full_only} <: StreamOperation
-    const full_only::Bool
-    const buffer::CircularBuffer{In}
+mutable struct Min{T<:Number} <: StreamOperation
+    const buffer::CircularBuffer{T}
     const window_size::Int
-    const counts::SortedDict{Out,Int}
+    const counts::SortedDict{T,Int}
     nan_count::Int
 
-    function Min{In,Out}(window_size::Int; full_only::Bool=false) where {In<:Number,Out<:Number}
+    function Min{T}(window_size::Int) where {T<:Number}
         window_size >= 1 || throw(ArgumentError("window_size must be 1 or greater"))
-        new{In,Out,full_only}(
-            full_only,
-            CircularBuffer{In}(window_size),
-            window_size,
-            SortedDict{Out,Int}(),
-            0,
-        )
+        new{T}(CircularBuffer{T}(window_size), window_size, SortedDict{T,Int}(), 0)
     end
 end
 
-operation_output_type(::Min{In,Out,full_only}) where {In,Out,full_only} = Out
+operation_output_type(::Min{T}) where {T} = T
 
-function reset!(op::Min{In,Out,full_only}) where {In,Out,full_only}
+function reset!(op::Min{T}) where {T}
     empty!(op.buffer)
     empty!(op.counts)
     op.nan_count = 0
     nothing
 end
 
-@inline function (op::Min{In,Out,full_only})(executor, value::In) where {In<:Number,Out<:Number,full_only}
+@inline function (op::Min{T})(_, value::T) where {T<:Number}
     if isfull(op.buffer)
         dropped = popfirst!(op.buffer)
         if isnan(dropped)
             op.nan_count -= 1
         else
-            key = convert(Out, dropped)
-            cnt = op.counts[key] - 1
+            cnt = op.counts[dropped] - 1
             if cnt == 0
-                delete!(op.counts, key)
+                delete!(op.counts, dropped)
             else
-                op.counts[key] = cnt
+                op.counts[dropped] = cnt
             end
         end
     end
@@ -55,25 +47,18 @@ end
     if isnan(value)
         op.nan_count += 1
     else
-        key = convert(Out, value)
-        op.counts[key] = get(op.counts, key, 0) + 1
+        op.counts[value] = get(op.counts, value, 0) + 1
     end
     nothing
 end
 
-@inline function is_valid(op::Min{In,Out,false}) where {In,Out}
+@inline function is_valid(op::Min{T}) where {T}
     !isempty(op.buffer)
 end
 
-@inline function is_valid(op::Min{In,Out,true}) where {In,Out}
-    isfull(op.buffer)
-end
-
-@inline function get_state(op::Min{In,Out})::Out where {In,Out}
-    if op.nan_count > 0
-        return convert(Out, NaN)
-    end
-    first(op.counts)[1]
+@inline function get_state(op::Min{T})::T where {T}
+    op.nan_count > 0 && return convert(T, NaN)
+    @inbounds first(op.counts)[1]
 end
 
 export Min
