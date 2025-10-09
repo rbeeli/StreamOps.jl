@@ -6,7 +6,7 @@ module _ModifiedSincOrig
 	smoothMS(data::AbstractVector{T}, deg::Int, m::Int) where T
 
 Smoothes a vector `data` with a modified sinc kernel.
-The `deg` parameter specifies the degree of the polinomial
+The `deg` parameter specifies the degree of the polynomial
 and `m` the halfwidth of the kernel.
 """
 function smoothMS(data::AbstractVector{T}, deg::Int, m::Int) where {T}
