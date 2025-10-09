@@ -1,10 +1,10 @@
 @testsnippet SGSnippet begin
     using LinearAlgebra
 
-    function savitzky_golay(y, window_size, order)
+    function savitzky_golay(y, window_size, order; one_step_ahead_predict::Bool=false)
         N = length(y)
         y_filtered = zeros(Float64, N)
-        h_dict = precompute_h(window_size, order)
+        h_dict = precompute_h(window_size, order, one_step_ahead_predict)
         @inbounds for t = 1:N
             n_t = min(t, window_size)
             h = h_dict[n_t]
@@ -14,7 +14,7 @@
         y_filtered
     end
 
-    function precompute_h(window_size, order)
+    function precompute_h(window_size, order, one_step_ahead_predict::Bool)
         h_dict = Dict{Int,Vector{Float64}}()
 
         for n = 1:window_size
@@ -29,7 +29,11 @@
             end
 
             c = zeros(m + 1)
-            c[1] = 1  # For smoothing (0th derivative)
+            if one_step_ahead_predict
+                fill!(c, 1.0)  # Evaluate fit at x = +1
+            else
+                c[1] = 1  # For smoothing (0th derivative)
+            end
             ATA = transpose(A) * A
             ATAc = ATA \ c
             h = A * ATAc  # h is now a Vector{Float64}
@@ -67,27 +71,49 @@ end
     order = 1
 
     for window_size in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        g = StreamGraph()
+        for one_step_ahead_predict in (false, true)
+            g = StreamGraph()
 
-        vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-        values_data = Tuple{DateTime,Float64}[
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ]
+            vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+            values_data = Tuple{DateTime,Float64}[
+                (DateTime(2000, 1, i), x)
+                for (i, x) in enumerate(vals)
+            ]
 
-        values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order))
-        output = sink!(g, :output, Buffer{Float64}())
-        bind!(g, values, avg)
-        bind!(g, avg, output)
+            values = source!(g, :values, HistoricIterable(Float64, values_data))
+            avg = op!(
+                g,
+                :avg,
+                SavitzkyGolay{Float64,Float64}(
+                    window_size,
+                    order;
+                    one_step_ahead_predict=one_step_ahead_predict,
+                ),
+            )
+            output = sink!(g, :output, Buffer{Float64}())
+            bind!(g, values, avg)
+            bind!(g, avg, output)
 
-        states = compile_graph!(DateTime, g)
-        exe = HistoricExecutor{DateTime}(g, states)
-        setup!(exe)
+            states = compile_graph!(DateTime, g)
+            exe = HistoricExecutor{DateTime}(g, states)
+            setup!(exe)
 
-        run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
-        @test output.operation.buffer ≈ savitzky_golay(vals, window_size, order)
-        @test output.operation.buffer[end] ≈ savitzky_golay(vals[end-window_size+1:end], window_size, order)[end]
+            run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            expected = savitzky_golay(
+                vals,
+                window_size,
+                order;
+                one_step_ahead_predict=one_step_ahead_predict,
+            )
+            @test output.operation.buffer ≈ expected
+            expected_tail = savitzky_golay(
+                vals[end-window_size+1:end],
+                window_size,
+                order;
+                one_step_ahead_predict=one_step_ahead_predict,
+            )
+            @test output.operation.buffer[end] ≈ expected_tail[end]
+        end
     end
 end
 
@@ -97,27 +123,49 @@ end
     order = 2
 
     for window_size in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        g = StreamGraph()
+        for one_step_ahead_predict in (false, true)
+            g = StreamGraph()
 
-        vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-        values_data = Tuple{DateTime,Float64}[
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ]
+            vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+            values_data = Tuple{DateTime,Float64}[
+                (DateTime(2000, 1, i), x)
+                for (i, x) in enumerate(vals)
+            ]
 
-        values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order))
-        output = sink!(g, :output, Buffer{Float64}())
-        bind!(g, values, avg)
-        bind!(g, avg, output)
+            values = source!(g, :values, HistoricIterable(Float64, values_data))
+            avg = op!(
+                g,
+                :avg,
+                SavitzkyGolay{Float64,Float64}(
+                    window_size,
+                    order;
+                    one_step_ahead_predict=one_step_ahead_predict,
+                ),
+            )
+            output = sink!(g, :output, Buffer{Float64}())
+            bind!(g, values, avg)
+            bind!(g, avg, output)
 
-        states = compile_graph!(DateTime, g)
-        exe = HistoricExecutor{DateTime}(g, states)
-        setup!(exe)
+            states = compile_graph!(DateTime, g)
+            exe = HistoricExecutor{DateTime}(g, states)
+            setup!(exe)
 
-        run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
-        @test output.operation.buffer ≈ savitzky_golay(vals, window_size, order)
-        @test output.operation.buffer[end] ≈ savitzky_golay(vals[end-window_size+1:end], window_size, order)[end]
+            run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            expected = savitzky_golay(
+                vals,
+                window_size,
+                order;
+                one_step_ahead_predict=one_step_ahead_predict,
+            )
+            @test output.operation.buffer ≈ expected
+            expected_tail = savitzky_golay(
+                vals[end-window_size+1:end],
+                window_size,
+                order;
+                one_step_ahead_predict=one_step_ahead_predict,
+            )
+            @test output.operation.buffer[end] ≈ expected_tail[end]
+        end
     end
 end
 
@@ -127,26 +175,48 @@ end
     order = 3
 
     for window_size in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        g = StreamGraph()
+        for one_step_ahead_predict in (false, true)
+            g = StreamGraph()
 
-        vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-        values_data = Tuple{DateTime,Float64}[
-            (DateTime(2000, 1, i), x)
-            for (i, x) in enumerate(vals)
-        ]
+            vals = Float64[1, 2, 3, 4, 1, -4, 3, 0, 9, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+            values_data = Tuple{DateTime,Float64}[
+                (DateTime(2000, 1, i), x)
+                for (i, x) in enumerate(vals)
+            ]
 
-        values = source!(g, :values, HistoricIterable(Float64, values_data))
-        avg = op!(g, :avg, SavitzkyGolay{Float64,Float64}(window_size, order))
-        output = sink!(g, :output, Buffer{Float64}())
-        bind!(g, values, avg)
-        bind!(g, avg, output)
+            values = source!(g, :values, HistoricIterable(Float64, values_data))
+            avg = op!(
+                g,
+                :avg,
+                SavitzkyGolay{Float64,Float64}(
+                    window_size,
+                    order;
+                    one_step_ahead_predict=one_step_ahead_predict,
+                ),
+            )
+            output = sink!(g, :output, Buffer{Float64}())
+            bind!(g, values, avg)
+            bind!(g, avg, output)
 
-        states = compile_graph!(DateTime, g)
-        exe = HistoricExecutor{DateTime}(g, states)
-        setup!(exe)
+            states = compile_graph!(DateTime, g)
+            exe = HistoricExecutor{DateTime}(g, states)
+            setup!(exe)
 
-        run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
-        @test output.operation.buffer ≈ savitzky_golay(vals, window_size, order)
-        @test output.operation.buffer[end] ≈ savitzky_golay(vals[end-window_size+1:end], window_size, order)[end]
+            run!(exe, DateTime(2000, 1, 1), DateTime(2000, 1, length(vals)))
+            expected = savitzky_golay(
+                vals,
+                window_size,
+                order;
+                one_step_ahead_predict=one_step_ahead_predict,
+            )
+            @test output.operation.buffer ≈ expected
+            expected_tail = savitzky_golay(
+                vals[end-window_size+1:end],
+                window_size,
+                order;
+                one_step_ahead_predict=one_step_ahead_predict,
+            )
+            @test output.operation.buffer[end] ≈ expected_tail[end]
+        end
     end
 end
